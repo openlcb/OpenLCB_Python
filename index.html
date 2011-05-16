@@ -17,6 +17,30 @@ Python Prototype</H1>
 
 <p>Initial content for this is being developed, stay tuned.</P>
 
+<h3>Utilities and Modules</h3>
+
+The basic Ethernet connection is accessed via the &quot;ethernetolcblink&quot; module.
+<p>
+<code><pre>
+    import ethernetolcblink as link
+    link.sendframe('10.0.1.98', 23, ':X180A000FN;', True)
+</pre></code>
+<p>
+Other cross-connection utilities can found in the &quot;canolcbutils&quot; module.
+
+<h3>Tools and Tests</h3>
+
+<dl>
+<dt><b>ethernetolcblink</b></dt><dd>Allows you to send specific packets</dd>
+<dt><b>verifyNodeGlobal</b></dt><dd>Send a "Verify Node Global" frame, getting a reply from each connected node.</dd>
+</dl>
+
+To run one from the Mac OS X or Linux command line, do e.g.:
+<code><pre>
+./verifyNodeGlobal.py
+</pre></code>
+
+
 <P STYLE="margin-bottom: 0cm"><BR>
 </P>
 <HR>
