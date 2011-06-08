@@ -18,13 +18,31 @@ def sendframe(host, port, frame, verbose) :
     s.connect((host, port))
     s.send(frame+'\n')
     
-    # if verbose, display what's received
-    if (verbose) : 
+    # receive any replies    
+    r = s.recv(1024)
+    while r:
+        # if verbose, display what's received 
+        if (verbose) : print r,
+        else : return
         r = s.recv(1024)
-        while r:
-            print r,
-            r = s.recv(1024)
+    return
+
+def receive(host, port, verbose) :
+    # if verbose, print
+    if (verbose) : print "receive from ",host,":",port
+
+    # send
+    s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    s.connect((host, port))
     
+    # receive any replies    
+    r = s.recv(1024)
+    while r:
+        # if verbose, display what's received 
+        if (verbose) : print r,
+        else : return
+        r = s.recv(1024)
+    return
 
 
 
