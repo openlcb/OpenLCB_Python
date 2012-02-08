@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 '''
 Utilities for communicating with CAN OpenLCB implementations
 
@@ -13,11 +14,23 @@ def makeframestring(header, body) :
     retval = ":X"
     retval += hex(header).upper()[2:]
     retval += "N"
-    for a in body :
-        retval += ("00"+(hex(a).upper()[2:]))[-2:]
+    if (body != None) :
+        for a in body :
+            retval += ("00"+(hex(a).upper()[2:]))[-2:]
     retval += ";"
     return retval
 
+'''
+Take a hex-byte-sequence string like 1.2.3.a3.4 and return
+an array of ints, used for e.g. input of node and event IDs
+'''
+def splitSequence(seq) :
+    strings = seq.split('.')
+    result = []
+    for a in strings : 
+        result = result+[int(a, 16)]
+    return result
+        
 '''
 Return (header, body) of a P/C Event Report frame
 alias: the source alias of this node
@@ -30,6 +43,7 @@ def eventframe(alias, event) :
 def main():
     (header, body) = eventframe(0x123, [11,255,240,4,5,6,7,8]);
     print makeframestring(header, body)
+    print splitSequence("1.2.3.a.0a.10.4")
 
 if __name__ == '__main__':
     main()

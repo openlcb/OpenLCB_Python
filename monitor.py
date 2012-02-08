@@ -1,14 +1,18 @@
 #!/usr/bin/env python
 '''
-Created on March 18, 2011
+Simple monitor of CAN traffic on default connection
+Kill to end
 
 @author: Bob Jacobsen
 '''
 
-import ethernetolcblink as link
+import connection as connection
 
 def main():
-    link.receive('10.0.1.98', 23, True)
+    while (True) :
+        frame = connection.network.receive()
+        if (frame != None ) : print frame,
+    return
 
 if __name__ == '__main__':
     main()
