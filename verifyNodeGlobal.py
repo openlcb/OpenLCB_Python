@@ -5,27 +5,34 @@ Created on March 18, 2011
 @author: Bob Jacobsen
 '''
 
-import defaults as defaults
+import connection as connection
+import canolcbutils
 
 def makeframe(alias, nodeID) :
-    return ':X180A000FN;'
+    return canolcbutils.makeframestring(0x180A7000+alias,nodeID)
     
 def usage() :
     print ""
-    print "Python module for connecting to an OpenLCB via an Ethernet connection."
     print "Called standalone, will send one CAN VerifyNode (Global) message"
-    print "display response"
+    print " and display response"
     print ""
-    print "Connection detail taken from defaults.py in that case"
+    print "Expect a single VerifiedNode reply in return"
+    print "e.g. [180B7sss] nn nn nn nn nn nn"
+    print "containing dest alias and NodeID"
     print ""
-    print "-a --alias alias (default 123)"
-    print "-n --node nodeID (default 01.02.03.04.05.06)"
+    print "Default connection detail taken from connection.py"
+    print ""
+    print "-a --alias source alias (default 123)"
+    print "-n --node dest nodeID (default 01.02.03.04.05.06)"
     print "-v verbose"
 
 import getopt, sys
 
 def main():
     # argument processing
+    nodeID = connection.testNodeID
+    alias = connection.thisNodeAlias
+    
     try:
         opts, remainder = getopt.getopt(sys.argv[1:], "h:p:n:a:v", ["alias=", "node=", "host=", "port="])
     except getopt.GetoptError, err:
@@ -35,20 +42,23 @@ def main():
         sys.exit(2)
     for opt, arg in opts:
         if opt == "-v":
-            defaults.network.verbose = True
+            connection.network.verbose = True
         elif opt in ("-h", "--host"):
-            defaults.network.host = arg
+            connection.network.host = arg
         elif opt in ("-p", "--port"):
-            defaults.network.port = int(arg)
+            connection.network.port = int(arg)
         elif opt in ("-a", "--alias"):
-            defaults.network.port = int(arg)
+            alias = int(arg)
         elif opt in ("-n", "--node"):
-            defaults.network.port = int(arg)
+            nodeID = canolcbutils.splitSequence(arg)
         else:
             assert False, "unhandled option"
 
     # now execute
-    defaults.network.send(makeframe(0,0))
+    connection.network.send(makeframe(alias, nodeID))
+    while (True) :
+        if (connection.network.receive() == None ) : break
+    return
 
 if __name__ == '__main__':
     main()

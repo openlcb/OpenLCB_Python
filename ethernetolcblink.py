@@ -15,50 +15,52 @@ class EthernetToOlcbLink :
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         #self.socket.timeout(10)
         
-        # defaults
+        # defaults (generally overridden by system-wide defaults elsewhere)
         self.host = "10.00.01.98" # Arduino adapter default
         self.port = 23
-        self.timeout = 0
+        self.timeout = 1.0
         self.verbose = False
+        self.socket = None
         return
     
-    
+    def connect(self) :
+        # if verbose, print
+        if (self.verbose) : print "connect to ",self.host,":",self.port
+        
+        self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self.socket.connect((self.host, self.port))
+        
+        return
+        
     def send(self, frame) :
+        if (self.socket == None) : self.connect()
+        
         # if verbose, print
-        if (self.verbose) : print "send ",frame," to ",self.host,":",self.port
+        if (self.verbose) : print "send    ",frame
     
         # send
-        s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        #s.timeout(self.timeout)
-        s.connect((self.host, self.port))
-        s.send(frame+'\n')
+        self.socket.send(frame+'\n')
         
-        # receive any replies    
-        r = s.recv(1024)
-        while r:
-            # if verbose, display what's received 
-            if (self.verbose) : print r,
-            else : return
-            r = s.recv(1024)
         return
-
-    def receive(self) :
+        
+    def receive(self) : # returns frame
+        if (self.socket == None) : self.connect()
+        
         # if verbose, print
-        if (self.verbose) : print "receive from ",self.host,":",self.port
-    
-        # send
-        s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        #s.timeout(self.timeout)
-        s.connect((self.host, self.port))
-        
-        # receive any replies    
-        r = s.recv(1024)
-        while r:
-            # if verbose, display what's received 
-            if (self.verbose) : print r,
-            else : return
-            r = s.recv(1024)
-        return
+        if (self.verbose) : print "receive ",
+            
+        self.socket.settimeout(self.timeout)
+        line = "";
+        try:
+            r = self.socket.recv(1024)
+            # assuming we get frame in a single message
+            while r:
+                # if verbose, display what's received 
+                if (self.verbose) : print r,
+                return r
+        except socket.timeout, err:
+            if (self.verbose) : print "" # blank line to show delay?
+            return None
 
 
 
