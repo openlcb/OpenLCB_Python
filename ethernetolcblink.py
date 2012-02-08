@@ -9,40 +9,56 @@ argparse is new in Jython 2.7, so dont use here
 '''
 import socket
 
-def sendframe(host, port, frame, verbose) :
-    # if verbose, print
-    if (verbose) : print "send ",frame," to ",host,":",port
-
-    # send
-    s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    s.connect((host, port))
-    s.send(frame+'\n')
+class EthernetToOlcbLink :
+    def __init__(self) :
+        # prepare, but don't open
+        self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        #self.socket.timeout(10)
+        
+        # defaults
+        self.host = "10.00.01.98" # Arduino adapter default
+        self.port = 23
+        self.timeout = 0
+        self.verbose = False
+        return
     
-    # receive any replies    
-    r = s.recv(1024)
-    while r:
-        # if verbose, display what's received 
-        if (verbose) : print r,
-        else : return
-        r = s.recv(1024)
-    return
-
-def receive(host, port, verbose) :
-    # if verbose, print
-    if (verbose) : print "receive from ",host,":",port
-
-    # send
-    s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    s.connect((host, port))
     
-    # receive any replies    
-    r = s.recv(1024)
-    while r:
-        # if verbose, display what's received 
-        if (verbose) : print r,
-        else : return
+    def send(self, frame) :
+        # if verbose, print
+        if (self.verbose) : print "send ",frame," to ",self.host,":",self.port
+    
+        # send
+        s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        #s.timeout(self.timeout)
+        s.connect((self.host, self.port))
+        s.send(frame+'\n')
+        
+        # receive any replies    
         r = s.recv(1024)
-    return
+        while r:
+            # if verbose, display what's received 
+            if (self.verbose) : print r,
+            else : return
+            r = s.recv(1024)
+        return
+
+    def receive(self) :
+        # if verbose, print
+        if (self.verbose) : print "receive from ",self.host,":",self.port
+    
+        # send
+        s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        #s.timeout(self.timeout)
+        s.connect((self.host, self.port))
+        
+        # receive any replies    
+        r = s.recv(1024)
+        while r:
+            # if verbose, display what's received 
+            if (self.verbose) : print r,
+            else : return
+            r = s.recv(1024)
+        return
 
 
 
@@ -51,17 +67,26 @@ import getopt, sys
 def main():
     global frame
     
-    # defaults
-    host = '10.0.1.98'  # Arduino adapter default
-    port = 23
-    verbose = False
+    # create connection object
+    network = EthernetToOlcbLink()
+
+    # get defaults
+    host = network.host 
+    port = network.port
+    verbose = network.verbose
+    
     frame = ':X182DF123N0203040506080001;'
 
     # process arguments
     (host, port, frame, verbose) = args(host, port, frame, verbose)
         
+    # load new defaults
+    network.host = host
+    network.port = port
+    network.verbose = verbose
+    
     # send the frame
-    sendframe(host, port, frame, verbose)
+    network.send(frame)
     
     return  # done with example
 
