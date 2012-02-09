@@ -34,7 +34,7 @@ def main():
     alias = connection.thisNodeAlias
     
     try:
-        opts, remainder = getopt.getopt(sys.argv[1:], "h:p:n:a:v", ["alias=", "node=", "host=", "port="])
+        opts, remainder = getopt.getopt(sys.argv[1:], "n:a:v", ["alias=", "node="])
     except getopt.GetoptError, err:
         # print help information and exit:
         print str(err) # will print something like "option -a not recognized"
@@ -43,10 +43,6 @@ def main():
     for opt, arg in opts:
         if opt == "-v":
             connection.network.verbose = True
-        elif opt in ("-h", "--host"):
-            connection.network.host = arg
-        elif opt in ("-p", "--port"):
-            connection.network.port = int(arg)
         elif opt in ("-a", "--alias"):
             alias = int(arg)
         elif opt in ("-n", "--node"):
