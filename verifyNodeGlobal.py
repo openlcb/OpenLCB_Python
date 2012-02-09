@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 '''
-Created on March 18, 2011
+Handle OpenLCB verifyNodeGlobal
 
 @author: Bob Jacobsen
 '''
@@ -48,19 +48,22 @@ def main():
             nodeID = canolcbutils.splitSequence(arg)
         else:
             assert False, "unhandled option"
-
     # now execute
+    retval = test(alias, nodeID, connection)
+    exit(retval)    
+    
+def test(alias, nodeID, connection):
     connection.network.send(makeframe(alias, nodeID))
     while (True) :
         reply = connection.network.receive()
         if (reply == None ) : 
             print "Expected reply not received"
-            exit(2)
+            return 2
         elif reply.startswith(":X180B7") :
-            exit(0)
+            return 0
         else :
             print "Unexpected reply received ", reply
-            exit(1)
+            return 1
     return
 
 if __name__ == '__main__':

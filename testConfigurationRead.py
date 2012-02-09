@@ -51,7 +51,7 @@ def main():
 
     if identifynode :
         import getUnderTestAlias
-        dest = getUnderTestAlias.get(alias, None)
+        dest, nodeID = getUnderTestAlias.get(alias, None)
 
     # now execute: read 1 byte from address 0, configuration space 
     connection.network.send(datagram.makeframe(alias, dest, [0x20,0x42,0,0,0,0,1]))
