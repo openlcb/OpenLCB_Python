@@ -3,45 +3,108 @@
 <HEAD>
 	<META HTTP-EQUIV="CONTENT-TYPE" CONTENT="text/html; charset=utf-8">
 	<TITLE>OpenLCB C/C++ Prototype</TITLE>
+	<META NAME="GENERATOR" CONTENT="OpenOffice.org 3.3  (Unix)">
+	<META NAME="CREATED" CONTENT="0;0">
+	<META NAME="CHANGEDBY" CONTENT="Bob Jacobsen">
+	<META NAME="CHANGED" CONTENT="20120208;23070600">
+	<META NAME="CHANGEDBY" CONTENT="Bob Jacobsen">
 	<STYLE TYPE="text/css">
 	<!--
-		H2.ctl { font-family: "Arial Unicode MS" }
+		H3.cjk { font-family: "SimSun" }
+		H3.ctl { font-family: "Lucida Sans" }
 	-->
 	</STYLE>
 </HEAD>
 <BODY LANG="en-US" BGCOLOR="#e6e6ff" DIR="LTR">
-<H1><FONT COLOR="#000000">
-<IMG SRC="../../web/logo-ajs-dph.png" NAME="OpenLCB" ALIGN=RIGHT WIDTH=337 HEIGHT=135 BORDER=2></FONT>OpenLCB
+<H1><FONT COLOR="#000000"><IMG SRC="../../web/logo-ajs-dph.png" NAME="OpenLCB" ALIGN=RIGHT WIDTH=337 HEIGHT=135 BORDER=2></FONT>OpenLCB
 Python Prototype</H1>
-<P>This is the index page of the OpenLCB&#8482; Python prototypes directory.</P>
-
-<p>Initial content for this is being developed, stay tuned.</P>
-
-<h3>Utilities and Modules</h3>
-
-The basic Ethernet connection is accessed via the &quot;ethernetolcblink&quot; module.
-<p>
-<code><pre>
-    import ethernetolcblink as link
-    link.sendframe('10.0.1.98', 23, ':X180A000FN;', True)
-</pre></code>
-<p>
-Other cross-connection utilities can found in the &quot;canolcbutils&quot; module.
-
-<h3>Tools and Tests</h3>
-
-<dl>
-<dt><b>ethernetolcblink</b></dt><dd>Allows you to send specific packets</dd>
-<dt><b>verifyNodeGlobal</b></dt><dd>Send a "Verify Node Global" frame, getting a reply from each connected node.</dd>
-</dl>
-
-To run one from the Mac OS X or Linux command line, do e.g.:
-<code><pre>
-./verifyNodeGlobal.py
-</pre></code>
-
-
+<P>This is the index page of the OpenLCB™ Python prototypes
+directory.</P>
+<P>Most of the Python modules in this package are meant to be run
+from the command line, or invoked programmatically.  
+</P>
+<P>To run one from the Mac OS X or Linux command line, do e.g.: 
+</P>
+<PRE STYLE="margin-bottom: 0.5cm"><CODE>./verifyNodeGlobal.py -v</CODE></PRE><P>
+When running from the command line, internal help is available via
+the -h option, as in:</P>
+<PRE STYLE="margin-bottom: 0.5cm"><CODE>./verifyNodeGlobal.py -h</CODE></PRE><P STYLE="margin-bottom: 0cm">
+Common options are:</P>
+<UL>
+	<LI><P STYLE="margin-bottom: 0cm">-h Print help information</P>
+	<LI><P STYLE="margin-bottom: 0cm">-v Verbose, show each message
+	(normal operation is to complete silently)</P>
+	<LI><P STYLE="margin-bottom: 0cm">-a nnn Source alias to be included
+	in transmitted messages</P>
+	<LI><P STYLE="margin-bottom: 0cm">-d nnn Destination alias to be
+	included in transmitted messages</P>
+	<LI><P STYLE="margin-bottom: 0cm">-t Dynamically find the
+	destination alias for the node-under-test (assumes only one node
+	present)</P>
+</UL>
 <P STYLE="margin-bottom: 0cm"><BR>
+</P>
+<P STYLE="margin-bottom: 0cm">The type of access (Ethernet or USB)
+and parameters such as IP address, default node IDs, etc are defined
+in the default.py file.  When using the command line, edit that file
+for your specific needs.</P>
+<H3 CLASS="western">Utilities and Modules</H3>
+<P>The basic Ethernet connection is accessed via the
+&quot;ethernetolcblink&quot; module. 
+</P>
+<PRE><CODE>    import ethernetolcblink as link</CODE>
+<CODE>    link.sendframe('10.0.1.98', 23, ':X180A000FN;', True)</CODE></PRE><P>
+Other cross-connection utilities can found in the &quot;canolcbutils&quot;
+module. 
+</P>
+<H3 CLASS="western">Frame and Message Tools</H3>
+<DL>
+	<DT><B>verifyNodeGlobal</B></DT><DD STYLE="margin-bottom: 0.5cm">
+	Send a &quot;Verify Node Global&quot; message, getting a reply from
+	each connected node. 
+	</DD><DT>
+	<B>verifyNodeAddressed</B></DT><DD STYLE="margin-bottom: 0.5cm">
+	Send a &quot;Verify Node Addressed&quot; message, getting a reply
+	from the addressed node. 
+	</DD><DT>
+	<B>identifyConsumers</B></DT><DD STYLE="margin-bottom: 0.5cm">
+	Send an &quot;Identify Consumers&quot; message, which will generate
+	a reply from any node using consuming the Event ID 
+	</DD><DT>
+	<B>identifyProducers</B></DT><DD STYLE="margin-bottom: 0.5cm">
+	Send a &quot;Identify Producers&quot; message, which will generate a
+	reply from any node using consuming the Event ID. 
+	</DD><DT>
+	<B>identifyEventsGlobal</B></DT><DD STYLE="margin-bottom: 0.5cm">
+	Send a &quot;Identify Events Global&quot; message, getting a reply
+	from each connected node. 
+	</DD><DT>
+	<B>identifyEventsAddressed</B></DT><DD STYLE="margin-bottom: 0.5cm">
+	Send a &quot;Verify Node Global&quot; message. 
+	</DD></DL>
+<H3 CLASS="western">
+Tests</H3>
+<DL>
+	<DT><B>testProducerConsumerNotification</B></DT><DD STYLE="margin-bottom: 0.5cm">
+	Uses IdentifyEvents to learn which events a node produces and
+	consumes, then checks that IdentifyConsumers and IdentifyProducers
+	will find them. 
+	</DD></DL>
+<H3 CLASS="western">
+Tools</H3>
+<DL>
+	<DT><B>monitor</B></DT><DD>
+	Monitors received frames until cancelled 
+	</DD><DT>
+	<B>ethernetolcblink</B></DT><DD>
+	Allows you to send specific CAN frames via an Ethernet adapter 
+	</DD><DT>
+	<B>getUnderTestAlias</B></DT><DD STYLE="margin-bottom: 0.5cm">
+	Assumes there is only one node attached, and finds the alias for
+	addressing it. 
+	</DD></DL>
+<P>
+<BR><BR>
 </P>
 <HR>
 <P STYLE="margin-bottom: 0cm">This web site contains trademarks and
