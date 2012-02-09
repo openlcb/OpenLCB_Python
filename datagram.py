@@ -35,6 +35,7 @@ def main():
     content = [1,2,3,4]
     alias = connection.thisNodeAlias
     dest = connection.testNodeAlias
+    identifynode = False
     
     try:
         opts, remainder = getopt.getopt(sys.argv[1:], "d:a:c:vt", ["dest=", "alias=", "content="])
@@ -53,10 +54,13 @@ def main():
         elif opt in ("-c", "--content"):
             content = canolcbutils.splitSequence(arg)
         elif opt == "-t":
-            import getUnderTestAlias
-            dest = getUnderTestAlias.get(alias, None)
+            identifynode = True
         else:
             assert False, "unhandled option"
+
+    if identifynode :
+        import getUnderTestAlias
+        dest = getUnderTestAlias.get(alias, None)
 
     # now execute
     connection.network.send(makeframe(alias, dest, content))
