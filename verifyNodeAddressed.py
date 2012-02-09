@@ -65,7 +65,15 @@ def main():
     # now execute
     connection.network.send(makeframe(alias, dest, nodeID))
     while (True) :
-        if (connection.network.receive() == None ) : break
+        reply = connection.network.receive()
+        if (reply == None ) : 
+            print "Expected reply not received"
+            exit(2)
+        elif reply.startswith(":X190B7") :
+            exit(0)
+        else :
+            print "Unexpected reply received ", reply
+            exit(1)
     return
 
 if __name__ == '__main__':
