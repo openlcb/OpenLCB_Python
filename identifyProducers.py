@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 '''
-Send identifyConsumers message
+Send identifyProducers message
 
 @author: Bob Jacobsen
 '''
@@ -9,14 +9,14 @@ import connection as connection
 import canolcbutils
 
 def makeframe(alias, eventID) :
-    return canolcbutils.makeframestring(0x1824F000+alias,eventID)
+    return canolcbutils.makeframestring(0x1828F000+alias,eventID)
     
 def usage() :
     print ""
-    print "Called standalone, will send one CAN IdentifyConsumers message"
+    print "Called standalone, will send one CAN IdentifyProducer message"
     print " and display response"
     print ""
-    print "Expect zero or more ConsumerIdentified reply in return"
+    print "Expect zero or more ProducerIdentified reply in return"
     print "e.g. [1926Bsss] nn nn nn nn nn nn"
     print "containing dest alias and EventID"
     print ""
