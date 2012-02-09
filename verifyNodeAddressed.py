@@ -25,6 +25,7 @@ def usage() :
     print "-a --alias source alias (default 0x"+hex(connection.thisNodeAlias).upper()+")"
     print "-d --dest dest alias (default 0x"+hex(connection.testNodeAlias).upper()+")"
     print "-n --node dest nodeID (default 01.02.03.04.05.06)"
+    print "-t find destination alias automatically"
     print "-v verbose"
 
 import getopt, sys
@@ -34,9 +35,10 @@ def main():
     nodeID = connection.testNodeID
     alias = connection.thisNodeAlias
     dest = connection.testNodeAlias
-
+    identifynode = False
+    
     try:
-        opts, remainder = getopt.getopt(sys.argv[1:], "d:n:a:v", ["alias=", "node=", "dest="])
+        opts, remainder = getopt.getopt(sys.argv[1:], "d:n:a:vt", ["alias=", "node=", "dest="])
     except getopt.GetoptError, err:
         # print help information and exit:
         print str(err) # will print something like "option -a not recognized"
@@ -48,11 +50,17 @@ def main():
         elif opt in ("-a", "--alias"): # needs hex processing
             alias = int(arg)
         elif opt in ("-d", "--dest"): # needs hex processing
-            alias = int(arg)
+            dest = int(arg)
         elif opt in ("-n", "--node"):
             nodeID = canolcbutils.splitSequence(arg)
+        elif opt == "-t":
+            identifynode = True
         else:
             assert False, "unhandled option"
+
+    if identifynode :
+        import getUnderTestAlias
+        dest = getUnderTestAlias.get(alias, None)
 
     # now execute
     connection.network.send(makeframe(alias, dest, nodeID))
