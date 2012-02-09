@@ -7,21 +7,12 @@ Send one generic datagram
 
 import connection as connection
 import canolcbutils
-
-def makeframe(alias, dest, content) :
-    return canolcbutils.makeframestring(0x1D000000+alias+(dest<<12),content)
-    
-def makereply(alias, dest) :
-    return canolcbutils.makeframestring(0x1E000000+alias+(dest<<12),[0x04])
+import datagram
     
 def usage() :
     print ""
-    print "Called standalone, will send one CAN datagram message"
+    print "Called standalone, will do one-byte memory read"
     print " and display response"
-    print ""
-    print "Expect a single datagram reply in return"
-    print "e.g. [1Esssddd] 4C"
-    print "from destination alias to source alias"
     print ""
     print "Default connection detail taken from connection.py"
     print ""
@@ -35,13 +26,12 @@ import getopt, sys
 
 def main():
     # argument processing
-    content = [1,2,3,4]
     alias = connection.thisNodeAlias
     dest = connection.testNodeAlias
     identifynode = False
     
     try:
-        opts, remainder = getopt.getopt(sys.argv[1:], "d:a:c:vt", ["dest=", "alias=", "content="])
+        opts, remainder = getopt.getopt(sys.argv[1:], "d:a:vt", ["dest=", "alias="])
     except getopt.GetoptError, err:
         # print help information and exit:
         print str(err) # will print something like "option -a not recognized"
@@ -54,8 +44,6 @@ def main():
             alias = int(arg)
         elif opt in ("-d", "--dest"):  # needs hex processing
             dest = int(arg)
-        elif opt in ("-c", "--content"):
-            content = canolcbutils.splitSequence(arg)
         elif opt == "-t":
             identifynode = True
         else:
@@ -65,10 +53,29 @@ def main():
         import getUnderTestAlias
         dest = getUnderTestAlias.get(alias, None)
 
-    # now execute
-    connection.network.send(makeframe(alias, dest, content))
-    while (True) :
-        if (connection.network.receive() == None ) : break
+    # now execute: read 1 byte from address 0, configuration space 
+    connection.network.send(datagram.makeframe(alias, dest, [0x20,0x42,0,0,0,0,1]))
+
+    # datagram reply
+    reply = connection.network.receive()
+    if (reply == None ) : 
+        print "No reply to read command datagram"
+        exit(2)
+    elif (not reply.startswith(":X1E")) or ( reply[11:13] != '04' ):
+        print "Unexpected reply to read command datagram ", reply
+        exit(1)
+    
+    # data response
+    reply = connection.network.receive()
+    if (reply == None ) : 
+        print "No data returned"
+        exit(4)
+    elif (not reply.startswith(":X1D")) or ( reply[11:23] != '205200000000' ):
+        print "Unexpected message instead of reply datagram ", reply
+        exit(3)
+
+    # send final reply
+    connection.network.send(datagram.makereply(alias, dest))
     return
 
 if __name__ == '__main__':
