@@ -69,7 +69,7 @@ def main():
         if (reply == None ) : 
             print "Expected reply not received"
             exit(2)
-        elif reply.startswith(":X190B7") :
+        elif reply.startswith(":X180B7") :
             exit(0)
         else :
             print "Unexpected reply received ", reply

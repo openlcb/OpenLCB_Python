@@ -13,8 +13,7 @@ def makeframe(alias, nodeID) :
     
 def usage() :
     print ""
-    print "Called standalone, will send one CAN VerifyNode (Global) message"
-    print " and display response"
+    print "Called standalone, will send  CAN VerifyNode (Global) message"
     print ""
     print "Expect a single VerifiedNode reply in return"
     print "e.g. [180B7sss] nn nn nn nn nn nn"
@@ -23,14 +22,14 @@ def usage() :
     print "Default connection detail taken from connection.py"
     print ""
     print "-a --alias source alias (default 123)"
-    print "-n --node dest nodeID (default 01.02.03.04.05.06)"
+    print "-n --node dest nodeID (default None, format 01.02.03.04.05.06)"
     print "-v verbose"
 
 import getopt, sys
 
 def main():
     # argument processing
-    nodeID = connection.testNodeID
+    nodeID = None
     alias = connection.thisNodeAlias
     
     try:
@@ -57,7 +56,7 @@ def main():
         if (reply == None ) : 
             print "Expected reply not received"
             exit(2)
-        elif reply.startswith(":X190B7") :
+        elif reply.startswith(":X180B7") :
             exit(0)
         else :
             print "Unexpected reply received ", reply

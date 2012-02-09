@@ -13,9 +13,9 @@ def get(alias, nodeID) :
     connection.network.send(verifyNodeGlobal.makeframe(alias, nodeID))
     while (True) :
         reply = connection.network.receive()
-        if (reply == None ) : return None
-        if (reply.startswith(":X190B7")) :
-            return int(reply[7:10],16)
+        if (reply == None ) : return None,reply
+        if (reply.startswith(":X180B7")) :
+            return int(reply[7:10],16),reply
 
 def usage() :
     print ""
@@ -58,8 +58,8 @@ def main():
             assert False, "unhandled option"
 
     # now execute
-    alias = get(alias, nodeID)
-    print "Found "+str(alias)+" ("+hex(alias)+")"
+    alias,frame = get(alias, nodeID)
+    print "Found alias "+str(alias)+" ("+hex(alias)+") for node ID ",canolcbutils.bodyArray(frame)
 
 if __name__ == '__main__':
     main()
