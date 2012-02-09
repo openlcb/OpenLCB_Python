@@ -30,7 +30,19 @@ def splitSequence(seq) :
     for a in strings : 
         result = result+[int(a, 16)]
     return result
-        
+ 
+'''
+Pull body bytes from frame as array
+'''
+def bodyArray(frame) :
+    string = frame[11:];
+    string = string[:-1]
+    result = []
+    while (len(string) > 1) :
+        result = result+[int(string[:2])]
+        string = string[2:]
+    return result
+           
 '''
 Return (header, body) of a P/C Event Report frame
 alias: the source alias of this node
@@ -44,6 +56,8 @@ def main():
     (header, body) = eventframe(0x123, [11,255,240,4,5,6,7,8]);
     print makeframestring(header, body)
     print splitSequence("1.2.3.a.0a.10.4")
+    print bodyArray(":X1E000000F010203040506;")
+    
 
 if __name__ == '__main__':
     main()
