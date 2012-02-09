@@ -9,13 +9,16 @@ import connection as connection
 import verifyNodeGlobal
 import canolcbutils
 
+'''
+Returns list of alias, nodeID
+'''
 def get(alias, nodeID) :
     connection.network.send(verifyNodeGlobal.makeframe(alias, nodeID))
     while (True) :
         reply = connection.network.receive()
-        if (reply == None ) : return None,reply
+        if (reply == None ) : return None,None
         if (reply.startswith(":X180B7")) :
-            return int(reply[7:10],16),reply
+            return int(reply[7:10],16),canolcbutils.bodyArray(reply)
 
 def usage() :
     print ""
@@ -58,8 +61,8 @@ def main():
             assert False, "unhandled option"
 
     # now execute
-    alias,frame = get(alias, nodeID)
-    print "Found alias "+str(alias)+" ("+hex(alias)+") for node ID ",canolcbutils.bodyArray(frame)
+    alias,nodeID = get(alias, nodeID)
+    print "Found alias "+str(alias)+" ("+hex(alias)+") for node ID ",nodeID
 
 if __name__ == '__main__':
     main()

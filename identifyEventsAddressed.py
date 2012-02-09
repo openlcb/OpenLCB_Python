@@ -56,7 +56,7 @@ def main():
 
     if identifynode :
         import getUnderTestAlias
-        dest = getUnderTestAlias.get(alias, None)
+        dest, nodeID = getUnderTestAlias.get(alias, None)
 
     # now execute
     connection.network.send(makeframe(alias,dest))

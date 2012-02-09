@@ -70,8 +70,12 @@ def main():
 
     if identifynode :
         import getUnderTestAlias
-        dest = getUnderTestAlias.get(alias, None)
+        dest,nodeID = getUnderTestAlias.get(alias, None)
 
+    retval = test(alias, dest, connection, verbose)
+    return retval
+    
+def test(alias, dest, connection, verbose) :
     # now execute
     connection.network.send(identifyEventsAddressed.makeframe(alias, dest))
     consumed = []
@@ -105,7 +109,7 @@ def main():
         elif ( not reply.startswith(":X192AB")) :
             print "Unexpected reply "+reply
         # here is OK, go around to next
-    return
+    return 0
 
 if __name__ == '__main__':
     main()
