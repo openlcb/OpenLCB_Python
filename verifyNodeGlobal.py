@@ -13,7 +13,9 @@ def makeframe(alias, nodeID) :
     
 def usage() :
     print ""
-    print "Called standalone, will send  CAN VerifyNode (Global) message"
+    print "Called standalone, will send  CAN VerifyNode (Global) message."
+    print "By default, this carries no Node ID information in the body, "
+    print "but if you supply the -n or --node option, it will be included."
     print ""
     print "Expect a single VerifiedNode reply in return"
     print "e.g. [180B7sss] nn nn nn nn nn nn"
