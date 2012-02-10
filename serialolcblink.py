@@ -12,7 +12,7 @@ class SerialOlcbLink :
     def __init__(self) :
         
         # defaults (generally overridden by system-wide defaults elsewhere)
-        self.host = "/dev/tty.usbserial-A7007AOC" # really serial port
+        self.host = "/dev/tty.usbserial-A7007AOK" # really serial port
         self.port = 115200                        # really baud rate
         self.timeout = 1.0
         self.verbose = False
@@ -72,7 +72,7 @@ def main():
     port = network.port
     verbose = network.verbose
     
-    frame = ':X182DF123N0203040506080001;'
+    frame = ':X180A7000N;'
 
     # process arguments
     (host, port, frame, verbose) = args(host, port, frame, verbose)
@@ -100,9 +100,9 @@ def usage() :
     print "  -p, --port for baud rate"
     print ""
     print "valid usages (default values):"
-    print "  python serialolcblink.py --port=/dev/tty.usbserial-A7007AOC"
-    print "  python serialolcblink.py --port=/dev/tty.usbserial-A7007AOC --speed=333333"
-    print "  python serialolcblink.py --port=/dev/tty.usbserial-A7007AOC --speed=333333 :X182DF123N0203040506080001\;"
+    print "  python serialolcblink.py --port=/dev/tty.usbserial-A7007AOK"
+    print "  python serialolcblink.py --port=/dev/tty.usbserial-A7007AOK --speed=115200"
+    print "  python serialolcblink.py --port=/dev/tty.usbserial-A7007AOK --speed=115200 :X180A7000N;\;"
     print ""
     print "Note: Most shells require escaping the semicolon at the end of the frame."
     
