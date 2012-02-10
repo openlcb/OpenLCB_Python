@@ -52,8 +52,12 @@ for your specific needs.</P>
 <P>The basic Ethernet connection is accessed via the
 &quot;ethernetolcblink&quot; module. 
 </P>
-<PRE><CODE>    import ethernetolcblink as link</CODE>
-<CODE>    link.sendframe('10.0.1.98', 23, ':X180A000FN;', True)</CODE></PRE><P>
+<PRE><CODE>    import ethernetolcblink</CODE></PRE>
+<P>The basic USB-Serial connection is accessed via the
+&quot;serialolcblink&quot; module. 
+</P>
+<PRE><CODE>    import serialolcblink</CODE></PRE>
+<P>
 Other cross-connection utilities can found in the &quot;canolcbutils&quot;
 module. 
 </P>
@@ -81,6 +85,9 @@ module.
 	</DD><DT>
 	<B>identifyEventsAddressed</B></DT><DD STYLE="margin-bottom: 0.5cm">
 	Send a &quot;Verify Node Global&quot; message. 
+	</DD><DT>
+	<B>datagram</B></DT><DD STYLE="margin-bottom: 0.5cm">
+	Send a &quot;datagram&quot; message. 
 	</DD></DL>
 <H3 CLASS="western">
 Tests</H3>
@@ -89,7 +96,12 @@ Tests</H3>
 	Uses IdentifyEvents to learn which events a node produces and
 	consumes, then checks that IdentifyConsumers and IdentifyProducers
 	will find them. 
-	</DD></DL>
+	</DD>
+	<DT><B>testConfigurationRead</B></DT><DD STYLE="margin-bottom: 0.5cm">
+	Sends a single-byte configuration read, and checks the responses
+	etc.
+	</DD>	
+	</DL>
 <H3 CLASS="western">
 Tools</H3>
 <DL>
