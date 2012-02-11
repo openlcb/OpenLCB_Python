@@ -25,16 +25,18 @@ def usage() :
     print "-a --alias source alias (default 0x"+hex(connection.thisNodeAlias).upper()+")"
     print "-e --event eventID as 1.2.3.4.5.6.7.8 form"
     print "-v verbose"
+    print "-V Very verbose"
 
 import getopt, sys
 
 def main():
     alias = connection.thisNodeAlias
     event = [1,2,3,4,5,6,7,8]
+    verbose = False
     
     # argument processing
     try:
-        opts, remainder = getopt.getopt(sys.argv[1:], "e:a:vt", ["alias=", "event="])
+        opts, remainder = getopt.getopt(sys.argv[1:], "e:a:vVt", ["alias=", "event="])
     except getopt.GetoptError, err:
         # print help information and exit:
         print str(err) # will print something like "option -a not recognized"
@@ -42,6 +44,9 @@ def main():
         sys.exit(2)
     for opt, arg in opts:
         if opt == "-v":
+            verbose = True
+        elif opt == "-V":
+            verbose = True
             connection.network.verbose = True
         elif opt in ("-a", "--alias"):
             alias = int(arg) # needs hex decode
@@ -50,11 +55,17 @@ def main():
         else:
             assert False, "unhandled option"
 
-    # now execute
+    retval = test(alias,event,connection,verbose)
+    exit(retval)
+
+def test(alias,event,connection,verbose) :
     connection.network.send(makeframe(alias,event))
+    count = 0
     while (True) :
         if (connection.network.receive() == None ) : break
-    return
+        count = count + 1
+    if verbose : print "Found",count,"nodes"
+    return 0
 
 if __name__ == '__main__':
     main()

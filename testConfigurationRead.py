@@ -29,6 +29,7 @@ def main():
     alias = connection.thisNodeAlias
     dest = connection.testNodeAlias
     identifynode = False
+    verbose = False
     
     try:
         opts, remainder = getopt.getopt(sys.argv[1:], "d:a:vt", ["dest=", "alias="])
@@ -40,6 +41,7 @@ def main():
     for opt, arg in opts:
         if opt == "-v":
             connection.network.verbose = True
+            verbose = True
         elif opt in ("-a", "--alias"):  # needs hex processing
             alias = int(arg)
         elif opt in ("-d", "--dest"):  # needs hex processing
@@ -53,30 +55,34 @@ def main():
         import getUnderTestAlias
         dest, nodeID = getUnderTestAlias.get(alias, None)
 
+    retval = test(alias, dest, connection, verbose)
+    exit(retval)
+    
+def test(alias, dest, connection, verbose) :
     # now execute: read 1 byte from address 0, configuration space 
-    connection.network.send(datagram.makeframe(alias, dest, [0x20,0x42,0,0,0,0,1]))
+    connection.network.send(datagram.makefinalframe(alias, dest, [0x20,0x42,0,0,0,0,1]))
 
     # datagram reply
     reply = connection.network.receive()
     if (reply == None ) : 
-        print "No reply to read command datagram"
-        exit(2)
-    elif (not reply.startswith(":X1E")) or ( reply[11:13] != '04' ):
-        print "Unexpected reply to read command datagram ", reply
-        exit(1)
+        if verbose : print "No reply to read command datagram"
+        return 2
+    elif not datagram.isreply(reply) :
+        if verbose : print "Unexpected reply to read command datagram ", reply
+        return 1
     
     # data response
     reply = connection.network.receive()
     if (reply == None ) : 
-        print "No data returned"
-        exit(4)
+        if verbose : print "No data returned"
+        return 4
     elif (not reply.startswith(":X1D")) or ( reply[11:23] != '205200000000' ):
-        print "Unexpected message instead of reply datagram ", reply
-        exit(3)
+        if verbose : print "Unexpected message instead of reply datagram ", reply
+        return 3
 
     # send final reply
     connection.network.send(datagram.makereply(alias, dest))
-    return
+    return 0
 
 if __name__ == '__main__':
     main()
