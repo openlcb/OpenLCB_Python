@@ -26,6 +26,7 @@ def usage() :
     print "-d --dest dest alias (default 0x"+hex(connection.testNodeAlias).upper()+")"
     print "-t find destination alias automatically"
     print "-v verbose"
+    print "-V very verbose"
 
 import getopt, sys
 
@@ -33,10 +34,11 @@ def main():
     alias = connection.thisNodeAlias
     dest = connection.testNodeAlias
     identifynode = False
+    verbose = False
 
     # argument processing
     try:
-        opts, remainder = getopt.getopt(sys.argv[1:], "d:a:vt", ["alias=", "dest="])
+        opts, remainder = getopt.getopt(sys.argv[1:], "d:a:vVt", ["alias=", "dest="])
     except getopt.GetoptError, err:
         # print help information and exit:
         print str(err) # will print something like "option -a not recognized"
@@ -44,7 +46,10 @@ def main():
         sys.exit(2)
     for opt, arg in opts:
         if opt == "-v":
+            verbose = True
+        elif opt == "-V":
             connection.network.verbose = True
+            verbose = True
         elif opt in ("-a", "--alias"):
             alias = int(arg) # needs hex decode
         elif opt in ("-d", "--dest"):
@@ -58,11 +63,17 @@ def main():
         import getUnderTestAlias
         dest, nodeID = getUnderTestAlias.get(alias, None)
 
-    # now execute
+    retval = test(alias, dest, connection, verbose)
+    exit(retval)
+    
+def test(alias, dest, connection, verbose) : 
     connection.network.send(makeframe(alias,dest))
+    count = 0
     while (True) :
         if (connection.network.receive() == None ) : break
-    return
+        count = count + 1
+    if verbose : print "Found",count,"events"
+    return 0
 
 if __name__ == '__main__':
     main()

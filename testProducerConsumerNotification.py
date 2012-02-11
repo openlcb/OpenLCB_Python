@@ -91,7 +91,9 @@ def test(alias, dest, connection, verbose) :
             event = canolcbutils.bodyArray(reply)
             if verbose : print "produces ", event
             produced = produced+[event]
-    # now check consumers
+    # now check consumers and producers individually
+    timeout = connection.network.timeout
+    connection.network.timeout = 0.25
     if connection.network.verbose : print "Start individual checks"
     for c in consumed :
         connection.network.send(identifyConsumers.makeframe(alias, c))
@@ -101,6 +103,11 @@ def test(alias, dest, connection, verbose) :
         elif ( not reply.startswith(":X1926B") ) :
             print "Unexpected reply "+reply
         # here is OK, go around to next
+        while True :
+            reply = connection.network.receive()
+            if (reply == None ) : break
+            elif ( not reply.startswith(":X1926B") ) :
+                print "Unexpected reply "+reply
     for p in produced :
         connection.network.send(identifyProducers.makeframe(alias, p))
         reply = connection.network.receive()
@@ -109,6 +116,12 @@ def test(alias, dest, connection, verbose) :
         elif ( not reply.startswith(":X192AB")) :
             print "Unexpected reply "+reply
         # here is OK, go around to next
+        while True :
+            reply = connection.network.receive()
+            if (reply == None ) : break
+            elif ( not reply.startswith(":X192AB") ) :
+                print "Unexpected reply "+reply
+    connection.network.timeout = timeout
     return 0
 
 if __name__ == '__main__':

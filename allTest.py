@@ -65,6 +65,7 @@ def main():
     exit(retval)    
     
 def test(alias, dest, nodeID, connection, verbose):
+
     import verifyNodeGlobal
     if verbose : print "verifyNodeGlobal w no NodeID"
     retval = verifyNodeGlobal.test(alias, None, connection)
@@ -74,9 +75,44 @@ def test(alias, dest, nodeID, connection, verbose):
     if verbose : print "verifyNodeGlobal with NodeID"
     retval = verifyNodeGlobal.test(alias, nodeID, connection)
     if retval != 0 :
-        print "Error in verifyNodeGlobal w no NodeID"
+        print "Error in verifyNodeGlobal w NodeID"
         exit(retval)
 
+    import identifyEventsGlobal
+    if verbose : print "identifyEventsGlobal"
+    retval = identifyEventsGlobal.test(alias, connection, verbose)
+    if retval != 0 :
+        print "Error in identifyEventsGlobal"
+        exit(retval)
+
+    import identifyEventsAddressed
+    if verbose : print "identifyEventsAddressed"
+    retval = identifyEventsAddressed.test(alias, dest, connection, verbose)
+    if retval != 0 :
+        print "Error in identifyEventsAddressed"
+        exit(retval)
+
+    import identifyConsumers
+    if verbose : print "identifyConsumers"
+    retval = identifyConsumers.test(alias, [1,2,3,4,5,6,7,8], connection, verbose)
+    if retval != 0 :
+        print "Error in identifyConsumers"
+        exit(retval)
+
+    import identifyProducers
+    if verbose : print "identifyProducers"
+    retval = identifyProducers.test(alias, [1,2,3,4,5,6,7,8], connection, verbose)
+    if retval != 0 :
+        print "Error in identifyProducers"
+        exit(retval)
+
+    import datagram
+    if verbose : print "datagram"
+    retval = datagram.test(alias, dest, [1,2,3,4], connection, verbose)
+    if retval != 0 :
+        print "Error in datagram"
+        exit(retval)
+    
     import testProducerConsumerNotification
     if verbose : print "testProducerConsumerNotification"
     retval = testProducerConsumerNotification.test(alias, dest, connection, verbose)
@@ -84,6 +120,23 @@ def test(alias, dest, nodeID, connection, verbose):
         print "Error in verifyNodeGlobal"
         exit(retval)
 
+    import testConfigurationRead
+    if verbose : print "testConfigurationRead"
+    retval = testConfigurationRead.test(alias, dest, connection, verbose)
+    if retval != 0 :
+        print "Error in testConfigurationRead", retval
+        exit(retval)
+
+    import testResponseTime
+    n = 100
+    if verbose : print "testResponseTime",n
+    retval = testResponseTime.test(alias, n, connection, verbose, 1)
+    
+    import unknownMtiAddressed
+    n = 100
+    if verbose : print "unknownMtiAddressed",n
+    retval = unknownMtiAddressed.test(alias, dest, connection, verbose)
+    
     return
 
 if __name__ == '__main__':

@@ -9,7 +9,9 @@ import connection as connection
 import canolcbutils
 
 def makeframe(alias, dest, nodeID) :
-    return canolcbutils.makeframestring(0x1E000000+alias+(dest<<12),[0x0A]+nodeID)
+    body = [0x0A]
+    if nodeID != None : body = body+nodeID
+    return canolcbutils.makeframestring(0x1E000000+alias+(dest<<12),body)
     
 def usage() :
     print ""
@@ -24,18 +26,19 @@ def usage() :
     print ""
     print "-a --alias source alias (default 0x"+hex(connection.thisNodeAlias).upper()+")"
     print "-d --dest dest alias (default 0x"+hex(connection.testNodeAlias).upper()+")"
-    print "-n --node dest nodeID (default 01.02.03.04.05.06)"
-    print "-t find destination alias automatically"
+    print "-n --node dest nodeID (default None, format 01.02.03.04.05.06)"
+    print "-t find destination alias and NodeID automatically"
     print "-v verbose"
 
 import getopt, sys
 
 def main():
     # argument processing
-    nodeID = connection.testNodeID
+    nodeID = None
     alias = connection.thisNodeAlias
     dest = connection.testNodeAlias
     identifynode = False
+    verbose = False
     
     try:
         opts, remainder = getopt.getopt(sys.argv[1:], "d:n:a:vt", ["alias=", "node=", "dest="])
@@ -47,6 +50,7 @@ def main():
     for opt, arg in opts:
         if opt == "-v":
             connection.network.verbose = True
+            verbose = True
         elif opt in ("-a", "--alias"): # needs hex processing
             alias = int(arg)
         elif opt in ("-d", "--dest"): # needs hex processing
@@ -60,20 +64,24 @@ def main():
 
     if identifynode :
         import getUnderTestAlias
-        dest, nodeID = getUnderTestAlias.get(alias, None)
+        dest, otherNodeId = getUnderTestAlias.get(alias, None)
+        if nodeID == None : nodeID = otherNodeId
 
-    # now execute
+    retval = test(alias, dest, nodeID, connection, verbose)
+    exit(retval)
+    
+def test(alias, dest, nodeID, connection, verbose) :
     connection.network.send(makeframe(alias, dest, nodeID))
     while (True) :
         reply = connection.network.receive()
         if (reply == None ) : 
-            print "Expected reply not received"
-            exit(2)
+            if verbose : print "Expected reply not received"
+            return 2
         elif reply.startswith(":X180B7") :
-            exit(0)
+            return 0
         else :
-            print "Unexpected reply received ", reply
-            exit(1)
+            if verbose : print "Unexpected reply received ", reply
+            return 1
     return
 
 if __name__ == '__main__':

@@ -103,9 +103,9 @@ def usage() :
     print "  -p, --port for port number"
     print ""
     print "valid usages (default values):"
-    print "  python openlcbdriver.py --host=10.00.01.98"
-    print "  python openlcbdriver.py --host=10.00.01.98 --port=23"
-    print "  python openlcbdriver.py --host=10.00.01.98 --port=23 :X182DF123N0203040506080001\;"
+    print "  ./ethernetolcblink.py --host=10.00.01.98"
+    print "  ./ethernetolcblink.py --host=10.00.01.98 --port=23"
+    print "  ./ethernetolcblink.py --host=10.00.01.98 --port=23 :X182DF123N0203040506080001\;"
     print ""
     print "Note: Most shells require escaping the semicolon at the end of the frame."
     
