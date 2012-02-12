@@ -39,7 +39,7 @@ def bodyArray(frame) :
     string = string[:-1]
     result = []
     while (string[0] != ';') :
-        result = result+[int(string[:2])]
+        result = result+[int(string[:2],16)]
         string = string[2:]
     return result
            

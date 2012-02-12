@@ -62,7 +62,12 @@ def test(alias, connection, verbose) :
     connection.network.send(makeframe(alias))
     count = 0
     while (True) :
-        if (connection.network.receive() == None ) : break
+        reply = connection.network.receive()
+        if (reply == None ) : break
+        if not (reply.startswith(':X192AB') or reply.startswith(':X1926B')):
+            if verbose : 
+                print "Wrong reply received", reply
+                return 4
         count = count + 1
     if verbose : print "Found",count,"events"
     return 0

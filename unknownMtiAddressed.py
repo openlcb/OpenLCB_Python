@@ -72,7 +72,7 @@ def main():
     exit(retval)
     
 def test(alias, dest, connection, verbose) :
-    for mti in range(0,255) :
+    for mti in range(0,256) :
         if mti in knownMti : continue
         connection.network.send(makeframe(alias, dest, mti))
         reply = connection.network.receive()
