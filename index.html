@@ -5,9 +5,6 @@
 	<TITLE>OpenLCB Python Prototype</TITLE>
 	<META NAME="GENERATOR" CONTENT="OpenOffice.org 3.3  (Unix)">
 	<META NAME="CREATED" CONTENT="0;0">
-	<META NAME="CHANGEDBY" CONTENT="Bob Jacobsen">
-	<META NAME="CHANGED" CONTENT="20120208;23070600">
-	<META NAME="CHANGEDBY" CONTENT="Bob Jacobsen">
 	<STYLE TYPE="text/css">
 	<!--
 		H3.cjk { font-family: "SimSun" }
@@ -32,8 +29,9 @@ the -h option, as in:</P>
 Common options are:</P>
 <UL>
 	<LI><P STYLE="margin-bottom: 0cm">-h Print help information</P>
-	<LI><P STYLE="margin-bottom: 0cm">-v Verbose, show each message
+	<LI><P STYLE="margin-bottom: 0cm">-v Verbose, show summary information
 	(normal operation is to complete silently)</P>
+	<LI><P STYLE="margin-bottom: 0cm">-V Very verbose, show each message</P>
 	<LI><P STYLE="margin-bottom: 0cm">-a nnn Source alias to be included
 	in transmitted messages</P>
 	<LI><P STYLE="margin-bottom: 0cm">-d nnn Destination alias to be
@@ -92,14 +90,19 @@ module.
 <H3 CLASS="western">
 Tests</H3>
 <DL>
+	<DT><B>allTest</B></DT><DD STYLE="margin-bottom: 0.5cm">
+	Runs the complete set of tests in sequence
+	</DD>
 	<DT><B>testProducerConsumerNotification</B></DT><DD STYLE="margin-bottom: 0.5cm">
 	Uses IdentifyEvents to learn which events a node produces and
 	consumes, then checks that IdentifyConsumers and IdentifyProducers
 	will find them. 
 	</DD>
-	<DT><B>testConfigurationRead</B></DT><DD STYLE="margin-bottom: 0.5cm">
-	Sends a single-byte configuration read, and checks the responses
-	etc.
+	<DT><B>testConfigurationProtocol</B></DT><DD STYLE="margin-bottom: 0.5cm">
+	Does a sequence of tests of the configuration protocol
+	</DD>	
+	<DT><B>testConfigurationProtocol</B></DT><DD STYLE="margin-bottom: 0.5cm">
+	Does a sequence of tests of the configuration protocol
 	</DD>	
 	</DL>
 <H3 CLASS="western">
@@ -107,8 +110,11 @@ Tools</H3>
 <DL>
 	<DT><B>monitor</B></DT><DD>
 	Monitors received frames until cancelled 
-	</DD><DT>
-	<B>ethernetolcblink</B></DT><DD>
+	</DD>
+	<DT><B>readConfiguration</B></DT><DD>
+	Reads from a node via the configuration protocol
+	</DD>
+	<DT><B>ethernetolcblink</B></DT><DD>
 	Allows you to send specific CAN frames via an Ethernet adapter 
 	</DD><DT>
 	<B>getUnderTestAlias</B></DT><DD STYLE="margin-bottom: 0.5cm">

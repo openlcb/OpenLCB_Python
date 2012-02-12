@@ -29,6 +29,7 @@ def usage() :
     print "-n --node dest nodeID (default None, format 01.02.03.04.05.06)"
     print "-t find destination alias and NodeID automatically"
     print "-v verbose"
+    print "-V Very verbose"
 
 import getopt, sys
 
@@ -41,7 +42,7 @@ def main():
     verbose = False
     
     try:
-        opts, remainder = getopt.getopt(sys.argv[1:], "d:n:a:vt", ["alias=", "node=", "dest="])
+        opts, remainder = getopt.getopt(sys.argv[1:], "d:n:a:vVt", ["alias=", "node=", "dest="])
     except getopt.GetoptError, err:
         # print help information and exit:
         print str(err) # will print something like "option -a not recognized"
@@ -49,6 +50,8 @@ def main():
         sys.exit(2)
     for opt, arg in opts:
         if opt == "-v":
+            verbose = True
+        elif opt == "-V":
             connection.network.verbose = True
             verbose = True
         elif opt in ("-a", "--alias"): # needs hex processing

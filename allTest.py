@@ -78,6 +78,13 @@ def test(alias, dest, nodeID, connection, verbose):
         print "Error in verifyNodeGlobal w NodeID"
         exit(retval)
 
+    import verifyNodeAddressed
+    if verbose : print "verifyNodeAddressed"
+    retval = verifyNodeAddressed.test(alias, dest, nodeID, connection, verbose)
+    if retval != 0 :
+        print "Error in verifyNodeAddressed"
+        exit(retval)
+
     import identifyEventsGlobal
     if verbose : print "identifyEventsGlobal"
     retval = identifyEventsGlobal.test(alias, connection, verbose)
@@ -120,11 +127,11 @@ def test(alias, dest, nodeID, connection, verbose):
         print "Error in verifyNodeGlobal"
         exit(retval)
 
-    import testConfigurationRead
-    if verbose : print "testConfigurationRead"
-    retval = testConfigurationRead.test(alias, dest, connection, verbose)
+    import testConfigurationProtocol
+    if verbose : print "testConfigurationProtocol"
+    retval = testConfigurationProtocol.test(alias, dest, connection, verbose)
     if retval != 0 :
-        print "Error in testConfigurationRead", retval
+        print "Error in testConfigurationProtocol", retval
         exit(retval)
 
     import testResponseTime
@@ -133,8 +140,7 @@ def test(alias, dest, nodeID, connection, verbose):
     retval = testResponseTime.test(alias, n, connection, verbose, 1)
     
     import unknownMtiAddressed
-    n = 100
-    if verbose : print "unknownMtiAddressed",n
+    if verbose : print "unknownMtiAddressed"
     retval = unknownMtiAddressed.test(alias, dest, connection, verbose)
     
     return

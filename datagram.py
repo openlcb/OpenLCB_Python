@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 '''
-Send one generic datagram
+Send and receive single datagrams
 
 @author: Bob Jacobsen
 '''
@@ -19,6 +19,43 @@ def makereply(alias, dest) :
 
 def isreply(frame) :
     return frame.startswith(":X1E") and frame[11:13] == "4C"
+
+def sendOneDatagram(alias, dest, content, connection, verbose) :
+    while len(content) > 8 :
+        frame = makepartialframe(alias, dest, content[0:8])
+        connection.network.send(frame)
+        content = content[8:]
+
+    frame = makefinalframe(alias, dest, content)
+    connection.network.send(frame)
+        
+    frame = connection.network.receive()
+    if frame == None : 
+        if verbose : print "Did not receive reply"
+        return 1
+    if not isreply(frame) :
+        if verbose : print "Unexpected message received instead of reply"
+        return 2
+    return 0
+
+def receiveOneDatagram(alias, dest, conection, verbose) :
+    retval = []
+    while True :
+        reply = connection.network.receive()
+        if (reply == None ) : 
+            if verbose : print "No datagram segment received"
+            return 4
+        elif reply.startswith(":X1C") :
+            retval = retval + canolcbutils.bodyArray(reply)
+            continue
+        elif reply.startswith(":X1D") :
+            retval = retval + canolcbutils.bodyArray(reply)
+            connection.network.send(makereply(alias, dest))
+            return retval
+        else :
+            if verbose : print "Unexpected message instead of datagram segment", reply
+            return 3
+
     
 def usage() :
     print ""
@@ -36,6 +73,7 @@ def usage() :
     print "-c --content message content (default 1,2,3,4)"
     print "-t find destination alias automatically"
     print "-v verbose"
+    print "-V Very verbose"
 
 import getopt, sys
 
@@ -48,7 +86,7 @@ def main():
     verbose = False
     
     try:
-        opts, remainder = getopt.getopt(sys.argv[1:], "d:a:c:vt", ["dest=", "alias=", "content="])
+        opts, remainder = getopt.getopt(sys.argv[1:], "d:a:c:vVt", ["dest=", "alias=", "content="])
     except getopt.GetoptError, err:
         # print help information and exit:
         print str(err) # will print something like "option -a not recognized"
@@ -56,6 +94,8 @@ def main():
         sys.exit(2)
     for opt, arg in opts:
         if opt == "-v":
+            verbose = True
+        elif opt == "-V" :
             connection.network.verbose = True
             verbose = True
         elif opt in ("-a", "--alias"):  # needs hex processing
@@ -73,26 +113,10 @@ def main():
         import getUnderTestAlias
         dest, nodeID = getUnderTestAlias.get(alias, None)
 
-    return test(alias, dest, content, connection, verbose)
+    exit( test(alias, dest, content, connection, verbose) )
     
-def test(alias, dest, content, connection, verbose) :
-    while len(content) > 8 :
-        frame = makepartialframe(alias, dest, content[0:8])
-        connection.network.send(frame)
-        content = content[8:]
-
-    frame = makefinalframe(alias, dest, content)
-    connection.network.send(frame)
-        
-    frame = connection.network.receive()
-    if frame == None : 
-        if verbose : print "Did not receive reply"
-        return 1
-    if not isreply(frame) :
-        if verbose : print "Unexpected message received instead of reply"
-        return 2
-    
-    return 0
+def test(alias, dest, content, connection, verbose) :    
+    return sendOneDatagram(alias, dest, content, connection, verbose)
 
 if __name__ == '__main__':
     main()
