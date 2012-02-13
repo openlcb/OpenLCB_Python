@@ -146,6 +146,7 @@ def test(alias, dest, connection, identifynode, verbose) :
         if verbose : print "did not wait long enough ", end-start
         return 22
     
+    if verbose : print "delay was ", end-start
     if end-start > 0.550 :
         if verbose : print "waited too long ", end-start
         return 23
