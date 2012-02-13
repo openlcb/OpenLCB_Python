@@ -135,6 +135,7 @@ def test(alias, dest, nodeID, connection, verbose):
         exit(retval)
 
     import testResponseTime
+    # quantity low because unknownMtiAddressed is also doing a bunch of traffic
     n = 100
     if verbose : print "testResponseTime",n
     retval = testResponseTime.test(alias, n, connection, verbose, 1)
@@ -142,6 +143,11 @@ def test(alias, dest, nodeID, connection, verbose):
     import unknownMtiAddressed
     if verbose : print "unknownMtiAddressed"
     retval = unknownMtiAddressed.test(alias, dest, connection, verbose)
+    
+    # done last, as changes alias in use
+    import testAliasConflict
+    if verbose : print "testAliasConflict"
+    retval = testAliasConflict.test(alias, dest, connection, verbose)
     
     return
 
