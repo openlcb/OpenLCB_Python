@@ -152,6 +152,8 @@ def test(alias, dest, nodeID, event, connection, verbose):
     import testAliasConflict
     if verbose : print "testAliasConflict"
     retval = testAliasConflict.test(alias, dest, connection, verbose)
+
+    if verbose : print "note: Did not perform testStartup, which is manual"
     
     return
 
