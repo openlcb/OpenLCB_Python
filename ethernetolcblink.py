@@ -25,7 +25,7 @@ class EthernetToOlcbLink :
     
     def connect(self) :
         # if verbose, print
-        if (self.verbose) : print "  connect to ",self.host,":",self.port
+        if (self.verbose) : print "   connect to ",self.host,":",self.port
         
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.socket.connect((self.host, self.port))
@@ -36,7 +36,7 @@ class EthernetToOlcbLink :
         if (self.socket == None) : self.connect()
         
         # if verbose, print
-        if (self.verbose) : print "  send    ",frame
+        if (self.verbose) : print "   send    ",frame
     
         # send
         self.socket.send(frame+'\n')
@@ -47,7 +47,7 @@ class EthernetToOlcbLink :
         if (self.socket == None) : self.connect()
         
         # if verbose, print
-        if (self.verbose) : print "  receive ",
+        if (self.verbose) : print "   receive ",
             
         self.socket.settimeout(self.timeout)
         line = "";
