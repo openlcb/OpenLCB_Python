@@ -142,14 +142,13 @@ def test(alias, dest, connection, identifynode, verbose) :
     if reply[7:10] != testAlias :
         if verbose : print "mismatched 5th source alias"
         return 15
+
+    if verbose : print "delay was ", end-start
+
     if end-start < 0.15 :
+        # some tolerance on check...
         if verbose : print "did not wait long enough ", end-start
         return 22
-    
-    if verbose : print "delay was ", end-start
-    if end-start > 0.550 :
-        if verbose : print "waited too long ", end-start
-        return 23
 
     # expect NodeInit
     reply = connection.network.receive()
