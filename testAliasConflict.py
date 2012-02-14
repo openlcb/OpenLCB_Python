@@ -18,7 +18,8 @@ Tests a node's response to seeing messages with its alias
 
 import connection as connection
 import canolcbutils
-
+import verifyNodeGlobal
+import verifyNodeAddressed
 import time
     
 def usage() :
@@ -73,11 +74,50 @@ def main():
     return retval
     
 def test(alias, dest, connection, verbose) :
-    # TODO: Add sending a global message (that normally doesn't get a response)
+    # Sending a global message (that normally doesn't get a response)
+    if verbose : print "  check no-response global message with alias conflict"
+    connection.network.send(verifyNodeGlobal.makeframe(dest, [0,0,0,0,0,0]))
+    reply = connection.network.receive()
+    if reply == None :
+        if verbose : print "no response received to RIF"
+        return 2
+    if int(reply[7:10],16) != dest :
+        if verbose : print "mismatched reply alias"
+        return 12
+    if not reply.startswith(":X10700") :
+        if verbose : print "CID reply not correct, RID expected"
+        return 32
     
-    # TODO: Add sending an addressed message to some other alias
+    # Sending a global message (that normally does get a response)
+    if verbose : print "  check response-inducing global message with alias conflict"
+    connection.network.send(verifyNodeGlobal.makeframe(dest, nodeID))
+    reply = connection.network.receive()
+    if reply == None :
+        if verbose : print "no response received to RIF"
+        return 2
+    if int(reply[7:10],16) != dest :
+        if verbose : print "mismatched reply alias"
+        return 12
+    if not reply.startswith(":X10700") :
+        if verbose : print "CID reply not correct, RID expected"
+        return 32
+    
+    # Sending an addressed message to some other alias (note arguments backwards, on purpose)
+    if verbose : print "  check addressed message with alias conflict"
+    connection.network.send(verifyNodeAddressed.makeframe(dest, alias, None))
+    reply = connection.network.receive()
+    if reply == None :
+        if verbose : print "no response received to RIF"
+        return 2
+    if int(reply[7:10],16) != dest :
+        if verbose : print "mismatched reply alias"
+        return 12
+    if not reply.startswith(":X10700") :
+        if verbose : print "CID reply not correct, RID expected"
+        return 32
 
-    # send a RIF     
+    # send a CheckID   
+    if verbose : print "  check CheckID with alias conflict"
     connection.network.send(canolcbutils.makeframestring(0x17020000+dest, None))
     reply = connection.network.receive()
     if reply == None :
@@ -87,11 +127,12 @@ def test(alias, dest, connection, verbose) :
         if verbose : print "mismatched reply alias"
         return 12
     if not reply.startswith(":X10700") :
-        if verbose : print "RIF reply not correct, CIF expected"
+        if verbose : print "CID reply not correct, RID expected"
         return 32
 
-    # send a CIF   
+    # send a ReserveID   
     connection.network.send(canolcbutils.makeframestring(0x10700000+dest, None))
+    if verbose : print "  check ReserveID with alias conflict"
     reply = connection.network.receive()
     if reply == None :
         if verbose : print "no response received to RIF"
@@ -100,7 +141,7 @@ def test(alias, dest, connection, verbose) :
         if verbose : print "node did not change alias"
         return 14
     if not reply.startswith(":X17") :
-        if verbose : print "CIF reply not correct, RIF sequence expected"
+        if verbose : print "RID reply not correct, CID sequence expected"
         return 34
 
     # we should probably check the rest of the sequence here
