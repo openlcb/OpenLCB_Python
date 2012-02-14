@@ -19,6 +19,7 @@ def usage() :
     print "-d --dest dest alias (default 123)"
     print "-t find destination alias automatically"
     print "-n --node dest nodeID (default 01.02.03.04.05.06)"
+    print "-e --event eventID as 1.2.3.4.5.6.7.8 form"
     print "-v verbose"
     print "-V Very verbose"
 
@@ -29,11 +30,12 @@ def main():
     nodeID = connection.testNodeID
     alias = connection.thisNodeAlias
     dest = connection.testNodeAlias
+    event = [1,2,3,4,5,6,7,8]
     verbose = False
     identifynode = False
     
     try:
-        opts, remainder = getopt.getopt(sys.argv[1:], "n:a:d:vVt", ["alias=", "node=", "dest="])
+        opts, remainder = getopt.getopt(sys.argv[1:], "e:n:a:d:vVt", ["event=", "alias=", "node=", "dest="])
     except getopt.GetoptError, err:
         # print help information and exit:
         print str(err) # will print something like "option -a not recognized"
@@ -53,6 +55,8 @@ def main():
             identifynode = True
         elif opt in ("-n", "--node"):
             nodeID = canolcbutils.splitSequence(arg)
+        elif opt in ("-e", "--event"):
+            event = canolcbutils.splitSequence(arg)
         else:
             assert False, "unhandled option"
 
@@ -61,10 +65,10 @@ def main():
         dest, nodeID = getUnderTestAlias.get(alias, None)
 
     # now execute
-    retval = test(alias, dest, nodeID, connection, verbose)
+    retval = test(alias, dest, nodeID, event, connection, verbose)
     exit(retval)    
     
-def test(alias, dest, nodeID, connection, verbose):
+def test(alias, dest, nodeID, event, connection, verbose):
 
     import verifyNodeGlobal
     if verbose : print "verifyNodeGlobal w no NodeID"
@@ -101,14 +105,14 @@ def test(alias, dest, nodeID, connection, verbose):
 
     import identifyConsumers
     if verbose : print "identifyConsumers"
-    retval = identifyConsumers.test(alias, [1,2,3,4,5,6,7,8], connection, verbose)
+    retval = identifyConsumers.test(alias, event, connection, verbose)
     if retval != 0 :
         print "Error in identifyConsumers"
         exit(retval)
 
     import identifyProducers
     if verbose : print "identifyProducers"
-    retval = identifyProducers.test(alias, [1,2,3,4,5,6,7,8], connection, verbose)
+    retval = identifyProducers.test(alias, event, connection, verbose)
     if retval != 0 :
         print "Error in identifyProducers"
         exit(retval)
