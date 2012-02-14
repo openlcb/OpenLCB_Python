@@ -79,73 +79,99 @@ def test(alias, dest, connection, verbose) :
     connection.network.send(verifyNodeGlobal.makeframe(dest, [0,0,0,0,0,0]))
     reply = connection.network.receive()
     if reply == None :
-        if verbose : print "no response received to RIF"
-        return 2
-    if int(reply[7:10],16) != dest :
-        if verbose : print "mismatched reply alias"
-        return 12
-    if not reply.startswith(":X10700") :
-        if verbose : print "CID reply not correct, RID expected"
-        return 32
+        if verbose : print "no response received to conflict frame"
+        return 21
+    if not reply.startswith(":X17") :
+        if verbose : print "Expected first CID"
+        return 22
+    if int(reply[7:10],16) == dest :
+        if verbose : print "did not update reply alias"
+        return 23
+    dest = int(reply[7:10],16)
+    # pull & drop rest of sequence
+    reply = connection.network.receive()
+    reply = connection.network.receive()
+    reply = connection.network.receive()
+    reply = connection.network.receive()
+    reply = connection.network.receive()
     
     # Sending a global message (that normally does get a response)
     if verbose : print "  check response-inducing global message with alias conflict"
-    connection.network.send(verifyNodeGlobal.makeframe(dest, nodeID))
+    connection.network.send(verifyNodeGlobal.makeframe(dest, None))
     reply = connection.network.receive()
     if reply == None :
-        if verbose : print "no response received to RIF"
-        return 2
-    if int(reply[7:10],16) != dest :
-        if verbose : print "mismatched reply alias"
-        return 12
-    if not reply.startswith(":X10700") :
-        if verbose : print "CID reply not correct, RID expected"
+        if verbose : print "no response received to conflict frame"
+        return 31
+    if not reply.startswith(":X17") :
+        if verbose : print "Expected first CID"
         return 32
+    if int(reply[7:10],16) == dest :
+        if verbose : print "did not update reply alias"
+        return 33
+    dest = int(reply[7:10],16)
+    # pull & drop rest of sequence
+    reply = connection.network.receive()
+    reply = connection.network.receive()
+    reply = connection.network.receive()
+    reply = connection.network.receive()
+    reply = connection.network.receive()
     
     # Sending an addressed message to some other alias (note arguments backwards, on purpose)
     if verbose : print "  check addressed message with alias conflict"
     connection.network.send(verifyNodeAddressed.makeframe(dest, alias, None))
     reply = connection.network.receive()
     if reply == None :
-        if verbose : print "no response received to RIF"
-        return 2
-    if int(reply[7:10],16) != dest :
-        if verbose : print "mismatched reply alias"
-        return 12
-    if not reply.startswith(":X10700") :
-        if verbose : print "CID reply not correct, RID expected"
-        return 32
+        if verbose : print "no response received to conflict frame"
+        return 41
+    if not reply.startswith(":X17") :
+        if verbose : print "Expected first CID"
+        return 42
+    if int(reply[7:10],16) == dest :
+        if verbose : print "did not update reply alias"
+        return 43
+    dest = int(reply[7:10],16)
+    # pull & drop rest of sequence
+    reply = connection.network.receive()
+    reply = connection.network.receive()
+    reply = connection.network.receive()
+    reply = connection.network.receive()
+    reply = connection.network.receive()
 
     # send a CheckID   
     if verbose : print "  check CheckID with alias conflict"
     connection.network.send(canolcbutils.makeframestring(0x17020000+dest, None))
     reply = connection.network.receive()
     if reply == None :
-        if verbose : print "no response received to RIF"
-        return 2
+        if verbose : print "no response received to CID"
+        return 51
     if int(reply[7:10],16) != dest :
         if verbose : print "mismatched reply alias"
-        return 12
+        return 52
     if not reply.startswith(":X10700") :
         if verbose : print "CID reply not correct, RID expected"
-        return 32
+        return 53
 
     # send a ReserveID   
     connection.network.send(canolcbutils.makeframestring(0x10700000+dest, None))
     if verbose : print "  check ReserveID with alias conflict"
     reply = connection.network.receive()
     if reply == None :
-        if verbose : print "no response received to RIF"
-        return 4
-    if int(reply[7:10],16) == dest :
-        if verbose : print "node did not change alias"
-        return 14
+        if verbose : print "no response received to conflict frame"
+        return 61
     if not reply.startswith(":X17") :
-        if verbose : print "RID reply not correct, CID sequence expected"
-        return 34
+        if verbose : print "Expected first CID"
+        return 62
+    if int(reply[7:10],16) == dest :
+        if verbose : print "did not update reply alias"
+        return 63
+    dest = int(reply[7:10],16)
+    # pull & drop rest of sequence
+    reply = connection.network.receive()
+    reply = connection.network.receive()
+    reply = connection.network.receive()
+    reply = connection.network.receive()
+    reply = connection.network.receive()
 
-    # we should probably check the rest of the sequence here
-    # but for now, assuming it starts OK is enough.
     return 0
 
 if __name__ == '__main__':
