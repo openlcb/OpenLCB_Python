@@ -21,7 +21,7 @@ class SerialOlcbLink :
     
     def connect(self) :
         # if verbose, print
-        if (self.verbose) : print "  connect to ",self.host," at ",self.port
+        if (self.verbose) : print "   connect to ",self.host," at ",self.port
         
         self.ser = serial.Serial(self.host, self.port)
         #self.ser.open()
@@ -32,8 +32,8 @@ class SerialOlcbLink :
         if (self.ser == None) : self.connect()
         
         # if verbose, print
-        if (self.verbose) : print "  send    ",frame
-    
+        if (self.verbose) : print "   send    ",frame
+
         # send
         self.ser.write(frame+'\n')
         
@@ -43,7 +43,7 @@ class SerialOlcbLink :
         if (self.ser == None) : self.connect()
         
         # if verbose, print
-        if (self.verbose) : print "  receive ",
+        if (self.verbose) : print "   receive ",
             
         self.ser.timeout = self.timeout
         line = "";
