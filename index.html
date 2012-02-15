@@ -22,7 +22,16 @@ from the command line, or invoked programmatically.
 </P>
 <P>To run one from the Mac OS X or Linux command line, do e.g.: 
 </P>
-<PRE STYLE="margin-bottom: 0.5cm"><CODE>./verifyNodeGlobal.py -v</CODE></PRE><P>
+<PRE STYLE="margin-bottom: 0.5cm"><CODE>./verifyNodeGlobal.py -v</CODE></PRE>
+<P>
+<P>To run the full set of tests from the Mac OS X or Linux command line, do : 
+</P>
+<PRE STYLE="margin-bottom: 0.5cm"><CODE>./allTest.py -t -v && echo OK</CODE></PRE>
+<p>followed by testing the start-up sequencing with : 
+</P>
+<PRE STYLE="margin-bottom: 0.5cm"><CODE>./testStartup.py -t -v && echo OK</CODE></PRE>
+<P>(Reset the node when prompted to force the start-up sequence to run)</p>
+<P>
 When running from the command line, internal help is available via
 the -h option, as in:</P>
 <PRE STYLE="margin-bottom: 0.5cm"><CODE>./verifyNodeGlobal.py -h</CODE></PRE><P STYLE="margin-bottom: 0cm">
