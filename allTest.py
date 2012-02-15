@@ -89,6 +89,13 @@ def test(alias, dest, nodeID, event, connection, verbose):
         print "Error in verifyNodeAddressed"
         exit(retval)
 
+    import protocolIdentProtocol
+    if verbose : print "protocolIdentProtocol"
+    retval = protocolIdentProtocol.test(alias, dest, connection, verbose)
+    if retval != 0 :
+        print "Error in protocolIdentProtocol"
+        exit(retval)
+
     import identifyEventsGlobal
     if verbose : print "identifyEventsGlobal"
     retval = identifyEventsGlobal.test(alias, connection, verbose)
@@ -128,7 +135,7 @@ def test(alias, dest, nodeID, event, connection, verbose):
     if verbose : print "testProducerConsumerNotification"
     retval = testProducerConsumerNotification.test(alias, dest, connection, verbose)
     if retval != 0 :
-        print "Error in verifyNodeGlobal"
+        print "Error in testProducerConsumerNotification"
         exit(retval)
 
     import testConfigurationProtocol
