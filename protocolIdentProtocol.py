@@ -21,7 +21,6 @@ def usage() :
     print ""
     print "-a --alias source alias (default 0x"+hex(connection.thisNodeAlias).upper()+")"
     print "-d --dest dest alias (default 0x"+hex(connection.testNodeAlias).upper()+")"
-    print "-n --node dest nodeID (default None, format 01.02.03.04.05.06)"
     print "-t find destination alias and NodeID automatically"
     print "-v verbose"
     print "-V Very verbose"
