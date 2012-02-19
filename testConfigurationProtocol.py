@@ -72,7 +72,7 @@ def test(alias, dest, connection, verbose) :
         # pass error code up
         return retval
     if retval[0:2] != [0x20,0x82] :
-        if verbose : print "Unexpected message instead of read reply datagram ", retval
+        print "Unexpected message instead of read reply datagram ", retval
         return 3
     if verbose : 
         print "Configuration Options:"
@@ -91,7 +91,7 @@ def test(alias, dest, connection, verbose) :
         # pass error code up
         return retval
     if retval[0:6] != [0x20,0x52,0x00,0x00,0x00,0x00] :
-        if verbose : print "Unexpected message instead of read reply datagram ", retval
+        print "Unexpected message instead of read reply datagram ", retval
         return 3
     if verbose : print "read value", retval[6:7]
     
@@ -105,7 +105,7 @@ def test(alias, dest, connection, verbose) :
         # pass error code up
         return retval
     if retval[0:6] != [0x20,0x52,0x00,0x00,0x00,0x00] :
-        if verbose : print "Unexpected message instead of read reply datagram ", retval
+        print "Unexpected message instead of read reply datagram ", retval
         return 3
     if verbose : print "read value", retval[6:]
         
@@ -119,7 +119,7 @@ def test(alias, dest, connection, verbose) :
         # pass error code up
         return retval
     if retval[0:3] != [0x20,0x86,0xFF] :
-        if verbose : print "Unexpected message instead of read reply datagram ", retval
+        print "Unexpected message instead of read reply datagram ", retval
         return 3
     if verbose : 
         print "Address Space Options:"

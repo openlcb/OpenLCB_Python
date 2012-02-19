@@ -68,10 +68,10 @@ def test(alias, dest, connection, verbose) :
     connection.network.send(makeframe(alias, dest))
     reply = connection.network.receive()
     if (reply == None ) : 
-        if verbose : print "Expected reply not received"
+        print "Expected reply not received"
         return 2
     if not (reply.startswith(":X1E") and int(reply[4:7],16)==alias and int(reply[7:10],16)==dest and reply[11:13]=="2F") :
-        if verbose : print "Unexpected reply received ", reply
+        print "Unexpected reply received ", reply
         return 1
 
     if verbose : print "ProtocolIdentificationProtocol not addressed, no reply"
@@ -80,7 +80,7 @@ def test(alias, dest, connection, verbose) :
     if (reply == None ) : 
         return 0
     else :
-        if verbose : print "Unexpected reply received ", reply
+        print "Unexpected reply received ", reply
         return 1
 
     return 0
