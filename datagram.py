@@ -31,10 +31,10 @@ def sendOneDatagram(alias, dest, content, connection, verbose) :
         
     frame = connection.network.receive()
     if frame == None : 
-        if verbose : print "Did not receive reply"
+        print "Did not receive reply"
         return 1
     if not isreply(frame) :
-        if verbose : print "Unexpected message received instead of reply"
+        print "Unexpected message received instead of reply"
         return 2
     return 0
 
@@ -43,7 +43,7 @@ def receiveOneDatagram(alias, dest, conection, verbose) :
     while True :
         reply = connection.network.receive()
         if (reply == None ) : 
-            if verbose : print "No datagram segment received"
+            print "No datagram segment received"
             return 4
         elif reply.startswith(":X1C") :
             retval = retval + canolcbutils.bodyArray(reply)
@@ -53,7 +53,7 @@ def receiveOneDatagram(alias, dest, conection, verbose) :
             connection.network.send(makereply(alias, dest))
             return retval
         else :
-            if verbose : print "Unexpected message instead of datagram segment", reply
+            print "Unexpected message instead of datagram segment", reply
             return 3
 
     
