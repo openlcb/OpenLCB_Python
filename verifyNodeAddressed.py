@@ -75,17 +75,22 @@ def main():
     
 def test(alias, dest, nodeID, connection, verbose) :
     connection.network.send(makeframe(alias, dest, nodeID))
-    while (True) :
-        reply = connection.network.receive()
-        if (reply == None ) : 
-            if verbose : print "Expected reply not received"
-            return 2
-        elif reply.startswith(":X180B7") :
-            return 0
-        else :
-            if verbose : print "Unexpected reply received ", reply
-            return 1
-    return
+    reply = connection.network.receive()
+    if (reply == None ) : 
+        print "Expected reply not received"
+        return 2
+    elif not reply.startswith(":X180B7") :
+        print "Unexpected reply received ", reply
+        return 1
+
+    # try with invalid alias
+    connection.network.send(makeframe(alias, ~dest, nodeID))
+    reply = connection.network.receive()
+    if (reply != None ) : 
+        print "Unexpected reply received ", reply
+        return 1
+    
+    return 0
 
 if __name__ == '__main__':
     main()
