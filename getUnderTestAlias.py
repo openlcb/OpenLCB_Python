@@ -12,14 +12,16 @@ import canolcbutils
 '''
 Returns list of alias, nodeID
 '''
-def get(alias, nodeID) :
+def get(alias, nodeID, verbose) :
     connection.network.send(verifyNodeGlobal.makeframe(alias, nodeID))
     while (True) :
         reply = connection.network.receive()
         if (reply == None ) : return None,None
         if (reply.startswith(":X180B7")) :
-            return int(reply[7:10],16),canolcbutils.bodyArray(reply)
-
+            alias,nodeID = int(reply[7:10],16),canolcbutils.bodyArray(reply)
+            if verbose : print "Found alias "+str(alias)+" ("+hex(alias)+") for node ID ",nodeID
+            return alias,nodeID
+            
 def usage() :
     print ""
     print " Assumoing one under-test node present, uses "
@@ -38,7 +40,7 @@ def main():
     # argument processing
     nodeID = None
     alias = connection.thisNodeAlias
-    
+    verbose = False
     try:
         opts, remainder = getopt.getopt(sys.argv[1:], "h:p:n:a:v", ["alias=", "node=", "host=", "port="])
     except getopt.GetoptError, err:
@@ -49,6 +51,7 @@ def main():
     for opt, arg in opts:
         if opt == "-v":
             connection.network.verbose = True
+            verbose = True
         elif opt in ("-h", "--host"):
             connection.network.host = arg
         elif opt in ("-p", "--port"):
@@ -61,8 +64,7 @@ def main():
             assert False, "unhandled option"
 
     # now execute
-    alias,nodeID = get(alias, nodeID)
-    print "Found alias "+str(alias)+" ("+hex(alias)+") for node ID ",nodeID
+    alias,nodeID = get(alias, nodeID, verbose)
 
 if __name__ == '__main__':
     main()
