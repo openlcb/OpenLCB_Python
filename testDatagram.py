@@ -128,7 +128,7 @@ def checkreply(alias, dest, connection, verbose) :
    
 def test(alias, dest, connection, verbose) :    
     # send a short datagram in two segments
-    if verbose : print "test two segments"
+    if verbose : print " test two segments"
     connection.network.send(makepartialframe(alias, dest, [0x20,0x42,0,0,0]))
     connection.network.send(makefinalframe(alias, dest, [0,8]))
     # check response
@@ -137,15 +137,43 @@ def test(alias, dest, connection, verbose) :
         return retval+10
     
     # send a short datagram in two segments with another to somebody else in between
-    if verbose : print "test two segments with another interposed" 
+    if verbose : print " test two segments with another interposed" 
     connection.network.send(makepartialframe(alias, dest, [0x20,0x42,0,0,0]))
     connection.network.send(makepartialframe(alias, ~dest, [0x20,0x42,0,0,0]))
     connection.network.send(makefinalframe(alias, dest, [0,8]))
     # check response
     retval = checkreply(alias, dest, connection, verbose)
     if type(retval) is int and retval != 0 :
-        return retval+10
-    
+        return retval+20
+
+    # NAK the response datagram
+    if verbose : print " send NAK to response"
+    connection.network.send(makefinalframe(alias, dest, [0x20,0x42,0,0,0,0,1]))
+    frame = connection.network.receive()
+    if frame == None : 
+        print "Did not receive reply"
+        return 31
+    if not isreply(frame) :
+        print "Unexpected message received instead of reply"
+        return 32
+    # read reply
+    reply = connection.network.receive()
+    if (reply == None ) : 
+        print "No datagram segment received"
+        return 34
+    elif not reply.startswith(":X1D") :
+        print "Unexpected message instead of datagram segment", reply
+        return 33
+    # send NAK for retransmit and see if it's right this time
+    connection.network.send(canolcbutils.makeframestring(0x1E000000+alias+(dest<<12),[0x4D]))
+    retval = datagram.receiveOneDatagram(alias, dest, connection, verbose)
+    if type(retval) is int : 
+        # pass error code up
+        return retval
+    if retval[0:3] != [0x20,0x52,0] :
+        print "Unexpected message instead of read reply datagram ", retval
+        return 37
+        
     return 0
 
 if __name__ == '__main__':
