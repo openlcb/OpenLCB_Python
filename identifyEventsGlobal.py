@@ -65,9 +65,8 @@ def test(alias, connection, verbose) :
         reply = connection.network.receive()
         if (reply == None ) : break
         if not (reply.startswith(':X192AB') or reply.startswith(':X1926B')):
-            if verbose : 
-                print "Wrong reply received", reply
-                return 4
+            print "Wrong reply received", reply
+            return 4
         count = count + 1
     if verbose : print "Found",count,"events"
     return 0

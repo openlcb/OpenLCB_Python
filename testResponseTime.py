@@ -78,10 +78,10 @@ def test(alias, n, connection, verbose, parallel) :
         for j in range(parallel) :
             reply = connection.network.receive()
             if (reply == None ) : 
-                if verbose : print "No reply received"
+                print "No reply received"
                 return 1
             if (not reply.startswith(":X180B7")) :
-                if verbose : print "Incorrect reply received"
+                print "Incorrect reply received"
                 return 2
 
     end = time.time()

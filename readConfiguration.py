@@ -85,7 +85,7 @@ def test(alias, dest, connection, count, space, verbose) :
         # pass error code up
         return retval
     if retval[0:6] != [0x20,cmd|0x10,0x00,0x00,0x00,0x00] :
-        if verbose : print "Unexpected message instead of read reply datagram ", retval
+        print "Unexpected message instead of read reply datagram ", retval
         return 3
     if verbose : print "read value", retval[6:]
 
