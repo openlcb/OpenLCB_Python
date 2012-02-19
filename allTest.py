@@ -70,6 +70,13 @@ def main():
     
 def test(alias, dest, nodeID, event, connection, verbose):
 
+    import aliasMapEnquiry
+    if verbose : print "aliasMapEnquiry"
+    retval = aliasMapEnquiry.test(alias, nodeID, connection, verbose)
+    if retval != 0 :
+        print "Error in aliasMapEnquiry"
+        exit(retval)
+
     import verifyNodeGlobal
     if verbose : print "verifyNodeGlobal w no NodeID"
     retval = verifyNodeGlobal.test(alias, None, connection)
@@ -145,20 +152,34 @@ def test(alias, dest, nodeID, event, connection, verbose):
         print "Error in testConfigurationProtocol", retval
         exit(retval)
 
-    import testResponseTime
-    # quantity low because unknownMtiAddressed is also doing a bunch of traffic
-    n = 100
-    if verbose : print "testResponseTime",n
-    retval = testResponseTime.test(alias, n, connection, verbose, 1)
+    import testConfigurationProtocol
+    if verbose : print "testConfigurationProtocol"
+    retval = testConfigurationProtocol.test(alias, dest, connection, verbose)
+    if retval != 0 :
+        print "Error in testConfigurationProtocol", retval
+        exit(retval)
+
+    import simpleNodeIdentificationInformation
+    if verbose : print "simpleNodeIdentificationInformation"
+    retval = simpleNodeIdentificationInformation.test(alias, dest, connection, verbose)
+    if retval != 0 :
+        print "Error in simpleNodeIdentificationInformation"
+        exit(retval)
     
     import unknownMtiAddressed
     if verbose : print "unknownMtiAddressed"
     retval = unknownMtiAddressed.test(alias, dest, connection, verbose)
+    if retval != 0 :
+        print "Error in unknownMtiAddressed"
+        exit(retval)
     
     # done last, as changes alias in use
     import testAliasConflict
     if verbose : print "testAliasConflict"
     retval = testAliasConflict.test(alias, dest, connection, verbose)
+    if retval != 0 :
+        print "Error in testAliasConflict"
+        exit(retval)
 
     if verbose : print "note: Did not perform testStartup, which is manual"
     
