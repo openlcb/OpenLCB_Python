@@ -62,7 +62,7 @@ def main():
 
     if identifynode :
         import getUnderTestAlias
-        dest, nodeID = getUnderTestAlias.get(alias, None)
+        dest, nodeID = getUnderTestAlias.get(alias, None, verbose)
 
     # now execute
     retval = test(alias, dest, nodeID, event, connection, verbose)
@@ -131,13 +131,6 @@ def test(alias, dest, nodeID, event, connection, verbose):
         print "Error in identifyProducers"
         exit(retval)
 
-    import datagram
-    if verbose : print "datagram"
-    retval = datagram.test(alias, dest, [1,2,3,4], connection, verbose)
-    if retval != 0 :
-        print "Error in datagram"
-        exit(retval)
-    
     import testProducerConsumerNotification
     if verbose : print "testProducerConsumerNotification"
     retval = testProducerConsumerNotification.test(alias, dest, connection, verbose)
@@ -145,6 +138,13 @@ def test(alias, dest, nodeID, event, connection, verbose):
         print "Error in testProducerConsumerNotification"
         exit(retval)
 
+    import datagram
+    if verbose : print "datagram"
+    retval = datagram.test(alias, dest, [1,2,3,4], connection, verbose)
+    if retval != 0 :
+        print "Error in datagram"
+        exit(retval)
+    
     import testConfigurationProtocol
     if verbose : print "testConfigurationProtocol"
     retval = testConfigurationProtocol.test(alias, dest, connection, verbose)
@@ -152,18 +152,25 @@ def test(alias, dest, nodeID, event, connection, verbose):
         print "Error in testConfigurationProtocol", retval
         exit(retval)
 
-    import testConfigurationProtocol
-    if verbose : print "testConfigurationProtocol"
-    retval = testConfigurationProtocol.test(alias, dest, connection, verbose)
+    import testDatagram
+    if verbose : print "testDatagram"
+    retval = testDatagram.test(alias, dest, connection, verbose)
     if retval != 0 :
-        print "Error in testConfigurationProtocol", retval
+        print "Error in testDatagram", retval
         exit(retval)
-
+    
     import simpleNodeIdentificationInformation
     if verbose : print "simpleNodeIdentificationInformation"
     retval = simpleNodeIdentificationInformation.test(alias, dest, connection, verbose)
     if retval != 0 :
         print "Error in simpleNodeIdentificationInformation"
+        exit(retval)
+    
+    import unknownDatagramType
+    if verbose : print "unknownDatagramType"
+    retval = unknownDatagramType.test(alias, dest, connection, verbose)
+    if retval != 0 :
+        print "Error in unknownDatagramType"
         exit(retval)
     
     import unknownMtiAddressed
