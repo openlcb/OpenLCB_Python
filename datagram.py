@@ -18,7 +18,7 @@ def makereply(alias, dest) :
     return canolcbutils.makeframestring(0x1E000000+alias+(dest<<12),[0x4C])
 
 def isreply(frame) :
-    return frame.startswith(":X1E") and frame[11:13] == "4C"
+    return frame.startswith(":X1E") and ( frame[11:13] == "4C" or frame[11:13] == "4D")
 
 def sendOneDatagram(alias, dest, content, connection, verbose) :
     while len(content) > 8 :
@@ -60,13 +60,15 @@ def receiveOneDatagram(alias, dest, conection, verbose) :
 def usage() :
     print ""
     print "Called standalone, will send one CAN datagram message"
-    print " and display response"
+    print " and display response."
     print ""
     print "Expect a single datagram reply in return"
     print "e.g. [1Esssddd] 4C"
     print "from destination alias to source alias"
     print ""
     print "Default connection detail taken from connection.py"
+    print ""
+    print "See also testDatagram.py"
     print ""
     print "-a --alias source alias (default 0x"+hex(connection.thisNodeAlias).upper()+")"
     print "-d --dest dest alias (default 0x"+hex(connection.testNodeAlias).upper()+")"
@@ -111,7 +113,7 @@ def main():
 
     if identifynode :
         import getUnderTestAlias
-        dest, nodeID = getUnderTestAlias.get(alias, None)
+        dest, nodeID = getUnderTestAlias.get(alias, None, verbose)
 
     exit( test(alias, dest, content, connection, verbose) )
     
