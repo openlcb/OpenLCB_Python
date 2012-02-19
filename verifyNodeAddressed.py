@@ -67,7 +67,7 @@ def main():
 
     if identifynode :
         import getUnderTestAlias
-        dest, otherNodeId = getUnderTestAlias.get(alias, None)
+        dest, otherNodeId = getUnderTestAlias.get(alias, None, verbose)
         if nodeID == None : nodeID = otherNodeId
 
     retval = test(alias, dest, nodeID, connection, verbose)
