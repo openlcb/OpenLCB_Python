@@ -79,16 +79,17 @@ def test(alias, dest, connection, verbose) :
     connection.network.send(verifyNodeGlobal.makeframe(dest, [0,0,0,0,0,0]))
     reply = connection.network.receive()
     if reply == None :
-        if verbose : print "no response received to conflict frame"
+        print "no response received to conflict frame"
         return 21
     if not reply.startswith(":X17") :
-        if verbose : print "Expected first CID"
+        print "Expected first CID"
         return 22
     if int(reply[7:10],16) == dest :
-        if verbose : print "did not update reply alias"
+        print "did not update reply alias"
         return 23
     dest = int(reply[7:10],16)
     # pull & drop rest of sequence
+    reply = connection.network.receive()
     reply = connection.network.receive()
     reply = connection.network.receive()
     reply = connection.network.receive()
@@ -100,16 +101,17 @@ def test(alias, dest, connection, verbose) :
     connection.network.send(verifyNodeGlobal.makeframe(dest, None))
     reply = connection.network.receive()
     if reply == None :
-        if verbose : print "no response received to conflict frame"
+        print "no response received to conflict frame"
         return 31
     if not reply.startswith(":X17") :
-        if verbose : print "Expected first CID"
+        print "Expected first CID"
         return 32
     if int(reply[7:10],16) == dest :
-        if verbose : print "did not update reply alias"
+        print "did not update reply alias"
         return 33
     dest = int(reply[7:10],16)
     # pull & drop rest of sequence
+    reply = connection.network.receive()
     reply = connection.network.receive()
     reply = connection.network.receive()
     reply = connection.network.receive()
@@ -131,6 +133,7 @@ def test(alias, dest, connection, verbose) :
         return 43
     dest = int(reply[7:10],16)
     # pull & drop rest of sequence
+    reply = connection.network.receive()
     reply = connection.network.receive()
     reply = connection.network.receive()
     reply = connection.network.receive()
@@ -166,6 +169,7 @@ def test(alias, dest, connection, verbose) :
         return 63
     dest = int(reply[7:10],16)
     # pull & drop rest of sequence
+    reply = connection.network.receive()
     reply = connection.network.receive()
     reply = connection.network.receive()
     reply = connection.network.receive()

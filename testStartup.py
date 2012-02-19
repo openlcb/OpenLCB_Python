@@ -85,10 +85,10 @@ def test(alias, dest, connection, identifynode, verbose) :
     reply = connection.network.receive()
     connection.network.timeout = timeout
     if reply == None :
-        if verbose : print "1st reply not received, did you reset node?"
+        print "1st CIM reply not received, did you reset node?"
         return 1
     if not reply.startswith(":X17") :
-        if verbose : print "1st reply not correct"
+        print "1st CIM reply not correct"
         return 31
     testAlias = reply[7:10]
     id = reply[4:7]
@@ -96,37 +96,37 @@ def test(alias, dest, connection, identifynode, verbose) :
     
     reply = connection.network.receive()
     if reply == None :
-        if verbose : print "2nd reply not received"
+        print "2nd CIM reply not received"
         return 2
     if reply[7:10] != testAlias :
-        if verbose : print "mismatched 2nd source alias"
+        print "mismatched 2nd CIM source alias"
         return 12
     if not reply.startswith(":X16") :
-        if verbose : print "2nd reply not correct"
+        print "2nd CIM reply not correct"
         return 32
     id = id+reply[4:7]
 
     reply = connection.network.receive()
     if reply == None :
-        if verbose : print "3rd reply not received"
+        print "3rd CIM reply not received"
         return 3
     if reply[7:10] != testAlias :
-        if verbose : print "mismatched 3rd source alias"
+        print "mismatched 3rd CIM source alias"
         return 13
     if not reply.startswith(":X15") :
-        if verbose : print "3rd reply not correct"
+        print "3rd CIM reply not correct"
         return 33
     id = id+reply[4:7]
 
     reply = connection.network.receive()
     if reply == None :
-        if verbose : print "4th reply not received"
+        print "4th CIM reply not received"
         return 4
     if reply[7:10] != testAlias :
-        if verbose : print "mismatched 4th source alias"
+        print "mismatched 4th CIM source alias"
         return 14
     if not reply.startswith(":X14") :
-        if verbose : print "4th reply not correct"
+        print "4th CIM reply not correct"
         return 34
     id = id+reply[4:7]
     
@@ -134,36 +134,51 @@ def test(alias, dest, connection, identifynode, verbose) :
     reply = connection.network.receive()
     end = time.time()
     if reply == None :
-        if verbose : print "5th reply not received"
+        print "RIM reply not received"
         return 5
     if not reply.startswith(":X10700") :
-        if verbose : print "5th reply not correct"
+        print "RIM reply not correct"
         return 35
     if reply[7:10] != testAlias :
-        if verbose : print "mismatched 5th source alias"
+        print "mismatched RIM source alias"
         return 15
 
     if verbose : print "delay was ", end-start
 
     if end-start < 0.15 :
         # some tolerance on check...
-        if verbose : print "did not wait long enough ", end-start
+        print "did not wait long enough ", end-start
         return 22
 
+    # expect AMD
+    reply = connection.network.receive()
+    if reply == None :
+        print "AMD reply not received"
+        return 6
+    if not reply.startswith(":X10701") :
+        print "AMD reply not correct"
+        return 35
+    if reply[7:10] != testAlias :
+        print "mismatched AMD source alias"
+        return 16
+    if id != reply[11:23] :
+        print "AMD node ID did not match",id, reply[11:23]
+        return 21
+    
     # expect NodeInit
     reply = connection.network.receive()
     if reply == None :
-        if verbose : print "6th reply not received"
-        return 6
+        print "NodeInit reply not received"
+        return 7
     if not reply.startswith(":X19087") :
-        if verbose : print "6th reply not correct"
-        return 35
+        print "NodeInit reply not correct"
+        return 37
     if reply[7:10] != testAlias :
-        if verbose : print "mismatched 6th source alias"
-        return 16
+        print "mismatched NodeInit source alias"
+        return 17
     if id != reply[11:23] :
-        if verbose : print "node ID did not match",id, reply[11:23]
-        return 21
+        print "NodeInit node ID did not match",id, reply[11:23]
+        return 27
     
     # expect one or more Produced/Consumed messages
 
@@ -181,7 +196,7 @@ def test(alias, dest, connection, identifynode, verbose) :
             if verbose : print "produces ", event
             produced = produced+[event]
         else :
-            if verbose : print "Unexpected message"
+            print "Unexpected message"
             return 50
     return 0
 
