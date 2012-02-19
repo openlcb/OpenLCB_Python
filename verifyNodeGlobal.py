@@ -25,6 +25,7 @@ def usage() :
     print ""
     print "-a --alias source alias (default 123)"
     print "-n --node dest nodeID (default None, format 01.02.03.04.05.06)"
+    print "-t find NodeID automatically"
     print "-v verbose"
     print "-V Very verbose"
 
@@ -34,10 +35,11 @@ def main():
     # argument processing
     nodeID = None
     alias = connection.thisNodeAlias
+    identifynode = False
     verbose = False
     
     try:
-        opts, remainder = getopt.getopt(sys.argv[1:], "n:a:vV", ["alias=", "node="])
+        opts, remainder = getopt.getopt(sys.argv[1:], "tn:a:vV", ["alias=", "node="])
     except getopt.GetoptError, err:
         # print help information and exit:
         print str(err) # will print something like "option -a not recognized"
@@ -53,25 +55,49 @@ def main():
             alias = int(arg)
         elif opt in ("-n", "--node"):
             nodeID = canolcbutils.splitSequence(arg)
+        elif opt == "-t":
+            identifynode = True
         else:
             assert False, "unhandled option"
+
+    if identifynode :
+        import getUnderTestAlias
+        dest, nodeID = getUnderTestAlias.get(alias, None)
+        if nodeID == None : nodeID = otherNodeId
+
     # now execute
     retval = test(alias, nodeID, connection)
     exit(retval)    
     
 def test(alias, nodeID, connection):
+    # first, send to this node
     connection.network.send(makeframe(alias, nodeID))
-    while (True) :
-        reply = connection.network.receive()
-        if (reply == None ) : 
-            print "Expected reply not received"
-            return 2
-        elif reply.startswith(":X180B7") :
-            return 0
-        else :
-            print "Unexpected reply received ", reply
-            return 1
-    return
+    reply = connection.network.receive()
+    if (reply == None ) : 
+        print "Expected reply to message with node ID not received"
+        return 2
+    elif not reply.startswith(":X180B7") :
+        print "Unexpected reply received ", reply
+        return 4
+
+    # send without node ID
+    connection.network.send(makeframe(alias, None))
+    reply = connection.network.receive()
+    if (reply == None ) : 
+        print "Expected reply to message without node ID not received"
+        return 12
+    elif not reply.startswith(":X180B7") :
+        print "Unexpected reply received ", reply
+        return 14
+
+    # send with wrong node ID
+    connection.network.send(makeframe(alias, [0,0,0,0,0,0]))
+    reply = connection.network.receive()
+    if (reply == None ) : 
+        return 0
+    else :
+        print "Unexpected reply received to frame with wrong node ID", reply
+        return 24
 
 if __name__ == '__main__':
     main()
