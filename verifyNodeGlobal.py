@@ -62,7 +62,7 @@ def main():
 
     if identifynode :
         import getUnderTestAlias
-        dest, nodeID = getUnderTestAlias.get(alias, None)
+        dest, nodeID = getUnderTestAlias.get(alias, None, verbose)
         if nodeID == None : nodeID = otherNodeId
 
     # now execute
