@@ -24,6 +24,13 @@ class SerialOlcbLink :
         if (self.verbose) : print "   connect to ",self.host," at ",self.port
         
         self.ser = serial.Serial(self.host, self.port)
+        self.ser.parity = serial.PARITY_NONE
+        self.ser.bytesize = serial.EIGHTBITS
+        self.ser.xonxoff = False
+        self.ser.rtscts = False
+        self.ser.dsrdtr = False
+        self.ser.setDTR(True)
+        self.ser.setRTS(True)
         #self.ser.open()
         
         return
