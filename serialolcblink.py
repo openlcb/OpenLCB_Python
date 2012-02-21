@@ -35,7 +35,7 @@ class SerialOlcbLink :
         
         # wait default time for Arduino startup
         # after (possible) reset due to serial startup
-        time.delay(network.startdelay)
+        time.sleep(network.startdelay)
         
         return
         
