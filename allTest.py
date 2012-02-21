@@ -20,6 +20,7 @@ def usage() :
     print "-t find destination alias automatically"
     print "-n --node dest nodeID (default 01.02.03.04.05.06)"
     print "-e --event eventID as 1.2.3.4.5.6.7.8 form"
+    print "-c continue after error; (attempts to) run to completion even if error encountered"
     print "-v verbose"
     print "-V Very verbose"
 
@@ -33,9 +34,10 @@ def main():
     event = [1,2,3,4,5,6,7,8]
     verbose = False
     identifynode = False
+    complete = False
     
     try:
-        opts, remainder = getopt.getopt(sys.argv[1:], "e:n:a:d:vVt", ["event=", "alias=", "node=", "dest="])
+        opts, remainder = getopt.getopt(sys.argv[1:], "e:n:a:d:vVtc", ["event=", "alias=", "node=", "dest="])
     except getopt.GetoptError, err:
         # print help information and exit:
         print str(err) # will print something like "option -a not recognized"
@@ -47,6 +49,8 @@ def main():
         elif opt == "-V":
             connection.network.verbose = True
             verbose = True
+        elif opt == "-c":
+            complete = True
         elif opt in ("-a", "--alias"):
             alias = int(arg)
         elif opt in ("-d", "--dest"):
@@ -65,50 +69,50 @@ def main():
         dest, nodeID = getUnderTestAlias.get(alias, None, verbose)
 
     # now execute
-    retval = test(alias, dest, nodeID, event, connection, verbose)
+    retval = test(alias, dest, nodeID, event, connection, verbose, complete)
     exit(retval)    
     
-def test(alias, dest, nodeID, event, connection, verbose):
+def test(alias, dest, nodeID, event, connection, verbose, complete):
 
     import aliasMapEnquiry
     if verbose : print "aliasMapEnquiry"
     retval = aliasMapEnquiry.test(alias, nodeID, connection, verbose)
     if retval != 0 :
         print "Error in aliasMapEnquiry"
-        exit(retval)
+        if not complete : exit(retval)
 
     import verifyNodeGlobal
     if verbose : print "verifyNodeGlobal w no NodeID"
     retval = verifyNodeGlobal.test(alias, None, connection)
     if retval != 0 :
         print "Error in verifyNodeGlobal w no NodeID"
-        exit(retval)
+        if not complete : exit(retval)
     if verbose : print "verifyNodeGlobal with NodeID"
     retval = verifyNodeGlobal.test(alias, nodeID, connection)
     if retval != 0 :
         print "Error in verifyNodeGlobal w NodeID"
-        exit(retval)
+        if not complete : exit(retval)
 
     import verifyNodeAddressed
     if verbose : print "verifyNodeAddressed"
     retval = verifyNodeAddressed.test(alias, dest, nodeID, connection, verbose)
     if retval != 0 :
         print "Error in verifyNodeAddressed"
-        exit(retval)
+        if not complete : exit(retval)
 
     import protocolIdentProtocol
     if verbose : print "protocolIdentProtocol"
     retval = protocolIdentProtocol.test(alias, dest, connection, verbose)
     if retval != 0 :
         print "Error in protocolIdentProtocol"
-        exit(retval)
+        if not complete : exit(retval)
 
     import identifyEventsGlobal
     if verbose : print "identifyEventsGlobal"
     retval = identifyEventsGlobal.test(alias, connection, verbose)
     if retval != 0 :
         print "Error in identifyEventsGlobal"
-        exit(retval)
+        if not complete : exit(retval)
 
     import identifyEventsAddressed
     if verbose : print "identifyEventsAddressed"
@@ -122,63 +126,63 @@ def test(alias, dest, nodeID, event, connection, verbose):
     retval = identifyConsumers.test(alias, event, connection, verbose)
     if retval != 0 :
         print "Error in identifyConsumers"
-        exit(retval)
+        if not complete : exit(retval)
 
     import identifyProducers
     if verbose : print "identifyProducers"
     retval = identifyProducers.test(alias, event, connection, verbose)
     if retval != 0 :
         print "Error in identifyProducers"
-        exit(retval)
+        if not complete : exit(retval)
 
     import testProducerConsumerNotification
     if verbose : print "testProducerConsumerNotification"
     retval = testProducerConsumerNotification.test(alias, dest, connection, verbose)
     if retval != 0 :
         print "Error in testProducerConsumerNotification"
-        exit(retval)
+        if not complete : exit(retval)
 
     import datagram
     if verbose : print "datagram"
     retval = datagram.test(alias, dest, [1,2,3,4], connection, verbose)
     if retval != 0 :
         print "Error in datagram"
-        exit(retval)
+        if not complete : exit(retval)
     
     import testConfigurationProtocol
     if verbose : print "testConfigurationProtocol"
     retval = testConfigurationProtocol.test(alias, dest, connection, verbose)
     if retval != 0 :
         print "Error in testConfigurationProtocol", retval
-        exit(retval)
+        if not complete : exit(retval)
 
     import testDatagram
     if verbose : print "testDatagram"
     retval = testDatagram.test(alias, dest, connection, verbose)
     if retval != 0 :
         print "Error in testDatagram", retval
-        exit(retval)
+        if not complete : exit(retval)
     
     import simpleNodeIdentificationInformation
     if verbose : print "simpleNodeIdentificationInformation"
     retval = simpleNodeIdentificationInformation.test(alias, dest, connection, verbose)
     if retval != 0 :
         print "Error in simpleNodeIdentificationInformation"
-        exit(retval)
+        if not complete : exit(retval)
     
     import unknownDatagramType
     if verbose : print "unknownDatagramType"
     retval = unknownDatagramType.test(alias, dest, connection, verbose)
     if retval != 0 :
         print "Error in unknownDatagramType"
-        exit(retval)
+        if not complete : exit(retval)
     
     import unknownMtiAddressed
     if verbose : print "unknownMtiAddressed"
     retval = unknownMtiAddressed.test(alias, dest, connection, verbose)
     if retval != 0 :
         print "Error in unknownMtiAddressed"
-        exit(retval)
+        if not complete : exit(retval)
     
     # done last, as changes alias in use
     import testAliasConflict
@@ -186,7 +190,7 @@ def test(alias, dest, nodeID, event, connection, verbose):
     retval = testAliasConflict.test(alias, dest, connection, verbose)
     if retval != 0 :
         print "Error in testAliasConflict"
-        exit(retval)
+        if not complete : exit(retval)
 
     if verbose : print "note: Did not perform testStartup, which is manual"
     
