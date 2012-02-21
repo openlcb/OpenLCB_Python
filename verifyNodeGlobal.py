@@ -74,20 +74,20 @@ def test(alias, nodeID, connection):
     connection.network.send(makeframe(alias, nodeID))
     reply = connection.network.receive()
     if (reply == None ) : 
-        print "Expected reply to message with node ID not received"
+        print "Global verify with matching node ID did not receive expected reply"
         return 2
     elif not reply.startswith(":X180B7") :
-        print "Unexpected reply received ", reply
+        print "Global verify with matching node ID received wrong reply message", reply
         return 4
 
     # send without node ID
     connection.network.send(makeframe(alias, None))
     reply = connection.network.receive()
     if (reply == None ) : 
-        print "Expected reply to message without node ID not received"
+        print "Global verify without node ID did not receive expected reply"
         return 12
     elif not reply.startswith(":X180B7") :
-        print "Unexpected reply received ", reply
+        print "Global verify without node ID received wrong reply message ", reply
         return 14
 
     # send with wrong node ID
@@ -96,7 +96,7 @@ def test(alias, nodeID, connection):
     if (reply == None ) : 
         return 0
     else :
-        print "Unexpected reply received to frame with wrong node ID", reply
+        print "Global verify with wrong node ID should not receive reply but did: ", reply
         return 24
 
 if __name__ == '__main__':
