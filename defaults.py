@@ -8,6 +8,7 @@ network.port = 23
 # network = serialolcblink.SerialOlcbLink()
 # network.host = "/dev/tty.usbserial-A7007AOK"
 # network.port = 115200
+# network.startdelay = 4
 
 
 thisNodeID = [1,2,3,4,5,6]

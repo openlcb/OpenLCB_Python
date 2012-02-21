@@ -7,6 +7,7 @@ argparse is new in Jython 2.7, so dont use here
 @author: Bob Jacobsen
 '''
 import serial
+import time
 
 class SerialOlcbLink :
     def __init__(self) :
@@ -31,7 +32,10 @@ class SerialOlcbLink :
         self.ser.dsrdtr = False
         self.ser.setDTR(True)
         self.ser.setRTS(True)
-        #self.ser.open()
+        
+        # wait default time for Arduino startup
+        # after (possible) reset due to serial startup
+        time.delay(network.startdelay)
         
         return
         
