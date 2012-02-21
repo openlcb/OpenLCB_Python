@@ -83,13 +83,19 @@ def test(alias, dest, connection, identifynode, verbose) :
     timeout = connection.network.timeout
     connection.network.timeout = 25
     reply = connection.network.receive()
+    while (True) :
+        if reply == None :
+            print "1st CIM reply not received, did you reset node?"
+            return 1
+        elif reply.startswith(":X17") :
+            break
+        elif reply.startswith(":X") :
+            if verbose: print "ignoring unexpected frame", reply
+        else :
+            if verbose: print "ignoring misc characters not a frame: ", reply
+        reply = connection.network.receive()
+        
     connection.network.timeout = timeout
-    if reply == None :
-        print "1st CIM reply not received, did you reset node?"
-        return 1
-    if not reply.startswith(":X17") :
-        print "1st CIM reply not correct"
-        return 31
     testAlias = reply[7:10]
     id = reply[4:7]
     start = time.time()
