@@ -75,8 +75,9 @@ def main():
     
 def test(alias, dest, connection, verbose) :
     # Sending a global message (that normally doesn't get a response)
+    # by sending verifyNodeGlobal with a nodeID that doesn't match any valid
     if verbose : print "  check no-response global message with alias conflict"
-    connection.network.send(verifyNodeGlobal.makeframe(dest, [0,0,0,0,0,0]))
+    connection.network.send(verifyNodeGlobal.makeframe(dest, [0,0,0,0,0,1]))
     reply = connection.network.receive()
     if reply == None :
         print "no response received to conflict frame"
