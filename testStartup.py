@@ -96,6 +96,7 @@ def test(alias, dest, connection, identifynode, verbose) :
         reply = connection.network.receive()
         
     connection.network.timeout = timeout
+    if verbose: print "Start checking node output"
     testAlias = reply[7:10]
     id = reply[4:7]
     start = time.time()
@@ -168,7 +169,7 @@ def test(alias, dest, connection, identifynode, verbose) :
         print "mismatched AMD source alias"
         return 16
     if id != reply[11:23] :
-        print "AMD node ID did not match",id, reply[11:23]
+        print "AMD node ID ",reply[11:23]," did not match one in CID frames ",id
         return 21
     
     # expect NodeInit
