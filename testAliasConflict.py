@@ -74,6 +74,12 @@ def main():
     return retval
     
 def test(alias, dest, connection, verbose) :
+    # Note: This test assumes that the response will be
+    # to reacquire another alias after the conflicted one is
+    # dropped.  This isn't required behavior by standard, but
+    # is a necessary condition for the test to continue and 
+    # check another conflict condition.
+    #
     # Sending a global message (that normally doesn't get a response)
     # by sending verifyNodeGlobal with a nodeID that doesn't match any valid
     if verbose : print "  check no-response global message with alias conflict"
