@@ -76,13 +76,14 @@ def main():
     
 def test(alias, dest, connection, identifynode, verbose) :
     # wait for reset
-    if verbose : print "Restart node now"
     
     # expect RIF sequence (check timing)
     connection.network.connect()
     timeout = connection.network.timeout
     connection.network.timeout = 25
+    if verbose : print "Restart node now"
     reply = connection.network.receive()
+    if verbose : print "Start checking node output"
     while (True) :
         if reply == None :
             print "1st CIM reply not received, did you reset node?"
@@ -96,7 +97,6 @@ def test(alias, dest, connection, identifynode, verbose) :
         reply = connection.network.receive()
         
     connection.network.timeout = timeout
-    if verbose: print "Start checking node output"
     testAlias = reply[7:10]
     id = reply[4:7]
     start = time.time()
