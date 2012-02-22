@@ -91,7 +91,7 @@ def test(alias, nodeID, connection):
         return 14
 
     # send with wrong node ID
-    connection.network.send(makeframe(alias, [0,0,0,0,0,0]))
+    connection.network.send(makeframe(alias, [0,0,0,0,0,1]))
     reply = connection.network.receive()
     if (reply == None ) : 
         return 0

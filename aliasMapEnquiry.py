@@ -78,7 +78,8 @@ def test(alias, nodeID, connection, verbose) :
         print "Unexpected reply received ", reply
         return 1
 
-    connection.network.send(makeframe(alias, [0,0,0,0,0,0]))
+    # test non-matching NodeID using a reserved one
+    connection.network.send(makeframe(alias, [0,0,0,0,0,1]))
     reply = connection.network.receive()
     if (reply != None ) : 
         print "Unexpected reply received when node ID didnt match ", reply
