@@ -35,8 +35,8 @@ class SerialOlcbLink :
         
         # wait default time for Arduino startup
         # after (possible) reset due to serial startup
-        time.sleep(self.startdelay)
         if self.startdelay > 0 :
+            time.sleep(self.startdelay)
             # dump all messages
             while self.ser.inWaiting() > 0 :
                 self.ser.readline()
