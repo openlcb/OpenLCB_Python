@@ -118,14 +118,20 @@ def test(alias, dest, connection, verbose) :
     if (type(retval) is int) : 
         # pass error code up
         return retval
-    if retval[0:3] != [0x20,0x86,0xFF] :
+    if retval[0:4] != [0x20,0x86,0x01,0xFF] :
         print "Unexpected message instead of read reply datagram ", retval
         return 3
     if verbose : 
         print "Address Space Options:"
-        print "      Highest address ", hex(((retval[3]*256+retval[4])*256+retval[5])*256+retval[6])
-        print "      Alignment flags ", hex(retval[7])
-        print "           Space name ", str(retval[8:])
+        print "      Present? ", hex(retval[2])
+        print "      Highest address ", hex(((retval[4]*256+retval[5])*256+retval[6])*256+retval[7])
+        print "      Alignment flags ", hex(retval[8])
+        if len(retval) > 9:
+ 		print "      Lowest address ", hex(((retval[9]*256+retval[10])*256+retval[11])*256+retval[12])
+	else:
+ 		print "      Lowest address 0x0000"
+	if len(retval) > 12:
+	        print "           Space name ", str(retval[12:])
     
     return 0
 
