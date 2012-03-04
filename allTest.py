@@ -170,6 +170,14 @@ def test(alias, dest, nodeID, event, connection, verbose, complete):
         print "Error in simpleNodeIdentificationInformation"
         if not complete : exit(retval)
     
+    import testReservedBits
+    if verbose : print "testReservedBits"
+    retval = testReservedBits.test(alias, nodeID, dest, connection, verbose)
+    if retval != 0 :
+        print "Error in testReservedBits"
+        if not complete : exit(retval)
+    
+    
     import unknownDatagramType
     if verbose : print "unknownDatagramType"
     retval = unknownDatagramType.test(alias, dest, connection, verbose)
