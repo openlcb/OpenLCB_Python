@@ -105,7 +105,7 @@ def main():
 
 def usage() :
     print ""
-    print "Python module for connecting to an OpenLCB via an Ethernet connection."
+    print "Python module for connecting to an OpenLCB via an serial connection."
     print "Called standalone, will send one CAN frame."
     print ""
     print "valid options:"
