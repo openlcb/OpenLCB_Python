@@ -78,9 +78,9 @@ def test(alias, dest, connection, identifynode, verbose) :
     # wait for reset
     
     # expect RIF sequence (check timing)
-    connection.network.connect()
     timeout = connection.network.timeout
     connection.network.timeout = 25
+    connection.network.connect()
     if verbose : print "Restart node now"
     reply = connection.network.receive()
     if verbose : print "Start checking node output"
@@ -138,8 +138,10 @@ def test(alias, dest, connection, identifynode, verbose) :
     id = id+reply[4:7]
     
     # expect CIF (check timing)
+    connection.network.timeout = 0.5
     reply = connection.network.receive()
     end = time.time()
+    connection.network.timeout = timeout
     if reply == None :
         print "RIM reply not received"
         return 5
