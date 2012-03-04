@@ -192,7 +192,7 @@ def test(alias, dest, nodeID, event, connection, verbose, complete):
         print "Error in testAliasConflict"
         if not complete : exit(retval)
 
-    if verbose : print "note: Did not perform testStartup, which is manual"
+    if verbose : print "Note: Did not perform testStartup, which is manual"
     
     return
 
