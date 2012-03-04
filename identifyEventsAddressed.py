@@ -72,7 +72,7 @@ def test(alias, dest, connection, verbose) :
     while (True) :
         if (connection.network.receive() == None ) : break
         count = count + 1
-    if verbose : print "Found",count,"events"
+    if verbose : print "  Found",count,"events"
     return 0
 
 if __name__ == '__main__':

@@ -64,7 +64,7 @@ def main():
     exit(retval)
     
 def test(alias, dest, connection, verbose) :
-    if verbose : print "SimpleNodeIdentificantInformation check valid request" 
+    if verbose : print "  check valid request" 
     connection.network.send(makeframe(alias, dest))
     reply = connection.network.receive()
     if reply == None : 
@@ -78,7 +78,7 @@ def test(alias, dest, connection, verbose) :
             print "Unexpected reply received ", reply
             return 1
 
-    if verbose : print "SimpleNodeIdentificantInformation address other node, expect no reply"
+    if verbose : print "  address other node, expect no reply"
     connection.network.send(makeframe(alias, (~dest)&0xFFF))
     reply = connection.network.receive()
     if reply == None : 
