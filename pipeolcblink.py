@@ -16,10 +16,13 @@ import subprocess
 class PipeOlcbLink :
     def __init__(self) :
         
-        # defaults (generally overridden by system-wide defaults elsewhere)
+        # Defaults (generally overridden by system-wide defaults elsewhere)
+        # To use these:
+        #    cd ../C   (e.g. to prototypes/C)
+        #    make
         self.location = "../C/libraries/OlcbTestCAN/obj/test/" # where to find file
-        self.name = "pymain"                                   # executable name
-        self.timeout = 1.0
+        self.name = "pyOlcbBasicNode"                          # executable name
+        self.timeout = 0.010
         self.startdelay = 0;
         self.verbose = False
         self.process = None
@@ -37,7 +40,16 @@ class PipeOlcbLink :
         # dump startup needed here
         if self.timeout < 2 :
             self.flush()
-        
+            self.process.stdin.write('T\n')
+            self.flush()
+            self.process.stdin.write('T\n')
+            self.flush()
+            self.process.stdin.write('T\n')
+            self.flush()
+            self.process.stdin.write('T\n')
+            self.flush()
+            self.process.stdin.write('T\n')
+            self.flush()
         return
         
     def send(self, frame) :
@@ -65,7 +77,15 @@ class PipeOlcbLink :
         r = self.process.stdout.readline()
 
         # timeout returns empty line
-        if not r.startswith(":") : 
+        count = 0
+        while not r.startswith(":") and self.timeout >= count*0.040 :
+            count = count + 1
+            # try again a time or two
+            self.process.stdin.write('T\n')
+            self.process.stdin.flush()
+            r = self.process.stdout.readline()
+            
+        if not r.startswith(":") :
             if (self.verbose) : print "<none>" # blank line to show delay?
             self.seenEnd = True
             return None
