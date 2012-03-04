@@ -32,17 +32,25 @@ class PipeOlcbLink :
         executable = self.location+self.name
         self.process = subprocess.Popen(executable,1,None,subprocess.PIPE,subprocess.PIPE, 
                         subprocess.STDOUT, None, False, True)
+        self.seenEnd = False
 
         # dump startup needed here
+        if self.timeout < 2 :
+            self.flush()
+        
         return
         
     def send(self, frame) :
-        if (self.process == None) : self.connect()
-        
+        if self.process == None : 
+            self.connect()
+        elif not self.seenEnd :
+            self.flush()
+            
         # if verbose, print
-        if (self.verbose) : print "   send    ",frame
+        if self.verbose : print "   send    ",frame
 
         # send
+        self.seenEnd = False
         self.process.stdin.write(frame+'\n')
         self.process.stdin.flush()
 
@@ -59,6 +67,7 @@ class PipeOlcbLink :
         # timeout returns empty line
         if not r.startswith(":") : 
             if (self.verbose) : print "<none>" # blank line to show delay?
+            self.seenEnd = True
             return None
 
         # if verbose, display what's received 
@@ -66,7 +75,17 @@ class PipeOlcbLink :
         
         return r       
 
+    def flush(self) : # reads past any pending input
+        while True :
+            r = self.process.stdout.readline()
+            if not r.startswith(":") :
+                self.seenEnd = True
+                break
+            if self.verbose : print "   drop    ",r,
+        return
 
+    def more(self) : # checks whether any more input in response to most recent stimulus
+        return False
 
 import getopt, sys
 
