@@ -10,11 +10,8 @@ Tests a node's response to seeing messages with its alias
 # :X16304573N;
 # :X15050573N;
 # :X10700573N;
+# :X10701573N020304050607;
 # :X19087573N020304050607;
-# :X192AB573N0203040506070001;
-# :X192AB573N0203040506070004;
-# :X1926B573N0203040506070005;
-# :X1926B573N0203040506070008;
 
 import connection as connection
 import canolcbutils
@@ -96,10 +93,13 @@ def test(alias, dest, connection, verbose) :
         return 23
     dest = int(reply[7:10],16)
     # pull & drop rest of sequence
-    reply = connection.network.receive()
-    reply = connection.network.receive()
-    reply = connection.network.receive()
-    reply = connection.network.receive()
+    reply = connection.network.receive()  # CID 2
+    reply = connection.network.receive()  # CID 3
+    reply = connection.network.receive()  # CID 4
+    timeout = connection.network.timeout
+    connection.network.timeout = 1.0
+    reply = connection.network.receive()  # RID
+    connection.network.timeout = timeout
     reply = connection.network.receive()
     reply = connection.network.receive()
     
@@ -118,10 +118,13 @@ def test(alias, dest, connection, verbose) :
         return 33
     dest = int(reply[7:10],16)
     # pull & drop rest of sequence
-    reply = connection.network.receive()
-    reply = connection.network.receive()
-    reply = connection.network.receive()
-    reply = connection.network.receive()
+    reply = connection.network.receive()  # CID 2
+    reply = connection.network.receive()  # CID 3
+    reply = connection.network.receive()  # CID 4
+    timeout = connection.network.timeout
+    connection.network.timeout = 1.0
+    reply = connection.network.receive()  # RID
+    connection.network.timeout = timeout
     reply = connection.network.receive()
     reply = connection.network.receive()
     
@@ -140,10 +143,13 @@ def test(alias, dest, connection, verbose) :
         return 43
     dest = int(reply[7:10],16)
     # pull & drop rest of sequence
-    reply = connection.network.receive()
-    reply = connection.network.receive()
-    reply = connection.network.receive()
-    reply = connection.network.receive()
+    reply = connection.network.receive()  # CID 2
+    reply = connection.network.receive()  # CID 3
+    reply = connection.network.receive()  # CID 4
+    timeout = connection.network.timeout
+    connection.network.timeout = 1.0
+    reply = connection.network.receive()  # RID
+    connection.network.timeout = timeout
     reply = connection.network.receive()
     reply = connection.network.receive()
 
@@ -176,10 +182,13 @@ def test(alias, dest, connection, verbose) :
         return 63
     dest = int(reply[7:10],16)
     # pull & drop rest of sequence
-    reply = connection.network.receive()
-    reply = connection.network.receive()
-    reply = connection.network.receive()
-    reply = connection.network.receive()
+    reply = connection.network.receive()  # CID 2
+    reply = connection.network.receive()  # CID 3
+    reply = connection.network.receive()  # CID 4
+    timeout = connection.network.timeout
+    connection.network.timeout = 1.0
+    reply = connection.network.receive()  # RID
+    connection.network.timeout = timeout
     reply = connection.network.receive()
     reply = connection.network.receive()
 
