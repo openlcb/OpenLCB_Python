@@ -128,7 +128,7 @@ def checkreply(alias, dest, connection, verbose) :
    
 def test(alias, dest, connection, verbose) :    
     # send a short datagram in two segments
-    if verbose : print " test two segments"
+    if verbose : print "  test two segments"
     connection.network.send(makepartialframe(alias, dest, [0x20,0x42,0,0,0]))
     connection.network.send(makefinalframe(alias, dest, [0,8]))
     # check response
@@ -137,7 +137,7 @@ def test(alias, dest, connection, verbose) :
         return retval+10
     
     # send a short datagram in two segments with another to somebody else in between
-    if verbose : print " test two segments with another interposed" 
+    if verbose : print "  test two segments with another interposed" 
     connection.network.send(makepartialframe(alias, dest, [0x20,0x42,0,0,0]))
     connection.network.send(makepartialframe(alias, ~dest, [0x20,0x42,0,0,0]))
     connection.network.send(makefinalframe(alias, dest, [0,8]))
@@ -147,7 +147,7 @@ def test(alias, dest, connection, verbose) :
         return retval+20
 
     # NAK the response datagram
-    if verbose : print " send NAK to response"
+    if verbose : print "  send NAK to response"
     connection.network.send(makefinalframe(alias, dest, [0x20,0x42,0,0,0,0,1]))
     frame = connection.network.receive()
     if frame == None : 

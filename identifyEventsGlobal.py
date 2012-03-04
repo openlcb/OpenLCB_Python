@@ -68,7 +68,7 @@ def test(alias, connection, verbose) :
             print "Wrong reply received", reply
             return 4
         count = count + 1
-    if verbose : print "Found",count,"events"
+    if verbose : print "  Found",count,"events"
     return 0
 
 if __name__ == '__main__':

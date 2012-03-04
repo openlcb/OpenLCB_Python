@@ -64,7 +64,7 @@ def main():
     exit(retval)
     
 def test(alias, dest, connection, verbose) :
-    if verbose : print "ProtocolIdentificationProtocol check OK"
+    if verbose : print "  check OK"
     connection.network.send(makeframe(alias, dest))
     reply = connection.network.receive()
     if (reply == None ) : 
@@ -74,7 +74,7 @@ def test(alias, dest, connection, verbose) :
         print "Unexpected reply received ", reply
         return 1
 
-    if verbose : print "ProtocolIdentificationProtocol not addressed, no reply"
+    if verbose : print "  not addressed, no reply"
     connection.network.send(makeframe(alias, (~dest)&0xFFF))
     reply = connection.network.receive()
     if (reply == None ) : 

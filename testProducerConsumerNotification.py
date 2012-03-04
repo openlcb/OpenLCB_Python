@@ -85,11 +85,11 @@ def test(alias, dest, connection, verbose) :
         if (reply == None ) : break
         if (reply.startswith(":X1926B")) :
             event = canolcbutils.bodyArray(reply)
-            if verbose : print "consumes ", event
+            if verbose : print "  consumes ", event
             consumed = consumed+[event]
         elif (reply.startswith(":X192AB")) :
             event = canolcbutils.bodyArray(reply)
-            if verbose : print "produces ", event
+            if verbose : print "  produces ", event
             produced = produced+[event]
     # now check consumers and producers individually
     timeout = connection.network.timeout
