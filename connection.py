@@ -39,8 +39,6 @@ def usage() :
     print "Invoked by other routines to know how to send, "
     print "not intended to be invoked standalone"
     print ""
-    print "currently set to Ethernet connection via node "+network.host+" port "+str(network.port)
-    print ""
     list()
     return
     
