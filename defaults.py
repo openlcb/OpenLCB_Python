@@ -1,21 +1,19 @@
 
-serial = True
-ethernet = not serial
+serial   = True
+ethernet = False
+local    = False
 
-local = False
-
-if ethernet :
+if ethernet and not local:
     import ethernetolcblink
     network = ethernetolcblink.EthernetToOlcbLink()
     network.host = "10.00.01.98"
-    #network.host = "99.32.118.100"
     network.port = 23
-elif serial : 
+elif serial and not local : 
     import serialolcblink
     network = serialolcblink.SerialOlcbLink()
-    network.port = "/dev/tty.usbserial-A6008c44"
+    network.port = "/dev/tty.usbserial-A7007AOC"
     network.speed = 230400
-    network.startdelay = 1
+    network.startdelay = 13
 elif local :
     import pipeolcblink
     network = pipeolcblink.PipeOlcbLink()
