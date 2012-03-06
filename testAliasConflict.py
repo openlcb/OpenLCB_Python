@@ -85,6 +85,13 @@ def test(alias, dest, connection, verbose) :
     if reply == None :
         print "no response received to conflict frame"
         return 21
+    if not reply.startswith(":X10702") :
+        print "Expected first AMR"
+        return 22
+    reply = connection.network.receive()
+    if reply == None :
+        print "no response received to conflict frame"
+        return 21
     if not reply.startswith(":X17") :
         print "Expected first CID"
         return 22
@@ -109,9 +116,16 @@ def test(alias, dest, connection, verbose) :
     reply = connection.network.receive()
     if reply == None :
         print "no response received to conflict frame"
+        return 21
+    if not reply.startswith(":X10702") :
+        print "Expected second AMR"
+        return 22
+    reply = connection.network.receive()
+    if reply == None :
+        print "no response received to conflict frame"
         return 31
     if not reply.startswith(":X17") :
-        print "Expected first CID"
+        print "Expected second CID"
         return 32
     if int(reply[7:10],16) == dest :
         print "did not update reply alias"
@@ -133,10 +147,17 @@ def test(alias, dest, connection, verbose) :
     connection.network.send(verifyNodeAddressed.makeframe(dest, alias, None))
     reply = connection.network.receive()
     if reply == None :
+        print "no response received to conflict frame"
+        return 21
+    if not reply.startswith(":X10702") :
+        print "Expected third AMR"
+        return 22
+    reply = connection.network.receive()
+    if reply == None :
         if verbose : print "no response received to conflict frame"
         return 41
     if not reply.startswith(":X17") :
-        if verbose : print "Expected first CID"
+        if verbose : print "Expected third CID"
         return 42
     if int(reply[7:10],16) == dest :
         if verbose : print "did not update reply alias"
@@ -172,10 +193,17 @@ def test(alias, dest, connection, verbose) :
     if verbose : print "  check ReserveID with alias conflict"
     reply = connection.network.receive()
     if reply == None :
+        print "no response received to conflict frame"
+        return 21
+    if not reply.startswith(":X10702") :
+        print "Expected fourth AMR"
+        return 22
+    reply = connection.network.receive()
+    if reply == None :
         if verbose : print "no response received to conflict frame"
         return 61
     if not reply.startswith(":X17") :
-        if verbose : print "Expected first CID"
+        if verbose : print "Expected fourth CID"
         return 62
     if int(reply[7:10],16) == dest :
         if verbose : print "did not update reply alias"
