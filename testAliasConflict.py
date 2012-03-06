@@ -85,7 +85,7 @@ def test(alias, dest, connection, verbose) :
     if reply == None :
         print "no response received to conflict frame"
         return 21
-    if not reply.startswith(":X10702") :
+    if not reply.startswith(":X10703") :
         print "Expected first AMR"
         return 22
     reply = connection.network.receive()
@@ -117,7 +117,7 @@ def test(alias, dest, connection, verbose) :
     if reply == None :
         print "no response received to conflict frame"
         return 21
-    if not reply.startswith(":X10702") :
+    if not reply.startswith(":X10703") :
         print "Expected second AMR"
         return 22
     reply = connection.network.receive()
@@ -149,7 +149,7 @@ def test(alias, dest, connection, verbose) :
     if reply == None :
         print "no response received to conflict frame"
         return 21
-    if not reply.startswith(":X10702") :
+    if not reply.startswith(":X10703") :
         print "Expected third AMR"
         return 22
     reply = connection.network.receive()
@@ -195,7 +195,7 @@ def test(alias, dest, connection, verbose) :
     if reply == None :
         print "no response received to conflict frame"
         return 21
-    if not reply.startswith(":X10702") :
+    if not reply.startswith(":X10703") :
         print "Expected fourth AMR"
         return 22
     reply = connection.network.receive()
