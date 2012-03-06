@@ -36,7 +36,7 @@ class SerialOlcbLink :
         self.ser.setRTS(True)
         
         # from http://bytes.com/topic/python/answers/170478-uart-parity-setting-mark-space-using-pyserial
-        if self.speed == 115200 :
+        if self.speed == 230400 :
             self.ser.parity = serial.PARITY_EVEN
             self.ser.stopbits = serial.STOPBITS_TWO
             import termios
