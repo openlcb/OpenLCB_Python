@@ -13,18 +13,19 @@ class SerialOlcbLink :
     def __init__(self) :
         
         # defaults (generally overridden by system-wide defaults elsewhere)
-        self.host = "/dev/tty.usbserial-A7007AOK" # really serial port
-        self.port = 115200                        # really baud rate
-        self.timeout = 1.0
+        self.port = "/dev/tty.usbserial-A7007AOK"
+        self.speed = 115200
+        self.timeout = 0.1     # try to keep operations fast
         self.verbose = False
+        self.startdelay = 0    # set to 12 if your hardware resets on connection
         self.ser = None
         return
     
     def connect(self) :
         # if verbose, print
-        if (self.verbose) : print "   connect to ",self.host," at ",self.port
+        if (self.verbose) : print "   connect to ",self.port," at ",self.speed
         
-        self.ser = serial.Serial(self.host, self.port)
+        self.ser = serial.Serial(self.port, self.speed)
         self.ser.parity = serial.PARITY_NONE
         self.ser.bytesize = serial.EIGHTBITS
         self.ser.xonxoff = False
@@ -82,18 +83,18 @@ def main():
     network = SerialOlcbLink()
 
     # get defaults
-    host = network.host 
-    port = network.port
+    port = network.port 
+    speed = network.speed
     verbose = network.verbose
     
     frame = ':X180A7000N;'
 
     # process arguments
-    (host, port, frame, verbose) = args(host, port, frame, verbose)
+    (port, speed, frame, verbose) = args(port, speed, frame, verbose)
         
     # load new defaults
-    network.host = host
     network.port = port
+    network.speed = speed
     network.verbose = verbose
     
     # send the frame
@@ -111,7 +112,7 @@ def usage() :
     print "valid options:"
     print "  -v for verbose; also displays any responses"
     print "  -p, --port for serial port to USB connection"
-    print "  -p, --port for baud rate"
+    print "  -s, --speed for baud rate"
     print ""
     print "valid usages (default values):"
     print "  python serialolcblink.py --port=/dev/tty.usbserial-A7007AOK"
@@ -120,7 +121,7 @@ def usage() :
     print ""
     print "Note: Most shells require escaping the semicolon at the end of the frame."
     
-def args(host, port, frame, verbose) :
+def args(port, speed, frame, verbose) :
     # argument processing
     try:
         opts, remainder = getopt.getopt(sys.argv[1:], "s:p:v", ["speed=", "port="])
@@ -133,14 +134,14 @@ def args(host, port, frame, verbose) :
         if opt == "-v":
             verbose = True
         elif opt in ("-p", "--port"):
-            host = arg
+            port = arg
         elif opt in ("-s", "--speed"):
-            port = int(arg)
+            speed = int(arg)
         else:
             assert False, "unhandled option"
     if (len(remainder) > 0) : 
         frame = remainder[0]
-    return (host, port, frame, verbose)
+    return (port, speed, frame, verbose)
     
 if __name__ == '__main__':
     main()
