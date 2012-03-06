@@ -11,8 +11,7 @@ Works with the (mutable) defaults.py file, which contains specific values
 import defaults
 
 network         = defaults.network
-network.host    = defaults.network.host
-network.port    = defaults.network.port
+
 thisNodeID      = defaults.thisNodeID 
 thisNodeAlias   = defaults.thisNodeAlias
 testNodeID      = defaults.testNodeID 
@@ -23,18 +22,6 @@ def main():
     usage()
     
     return  # done with example
-
-# following is just start of a load/store system for defaults
-# to replace the defaults.py file
-
-def store(file) :
-    pickle(network.host, file)
-    pickle(network.port, file)
-    pickle(thisNodeID, file)
-    pickle(thisNodeAlias, file)
-    pickle(testNodeID, file)
-    pickle(testNodeAlias, file)
-    return
     
 def list() :
     print "network.host = "+network.host
