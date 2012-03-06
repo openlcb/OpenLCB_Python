@@ -28,12 +28,23 @@ class SerialOlcbLink :
         self.ser = serial.Serial(self.port, self.speed)
         self.ser.parity = serial.PARITY_NONE
         self.ser.bytesize = serial.EIGHTBITS
+        self.ser.stopbits = serial.STOPBITS_TWO
         self.ser.xonxoff = False
         self.ser.rtscts = False
         self.ser.dsrdtr = False
         self.ser.setDTR(True)
         self.ser.setRTS(True)
         
+        # from http://bytes.com/topic/python/answers/170478-uart-parity-setting-mark-space-using-pyserial
+        if self.speed == 115200 :
+            self.ser.parity = serial.PARITY_EVEN
+            self.ser.stopbits = serial.STOPBITS_TWO
+            import termios
+            iflag, oflag, cflag, lflag, ispeed, ospeed, cc = termios.tcgetattr(self.ser)
+            cflag |= 0x40000000 # CMSPAR to select MARK parity
+            termios.tcsetattr(self.ser, termios.TCSANOW, [iflag, oflag, cflag, lflag,ispeed, ospeed, cc])
+        
+                
         # wait default time for Arduino startup
         # after (possible) reset due to serial startup
         if self.startdelay > 0 :
