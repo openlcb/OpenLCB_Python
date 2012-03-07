@@ -48,6 +48,7 @@ class SerialOlcbLink :
         # wait default time for Arduino startup
         # after (possible) reset due to serial startup
         if self.startdelay > 0 :
+            if self.verbose : print "   waiting", self.startdelay, "seconds for adapter restart"
             time.sleep(self.startdelay)
             # dump all messages
             while self.ser.inWaiting() > 0 :
@@ -55,10 +56,10 @@ class SerialOlcbLink :
         return
         
     def send(self, frame) :
-        if (self.ser == None) : self.connect()
+        if self.ser == None : self.connect()
         
         # if verbose, print
-        if (self.verbose) : print "   send    ",frame
+        if self.verbose : print "   send    ",frame
 
         # send
         self.ser.write(frame+'\n')
