@@ -30,8 +30,8 @@ def usage() :
     print "Default connection detail taken from connection.py"
     print ""
     print "-a --alias source alias (default 123)"
-    print "-n --num number of cycles (default 100)"
-    print "-g process requests as parallel groups (default 1)"
+    print "-n --num number of cycles (default 100, 0 means forever)"
+    print "-p number of requests to send in parallel (default 1)"
     print "-v verbose"
     print "-V Very verbose"
 
@@ -69,24 +69,31 @@ def main():
     # now execute
     retval = test(alias, n, connection, verbose, parallel)
     exit(retval)
+
+def once(alias, n, connection, verbose, parallel) :
+    for j in range(parallel) :
+        connection.network.send(verifyNodeGlobal.makeframe(alias, None))
+    for j in range(parallel) :
+        reply = connection.network.receive()
+        if (reply == None ) : 
+            print "No reply received"
+            return 1
+        if (not reply.startswith(":X180B7")) :
+            print "Incorrect reply received"
+            return 2
+    return 0
     
 def test(alias, n, connection, verbose, parallel) :
-    start = time.time()
-    for i in range(n) :
-        for j in range(parallel) :
-            connection.network.send(verifyNodeGlobal.makeframe(alias, None))
-        for j in range(parallel) :
-            reply = connection.network.receive()
-            if (reply == None ) : 
-                print "No reply received"
-                return 1
-            if (not reply.startswith(":X180B7")) :
-                print "Incorrect reply received"
-                return 2
-
-    end = time.time()
-    if verbose :
-        print end-start
+    if n == 0 :
+        while once(alias, n, connection, verbose, parallel) == 0 : pass
+    else :
+        start = time.time()
+        for i in range(n) :
+            retval = once(alias, n, connection, verbose, parallel)
+            if retval != 0 : return retval
+        end = time.time()
+        if verbose :
+            print end-start
     
     return 0
         
