@@ -11,6 +11,10 @@ import canolcbutils
 
 '''
 Returns list of alias, nodeID
+
+It obtains these by sending a globally-visible "verify nodes" message,
+so it expects to have only one node on the network so that replies are unique.
+
 '''
 def get(alias, nodeID, verbose) :
     connection.network.send(verifyNodeGlobal.makeframe(alias, nodeID))
