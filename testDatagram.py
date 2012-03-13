@@ -109,6 +109,7 @@ def main():
 
 import datagram
 
+# Check for a reply datagram to a request, and check if it's basically OK
 def checkreply(alias, dest, connection, verbose) :
     frame = connection.network.receive()
     if frame == None : 
@@ -127,16 +128,16 @@ def checkreply(alias, dest, connection, verbose) :
         return 3
    
 def test(alias, dest, connection, verbose) :    
-    # send a short datagram in two segments
+    # send a short read-request datagram in two segments
     if verbose : print "  test two segments"
     connection.network.send(makepartialframe(alias, dest, [0x20,0x42,0,0,0]))
     connection.network.send(makefinalframe(alias, dest, [0,8]))
-    # check response
+    # check response to make sure it was received and interpreted OK
     retval = checkreply(alias, dest, connection, verbose)
     if type(retval) is int and retval != 0 :
         return retval+10
     
-    # send a short datagram in two segments with another to somebody else in between
+    # send a short read-request datagram in two segments with another to somebody else in between
     if verbose : print "  test two segments with another interposed" 
     connection.network.send(makepartialframe(alias, dest, [0x20,0x42,0,0,0]))
     connection.network.send(makepartialframe(alias, ~dest, [0x20,0x42,0,0,0]))
@@ -156,7 +157,7 @@ def test(alias, dest, connection, verbose) :
     if not isreply(frame) :
         print "Unexpected message received instead of reply"
         return 32
-    # read reply
+    # read reply, should be a resend of same
     reply = connection.network.receive()
     if (reply == None ) : 
         print "No datagram segment received"
@@ -164,7 +165,7 @@ def test(alias, dest, connection, verbose) :
     elif not reply.startswith(":X1D") :
         print "Unexpected message instead of datagram segment", reply
         return 33
-    # send NAK for retransmit and see if it's right this time
+    # send NAK asking for retransmit retransmit and see if it's right this time
     connection.network.send(canolcbutils.makeframestring(0x1E000000+alias+(dest<<12),[0x4D,02,00]))
     retval = datagram.receiveOneDatagram(alias, dest, connection, verbose)
     if type(retval) is int : 
