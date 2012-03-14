@@ -176,6 +176,13 @@ def test(alias, dest, nodeID, event, connection, verbose, complete, repeat, iden
             print "Error in simpleNodeIdentificationInformation"
             if not complete : exit(retval)
         
+        import testCDI
+        if verbose : print "testCDI"
+        retval = testCDI.test(alias, dest, connection, verbose)
+        if retval != 0 :
+            print "Error in testCDI"
+            if not complete : exit(retval)
+        
         import testReservedBits
         if verbose : print "testReservedBits"
         retval = testReservedBits.test(alias, nodeID, dest, connection, verbose)
