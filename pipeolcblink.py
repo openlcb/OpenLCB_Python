@@ -34,7 +34,7 @@ class PipeOlcbLink :
         
         executable = self.location+self.name
         self.process = subprocess.Popen(executable,1,None,subprocess.PIPE,subprocess.PIPE, 
-                        subprocess.STDOUT, None, False, True)
+                        sys.stderr, None, False, True)
         self.seenEnd = False
 
         # dump startup needed here
