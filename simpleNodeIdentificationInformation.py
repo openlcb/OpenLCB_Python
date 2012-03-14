@@ -66,10 +66,12 @@ def main():
 def test(alias, dest, connection, verbose) :
     if verbose : print "  check valid request" 
     connection.network.send(makeframe(alias, dest))
-    reply = connection.network.receive()
-    if reply == None : 
-        print "Expected reply not received"
-        return 2
+    
+    mfgName = ""
+    mfgType = ""
+    mfgVers = ""
+    fill = 0   # 0 is format byte, 1 is name, 2 is type, 3 is vers
+    
     while (True) :
         reply = connection.network.receive()
         if reply == None :
@@ -77,6 +79,29 @@ def test(alias, dest, connection, verbose) :
         if not (reply.startswith(":X1E") and int(reply[4:7],16)==alias and int(reply[7:10],16)==dest and reply[11:13]=="53") :
             print "Unexpected reply received ", reply
             return 1
+        # process content
+        val = canolcbutils.bodyArray(reply)
+        for c in val[1:] :
+            if fill == 0 :
+                fill = 1
+                if c != 1 :
+                    print "First byte should have been one, was ",c
+                    return 3
+            elif fill == 1 : 
+                mfgName = mfgName+chr(c)
+            elif fill == 2 :
+                mfgType = mfgType+chr(c)         
+            elif fill == 3 :
+                mfgVers = mfgVers+chr(c)         
+            else :
+                print "Unexpected extra content", c
+                return 15
+            if c == 0 :
+                fill = fill + 1
+    if verbose :
+        print "   Manufacturer: ", mfgName
+        print "           Type: ", mfgType
+        print "        Version: ", mfgVers
 
     if verbose : print "  address other node, expect no reply"
     connection.network.send(makeframe(alias, (~dest)&0xFFF))
