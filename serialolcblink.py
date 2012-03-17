@@ -1,8 +1,8 @@
 #!/usr/bin/env python
 '''
-Drive an OpenLCB via USB
+Drive an OpenLCB via USB serial
 
-argparse is new in Jython 2.7, so dont use here
+Note: At 230400, requires CAN2USBino version 2 or later.
 
 @author: Bob Jacobsen
 '''
@@ -29,7 +29,7 @@ class SerialOlcbLink :
         self.ser.parity = serial.PARITY_NONE
         self.ser.bytesize = serial.EIGHTBITS
         self.ser.stopbits = serial.STOPBITS_TWO
-        self.ser.xonxoff = False
+        self.ser.setXonXoff(True)
         self.ser.rtscts = False
         self.ser.dsrdtr = False
         self.ser.setDTR(True)
@@ -61,8 +61,15 @@ class SerialOlcbLink :
         # if verbose, print
         if self.verbose : print "   send    ",frame
 
+        # double-output format needed if operating at  230400
+        tframe = frame+'\n'
+        if self.speed == 230400 :
+            tframe = "!!"
+            for c in frame[1:len(frame)-1] :
+                tframe = tframe+c+c
+            tframe = tframe+";;"
         # send
-        self.ser.write(frame+'\n')
+        self.ser.write(tframe)
         
         return
         
@@ -75,7 +82,9 @@ class SerialOlcbLink :
         self.ser.timeout = self.timeout
         line = "";
         r = self.ser.readline()
-
+        # remove Xoff/Xon characters if present
+        r = r.replace("\x11", "")
+        r = r.replace("\x13", "")
         # timeout returns ""
         if r == "" : 
             if (self.verbose) : print "<none>" # blank line to show delay?
