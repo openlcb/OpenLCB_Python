@@ -75,10 +75,13 @@ def once(alias, n, connection, verbose, parallel) :
         connection.network.send(verifyNodeGlobal.makeframe(alias, None))
     for j in range(parallel) :
         reply = connection.network.receive()
-        if (reply == None ) : 
+        while reply != None and reply.startswith("!") :
+            # skip
+            reply = connection.network.receive()
+        if reply == None : 
             print "No reply received"
             return 1
-        if (not reply.startswith(":X180B7")) :
+        if not reply.startswith(":X180B7") :
             print "Incorrect reply received"
             return 2
     return 0
