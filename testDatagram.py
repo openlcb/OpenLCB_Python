@@ -151,7 +151,10 @@ def test(alias, dest, connection, verbose) :
     # interposed one could get rejected or processed; here we assume rejected
     if verbose : print "  test two segments with another datagram interposed" 
     connection.network.send(makepartialframe(alias, dest, [0x20,0x42,0,0,0]))
-    connection.network.send(makepartialframe((~alias)&0xFFF, dest, [0x20,0x42,0,0,0,0,8]))
+    newalias = (!alias)&0xFFF
+    if newalias == dest:
+	newalias = newalias - 1;
+    connection.network.send(makepartialframe(newalias, dest, [0x20,0x42,0,0,0,0,8]))
     # check for reject of this one
     frame = connection.network.receive()
     if frame == None or not (frame.startswith(":X1E") and frame[4:7] == hex((~alias)&0xFFF)[2:] and frame[11:13] == "4D") :
