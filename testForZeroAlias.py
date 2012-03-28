@@ -84,9 +84,6 @@ def once(dest, connection, identifynode, verbose) :
     if not reply.startswith(":X17") :
         print "Expected first CID"
         return -22
-    if int(reply[7:10],16) == dest :
-        print "did not update reply alias, repeated 0x"+reply[7:10]
-        #return -23
     if int(reply[7:10],16) == 0 :
         print "received alias == 0"
         return -24
