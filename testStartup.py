@@ -98,6 +98,10 @@ def test(alias, dest, connection, identifynode, verbose) :
         
     connection.network.timeout = timeout
     testAlias = reply[7:10]
+    if int(testAlias) == 0 :
+        print "node using alias == 0"
+        return 331
+        
     id = reply[4:7]
     start = time.time()
     
