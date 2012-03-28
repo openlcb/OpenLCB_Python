@@ -218,6 +218,7 @@ def test(alias, dest, nodeID, event, connection, verbose, complete, repeat, iden
         if verbose : print ""
         
     if verbose : print "Note: Did not perform testStartup, which is manual"
+    if verbose : print "Note: Did not perform testForZeroAlias.py, which is slow"
     
     return
 
