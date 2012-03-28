@@ -88,6 +88,9 @@ def test(alias, dest, connection, verbose) :
     if not reply.startswith(":X10703") :
         print "Expected first AMR"
         return 22
+    if int(reply[7:10],16) != dest :
+        print "incorrect alias in AMR"
+        return 23
     reply = connection.network.receive()
     if reply == None :
         print "no response received to conflict frame"
@@ -109,6 +112,7 @@ def test(alias, dest, connection, verbose) :
     connection.network.timeout = timeout
     reply = connection.network.receive()
     reply = connection.network.receive()
+    reply = connection.network.receive()
     
     # Sending a global message (that normally does get a response)
     if verbose : print "  check response-inducing global message with alias conflict"
@@ -120,6 +124,9 @@ def test(alias, dest, connection, verbose) :
     if not reply.startswith(":X10703") :
         print "Expected second AMR"
         return 22
+    if int(reply[7:10],16) != dest :
+        print "incorrect alias in AMR"
+        return 23
     reply = connection.network.receive()
     if reply == None :
         print "no response received to conflict frame"
@@ -141,6 +148,7 @@ def test(alias, dest, connection, verbose) :
     connection.network.timeout = timeout
     reply = connection.network.receive()
     reply = connection.network.receive()
+    reply = connection.network.receive()
     
     # Sending an addressed message to some other alias (note arguments backwards, on purpose)
     if verbose : print "  check addressed message with alias conflict"
@@ -152,6 +160,9 @@ def test(alias, dest, connection, verbose) :
     if not reply.startswith(":X10703") :
         print "Expected third AMR"
         return 22
+    if int(reply[7:10],16) != dest :
+        print "incorrect alias in AMR"
+        return 23
     reply = connection.network.receive()
     if reply == None :
         if verbose : print "no response received to conflict frame"
@@ -171,6 +182,7 @@ def test(alias, dest, connection, verbose) :
     connection.network.timeout = 1.0
     reply = connection.network.receive()  # RID
     connection.network.timeout = timeout
+    reply = connection.network.receive()
     reply = connection.network.receive()
     reply = connection.network.receive()
 
@@ -198,6 +210,9 @@ def test(alias, dest, connection, verbose) :
     if not reply.startswith(":X10703") :
         print "Expected fourth AMR"
         return 22
+    if int(reply[7:10],16) != dest :
+        print "incorrect alias in AMR"
+        return 23
     reply = connection.network.receive()
     if reply == None :
         if verbose : print "no response received to conflict frame"
@@ -217,6 +232,7 @@ def test(alias, dest, connection, verbose) :
     connection.network.timeout = 1.0
     reply = connection.network.receive()  # RID
     connection.network.timeout = timeout
+    reply = connection.network.receive()
     reply = connection.network.receive()
     reply = connection.network.receive()
 
