@@ -98,8 +98,8 @@ def test(alias, dest, connection, verbose) :
     if not reply.startswith(":X17") :
         print "Expected first CID"
         return 22
-    if int(reply[7:10],16) == dest :
-        print "did not update reply alias"
+    if int(reply[7:10],16) == 0 :
+        print "received alias == 0"
         return 23
     dest = int(reply[7:10],16)
     # pull & drop rest of sequence
@@ -134,8 +134,8 @@ def test(alias, dest, connection, verbose) :
     if not reply.startswith(":X17") :
         print "Expected second CID"
         return 32
-    if int(reply[7:10],16) == dest :
-        print "did not update reply alias"
+    if int(reply[7:10],16) == 0 :
+        print "received alias == 0"
         return 33
     dest = int(reply[7:10],16)
     # pull & drop rest of sequence
@@ -170,8 +170,8 @@ def test(alias, dest, connection, verbose) :
     if not reply.startswith(":X17") :
         if verbose : print "Expected third CID"
         return 42
-    if int(reply[7:10],16) == dest :
-        if verbose : print "did not update reply alias"
+    if int(reply[7:10],16) == 0 :
+        print "received alias == 0"
         return 43
     dest = int(reply[7:10],16)
     # pull & drop rest of sequence
@@ -220,8 +220,8 @@ def test(alias, dest, connection, verbose) :
     if not reply.startswith(":X17") :
         if verbose : print "Expected fourth CID"
         return 62
-    if int(reply[7:10],16) == dest :
-        if verbose : print "did not update reply alias"
+    if int(reply[7:10],16) == 0 :
+        print "received alias == 0"
         return 63
     dest = int(reply[7:10],16)
     # pull & drop rest of sequence
