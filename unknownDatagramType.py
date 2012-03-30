@@ -72,7 +72,7 @@ def test(alias, dest, connection, verbose) :
         if reply == None : 
             print "Expected reply not received for", type
             return 2
-        if  (not reply.startswith(":X1E")) or reply[11:17] != "4D0001"  : 
+        if  (not reply.startswith(":X1E")) or reply[11:17] != "4D1040"  : 
             print "Wrong reply received for", type
             return 4
     return 0

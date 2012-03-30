@@ -186,7 +186,7 @@ def test(alias, dest, connection, verbose) :
         print "Unexpected message instead of datagram segment", reply
         return 33
     # send NAK asking for retransmit retransmit and see if it's right this time
-    connection.network.send(canolcbutils.makeframestring(0x1E000000+alias+(dest<<12),[0x4D,02,00]))
+    connection.network.send(canolcbutils.makeframestring(0x1E000000+alias+(dest<<12),[0x4D,0x20,00]))
     retval = datagram.receiveOneDatagram(alias, dest, connection, verbose)
     if type(retval) is int : 
         # pass error code up
