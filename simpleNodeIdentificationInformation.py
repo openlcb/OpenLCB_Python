@@ -69,7 +69,10 @@ def test(alias, dest, connection, verbose) :
     
     mfgName = ""
     mfgType = ""
-    mfgVers = ""
+    mfgHVers = ""
+    mfgSVers = ""
+    userName = ""
+    userComment = ""
     fill = 0   # 0 is format byte, 1 is name, 2 is type, 3 is vers
     
     while (True) :
@@ -85,23 +88,41 @@ def test(alias, dest, connection, verbose) :
             if fill == 0 :
                 fill = 1
                 if c != 1 :
-                    print "First byte should have been one, was ",c
+                    print "First byte of first part should have been one, was ",c
                     return 3
             elif fill == 1 : 
                 mfgName = mfgName+chr(c)
             elif fill == 2 :
                 mfgType = mfgType+chr(c)         
             elif fill == 3 :
-                mfgVers = mfgVers+chr(c)         
+                mfgHVers = mfgHVers+chr(c)         
+            elif fill == 4 :
+                mfgSVers = mfgSVers+chr(c)         
+            elif fill == 5 :
+                fill = 6
+                if c != 1 :
+                    print "First byte of second part should have been one, was ",c
+                    return 4
+            elif fill == 6 :
+                userName = userName+chr(c)         
+            elif fill == 7 :
+                userComment = userComment+chr(c)         
             else :
                 print "Unexpected extra content", c
                 return 15
-            if c == 0 :
+            if c == 0 :   # end of string
                 fill = fill + 1
+    if fill != 8 and fill != 5:
+        print "Didn't receive all strings", fill
+        return fill+10
     if verbose :
-        print "   Manufacturer: ", mfgName
-        print "           Type: ", mfgType
-        print "        Version: ", mfgVers
+        print "       Manufacturer: ", mfgName
+        print "               Type: ", mfgType
+        print "   Hardware Version: ", mfgHVers
+        print "   Software Version: ", mfgSVers
+        if fill == 8 :
+            print "          User Name: ", userName
+            print "       User Comment: ", userComment
 
     if verbose : print "  address other node, expect no reply"
     connection.network.send(makeframe(alias, (~dest)&0xFFF))
