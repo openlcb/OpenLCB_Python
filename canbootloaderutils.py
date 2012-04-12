@@ -6,6 +6,16 @@ Utilities for communicating with CAN FLIP ISP
 @author: D.E. Goodman-Wilson
 '''
 
+
+'''
+Check that a frame is of a given type
+'''
+def isFrameType(frame, CMD, CRIS) :
+  if not frame.startswith(":S"): return False
+
+  if (int(frame.split('S')[-1].split('N')[0], 16) == (CRIS<<3) + CMD): return True
+  return False
+
 '''
 Turn frame values into a string for sending to the interface.
 header is the int value of the CAN frame header.
@@ -13,7 +23,7 @@ body is an array of 0 to 8 bytes of data for the frame body.
 '''
 def makeframestring(CRIS, command, body) :
     retval = ":S"
-    retval += hex((CRIS<<4)+command).upper()[2:]
+    retval += "%0.4X" % ((CRIS<<3)+command)
     retval += "N"
     if (body != None) :
         for a in body :
