@@ -190,11 +190,13 @@ if __name__ == '__main__':
 
 ############ main code
     #fake an alias
-    dest = 0x703
-    CRIS = (dest>>4) & 0xFF
-    NNB = dest & 0x0F
-    #CRIS = 0x00
-    #NNB = 0xFF
+    #dest = 0x703
+    #CRIS = (dest>>4) & 0xFF
+    #NNB = dest & 0x0F
+
+    #use universal address, will program any node in bootloader mode on network. Will probably break if more than one :(
+    CRIS = 0x00
+    NNB = 0xFF
     if not selectNode(CRIS, NNB, connection, verbose): exit(1)
 
     #connected, now what?
