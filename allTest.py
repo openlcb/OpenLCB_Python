@@ -205,6 +205,10 @@ def test(alias, dest, nodeID, event, connection, verbose, complete, repeat, iden
             print "Error in unknownMtiAddressed"
             if not complete : exit(retval)
         
+        import testStandardFrame
+        if verbose : print "testStandardFrame"
+        retval = testStandardFrame.test(connection, verbose)
+        
         # done last, as changes alias in use
         import testAliasConflict
         if verbose : print "testAliasConflict"
