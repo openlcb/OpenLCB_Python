@@ -13,13 +13,9 @@ import canolcbutils
     
 def usage() :
     print ""
-    print "Called standalone, will send  CAN VerifyNode (Global) message."
-    print "By default, this carries no Node ID information in the body, "
-    print "but if you supply the -n or --node option, it will be included."
+    print "Test that various reserved bits are not being (incorrectly) checked."
     print ""
-    print "Expect a single VerifiedNode reply in return"
-    print "e.g. [180B7sss] nn nn nn nn nn nn"
-    print "containing dest alias and NodeID"
+    print "Relies on the node properly handling verifyNodeAddressed and verifyNodeGlobal"
     print ""
     print "Default connection detail taken from connection.py"
     print ""
