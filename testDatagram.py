@@ -167,7 +167,7 @@ def test(alias, dest, connection, verbose) :
     if type(retval) is int and retval != 0 :
         return retval+20
 
-    # NAK the response datagram
+    # NAK the response datagram & check for retransmission
     if verbose : print "  send NAK to response"
     connection.network.send(makefinalframe(alias, dest, [0x20,0x42,0,0,0,0,1]))
     frame = connection.network.receive()
@@ -195,6 +195,21 @@ def test(alias, dest, connection, verbose) :
         print "Unexpected message instead of read reply datagram ", retval
         return 37
         
+    # Test recovery from failure during datagram send by sending a 1st segment, then AMR, 
+    # then a complete datagram.  The reply will tell if the first part
+    # was properly ignored.
+    if verbose : print "  test recovery from node failure after partial transmission of datagram" 
+    # send 1st part (valid datagram part, garbage content)
+    connection.network.send(makepartialframe(alias, dest, [0,0,0]))
+    # send AMR for that node
+    connection.network.send(canolcbutils.makeframestring(0x10703000+alias,None))
+    # send correct datagram
+    connection.network.send(makefinalframe(alias, dest, [0x20,0x42,0,0,0,0,8]))
+    # check response
+    retval = checkreply(alias, dest, connection, verbose)
+    if type(retval) is int and retval != 0 :
+        return retval+20
+
     return 0
 
 if __name__ == '__main__':
