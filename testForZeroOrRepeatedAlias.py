@@ -57,7 +57,7 @@ def main():
     retval = test(dest, connection, identifynode, n, verbose)
     return retval
     
-def once(dest, connection, identifynode, verbose) :
+def once(dest, connection, identifynode, verbose, marks) :
     alias = (dest-10)|1
 
     # Note: This test assumes that the response will be
@@ -68,7 +68,6 @@ def once(dest, connection, identifynode, verbose) :
     #
     # Sending a global message (that normally doesn't get a response)
     # by sending verifyNodeGlobal with a nodeID that doesn't match any valid
-    if verbose : print "  check no-response global message with alias conflict"
     connection.network.send(verifyNodeGlobal.makeframe(dest, [0,0,0,0,0,1]))
     reply = connection.network.receive()
     if reply == None :
@@ -89,8 +88,9 @@ def once(dest, connection, identifynode, verbose) :
         return -24
     if int(reply[7:10],16) == dest :
         print "received alias == previous alias"
-        return -25
+        # this is just noted, it doesnt end test
     dest = int(reply[7:10],16)
+    marks.add(dest)
     # pull & drop rest of sequence
     reply = connection.network.receive()  # CID 2
     reply = connection.network.receive()  # CID 3
@@ -103,18 +103,21 @@ def once(dest, connection, identifynode, verbose) :
     return dest
     
 def test(dest, connection, identifynode, n, verbose) :
+    marks = set()
     if identifynode :
         import getUnderTestAlias
         dest, otherNodeId = getUnderTestAlias.get(0x123, None, verbose)
 
     if n == 0 :
         while dest >= 0 : 
-            dest = once(dest, connection, identifynode, verbose)
+            dest = once(dest, connection, identifynode, verbose, marks)
     else :
         for i in range(n) :
-            dest = once(dest, connection, identifynode, verbose)
+            dest = once(dest, connection, identifynode, verbose, marks)
             if dest < 0 : return -dest
     
+    if verbose : 
+        print "covered", len(marks), "of 4095 in",n,"attempts"
     return 0
 
 if __name__ == '__main__':
