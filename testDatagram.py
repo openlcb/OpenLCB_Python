@@ -198,13 +198,42 @@ def test(alias, dest, connection, verbose) :
     # Test recovery from failure during datagram send by sending a 1st segment, then AMR, 
     # then a complete datagram.  The reply will tell if the first part
     # was properly ignored.
-    if verbose : print "  test recovery from node failure after partial transmission of datagram" 
+    if verbose : print "  test recovery from AMR (node failure) after partial transmission of datagram" 
     # send 1st part (valid datagram part, garbage content)
     connection.network.send(makepartialframe(alias, dest, [0,0,0]))
     # send AMR for that node
     connection.network.send(canolcbutils.makeframestring(0x10703000+alias,None))
     # send correct datagram
     connection.network.send(makefinalframe(alias, dest, [0x20,0x42,0,0,0,0,8]))
+    # check response
+    retval = checkreply(alias, dest, connection, verbose)
+    if type(retval) is int and retval != 0 :
+        return retval+20
+
+    # Test recovery from failure during datagram send by sending a 1st segment, then AMD, 
+    # then a complete datagram.  The reply will tell if the first part
+    # was properly ignored.
+    if verbose : print "  test recovery from AMD (node failure) after partial transmission of datagram" 
+    # send 1st part (valid datagram part, garbage content)
+    connection.network.send(makepartialframe(alias, dest, [0,0,0]))
+    # send AMR for that node
+    connection.network.send(canolcbutils.makeframestring(0x10701000+alias,None))
+    # send correct datagram
+    connection.network.send(makefinalframe(alias, dest, [0x20,0x42,0,0,0,0,8]))
+    # check response
+    retval = checkreply(alias, dest, connection, verbose)
+    if type(retval) is int and retval != 0 :
+        return retval+20
+
+    # Test that AMR and AMD from other nodes don't confuse datagram transmission
+    if verbose : print "  test that AMR, AMD from other nodes doesnt interfere" 
+    # send 1st part (valid datagram part)
+    connection.network.send(makepartialframe(alias, dest, [0x20]))
+    # send AMR,AMD for another node
+    connection.network.send(canolcbutils.makeframestring(0x10703000+(alias^dest),None))
+    connection.network.send(canolcbutils.makeframestring(0x10701000+(alias^dest),None))
+    # send 2nd part datagram
+    connection.network.send(makefinalframe(alias, dest, [0x42,0,0,0,0,8]))
     # check response
     retval = checkreply(alias, dest, connection, verbose)
     if type(retval) is int and retval != 0 :
