@@ -208,6 +208,9 @@ def test(alias, dest, connection, identifynode, verbose) :
             event = canolcbutils.bodyArray(reply)
             if verbose : print "produces ", event
             produced = produced+[event]
+        elif (reply.startswith(":X182DF")) :
+            event = canolcbutils.bodyArray(reply)
+	    if verbose : print "event produced", event
         else :
             print "Unexpected message"
             return 50
