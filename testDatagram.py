@@ -153,11 +153,11 @@ def test(alias, dest, connection, verbose) :
     connection.network.send(makepartialframe(alias, dest, [0x20,0x42,0,0,0]))
     newalias = (~alias)&0xFFF
     if newalias == dest:
-	newalias = newalias - 1;
-    connection.network.send(makepartialframe(newalias, dest, [0x20,0x42,0,0,0,0,8]))
+	newalias = (newalias - 1)&0xFFF;
+    connection.network.send(makefinalframe(newalias, dest, [0x20,0x42,0,0,0,0,8]))
     # check for reject of this one
     frame = connection.network.receive()
-    if frame == None or not (frame.startswith(":X1E") and frame[4:7] == hex(newalias)[2:] and frame[11:13] == "4D") :
+    if frame == None or not (frame.startswith(":X1E") and frame[4:7] == hex(newalias)[2:].upper() and frame[11:13] == "4D") :
         print "interposed datagram was not rejected due to buffer full:", frame
         return 81
     # send final part of original datagram
