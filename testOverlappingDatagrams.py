@@ -12,9 +12,15 @@ import canolcbutils
 
 # the following are cut&pasted from testDatagram, and should be properly imported instead
 
-def makepartialframe(alias, dest, content) :
+def makeonlyframe(alias, dest, content) :
+    return canolcbutils.makeframestring(0x1A000000+alias+(dest<<12),content)
+
+def makefirstframe(alias, dest, content) :
+    return canolcbutils.makeframestring(0x1B000000+alias+(dest<<12),content)
+
+def makemiddleframe(alias, dest, content) :
     return canolcbutils.makeframestring(0x1C000000+alias+(dest<<12),content)
-    
+
 def makefinalframe(alias, dest, content) :
     return canolcbutils.makeframestring(0x1D000000+alias+(dest<<12),content)
 
@@ -24,17 +30,29 @@ def makereply(alias, dest) :
 def isreply(frame) :
     return frame.startswith(":X1E") and frame[11:13] == "4C"
 
+def isNAK(frame) :
+    return frame.startswith(":X1E") and frame[11:13] == "4D"
+
 def sendOneDatagram(alias, dest, content, connection, verbose) :
+    if(len(content) <= 8):
+        frame = makeonlyframe(alias, dest, content)
+        connection.network.send(frame)
+        return
+
+    frame = makefirstframe(alias, dest, content[0:8])
+    connection.network.send(frame)
+    content = content[8:]
+
     while len(content) > 8 :
-        frame = makepartialframe(alias, dest, content[0:8])
+        frame = makemiddleframe(alias, dest, content[0:8])
         connection.network.send(frame)
         content = content[8:]
 
     frame = makefinalframe(alias, dest, content)
     connection.network.send(frame)
-        
+
     frame = connection.network.receive()
-    if frame == None : 
+    if frame == None :
         print "Did not receive reply"
         return 1
     if not isreply(frame) :
@@ -44,9 +62,21 @@ def sendOneDatagram(alias, dest, content, connection, verbose) :
 
 def receiveOneDatagram(alias, dest, conection, verbose) :
     retval = []
+    reply = connection.network.receive()
+
+    if reply.startswith(":X1A"):
+      retval = retval + canolcbutils.bodyArray(reply)
+      connection.network.send(makereply(alias, dest))
+      return retval
+
+    if reply.startswith(":X1B"):
+      retval = retval + canolcbutils.bodyArray(reply)
+    else:
+      print "Unexpected message instead of first datagram segment", reply
+      return 3
     while True :
         reply = connection.network.receive()
-        if (reply == None ) : 
+        if (reply == None ) :
             print "No datagram segment received"
             return 4
         elif reply.startswith(":X1C") :
@@ -60,9 +90,6 @@ def receiveOneDatagram(alias, dest, conection, verbose) :
             print "Unexpected message instead of datagram segment", reply
             return 3
 
-
-
-    
 def usage() :
     print ""
     print "Test of the specific case of overlapping datagrams,"
@@ -129,14 +156,26 @@ def checkreply(alias, dest, connection, verbose) :
         print "Unexpected message received instead of reply"
         return 2
     # read reply
-    retval = datagram.receiveOneDatagram(alias, dest, connection, verbose)
+    retval = receiveOneDatagram(alias, dest, connection, verbose)
     if type(retval) is int : 
         # pass error code up
         return retval
     if retval[0:3] != [0x20,0x52,0] :
         print "Unexpected message instead of read reply datagram ", retval
         return 3
-   
+
+# Check for a NAK datagram to a request, and check if it's basically OK
+def checkrejection(alias, dest, connection, verbose) :
+    frame = connection.network.receive()
+    if frame == None :
+        print "Did not receive reply"
+        return 1
+    if not isNAK(frame) :
+        print "Unexpected message received instead of NAK"
+        return 2
+    return 0
+
+
 def test(alias, dest, num, connection, verbose) :    
 
     # going to send a [0x20,0x42,0,0,0,0,8] read datagram in three parts:
@@ -147,7 +186,7 @@ def test(alias, dest, num, connection, verbose) :
     if connection.network.verbose : print "send initial frame from first source, plus",num,"more that should be ignored"
     tempalias = alias
     for n in range(0,num+1) :
-        connection.network.send(makepartialframe(tempalias, dest, [0x20]))
+        connection.network.send(makefirstframe(tempalias, dest, [0x20]))
         tempalias = (tempalias + 1 ) & 0xFFF
         if tempalias == dest : 
             tempalias = (tempalias + 1 ) & 0xFFF
@@ -160,7 +199,7 @@ def test(alias, dest, num, connection, verbose) :
     
     
     if connection.network.verbose : print "finish 1st datagram frames & check reply"
-    connection.network.send(makepartialframe(alias, dest, [0x42,0,0]))
+    connection.network.send(makemiddleframe(alias, dest, [0x42,0,0]))
     connection.network.send(makefinalframe(alias, dest, [0,0,8]))
     # check response
     retval = checkreply(alias, dest, connection, verbose)
@@ -173,7 +212,7 @@ def test(alias, dest, num, connection, verbose) :
         tempalias = (tempalias + 1 ) & 0xFFF
         if tempalias == dest : 
             tempalias = (tempalias + 1 ) & 0xFFF
-        connection.network.send(makepartialframe(tempalias, dest, [0x42,0,0]))
+        connection.network.send(makemiddleframe(tempalias, dest, [0x42,0,0]))
     # do not expect reply at this point
     frame = connection.network.receive()
     if frame != None :
@@ -193,13 +232,9 @@ def test(alias, dest, num, connection, verbose) :
             if frame == None :
                 print "missing reply to final segment"
                 return 83
-            if  not (frame.startswith(":X1E") and frame[4:7] == hex(tempalias)[2:].upper() and frame[11:17] == "4D2000") :
-                if frame.startswith(":X1E") and frame[4:7] == hex(tempalias)[2:].upper() and frame[11:17] == "4D1040" :
-                    print "expected NAK-buffer-unavailable reply to final frame of final datagram but received NAK-invalid-format, corrupted datagram generated?", frame
-                    return 84
-                else :
-                    print "expected NAK-buffer-unavailable reply to final frame of final datagram but received", frame
-                    return 85
+            if  not (frame.startswith(":X1E") and frame[4:7] == hex(tempalias)[2:].upper() and frame[11:13] == "4D" and (frame[13:15] == "20" or frame[13:15] == "60") ) :
+                  print "expected NAK-buffer-unavailable reply to final frame of final datagram but received", frame
+                  return 85
         else :
             # expect it's OK before last
             retval = checkreply(tempalias, dest, connection, verbose)
