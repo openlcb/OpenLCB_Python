@@ -21,7 +21,7 @@ def get(alias, nodeID, verbose) :
     while (True) :
         reply = connection.network.receive()
         if (reply == None ) : return None,None
-        if (reply.startswith(":X180B7")) :
+        if (reply.startswith(":X188B7")) :
             alias,nodeID = int(reply[7:10],16),canolcbutils.bodyArray(reply)
             if verbose : print "Found alias "+str(alias)+" ("+hex(alias)+") for node ID ",nodeID
             return alias,nodeID
