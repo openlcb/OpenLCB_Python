@@ -8,7 +8,13 @@ Send and receive single datagrams
 import connection as connection
 import canolcbutils
 
-def makepartialframe(alias, dest, content) :
+def makeonlyframe(alias, dest, content) :
+    return canolcbutils.makeframestring(0x1A000000+alias+(dest<<12),content)
+
+def makefirstframe(alias, dest, content) :
+    return canolcbutils.makeframestring(0x1B000000+alias+(dest<<12),content)
+
+def makemiddleframe(alias, dest, content) :
     return canolcbutils.makeframestring(0x1C000000+alias+(dest<<12),content)
     
 def makefinalframe(alias, dest, content) :
@@ -21,13 +27,22 @@ def isreply(frame) :
     return frame.startswith(":X1E") and ( frame[11:13] == "4C" or frame[11:13] == "4D")
 
 def sendOneDatagram(alias, dest, content, connection, verbose) :
-    while len(content) > 8 :
-        frame = makepartialframe(alias, dest, content[0:8])
+    if len(content) > 8 :
+        first = True
+        while len(content) > 8 :
+            if first :
+                frame = makefirstframe(alias, dest, content[0:8])
+                first = False
+            else :
+                frame = makemiddleframe(alias, dest, content[0:8])
+            connection.network.send(frame)
+            content = content[8:]
+    
+        frame = makefinalframe(alias, dest, content)
         connection.network.send(frame)
-        content = content[8:]
-
-    frame = makefinalframe(alias, dest, content)
-    connection.network.send(frame)
+    else :
+        frame = makeonlyframe(alias, dest, content)
+        connection.network.send(frame)
         
     frame = connection.network.receive()
     if frame == None : 
@@ -45,10 +60,10 @@ def receiveOneDatagram(alias, dest, conection, verbose) :
         if (reply == None ) : 
             print "No datagram segment received"
             return 4
-        elif reply.startswith(":X1C") :
+        elif reply.startswith(":X1B") or reply.startswith(":X1C") :
             retval = retval + canolcbutils.bodyArray(reply)
             continue
-        elif reply.startswith(":X1D") :
+        elif reply.startswith(":X1A") or reply.startswith(":X1D") :
             retval = retval + canolcbutils.bodyArray(reply)
             connection.network.send(makereply(alias, dest))
             return retval
@@ -72,7 +87,7 @@ def usage() :
     print ""
     print "-a --alias source alias (default 0x"+hex(connection.thisNodeAlias).upper()+")"
     print "-d --dest dest alias (default 0x"+hex(connection.testNodeAlias).upper()+")"
-    print "-c --content message content (default 1,2,3,4)"
+    print "-c --content message content (default 1.2.3.4)"
     print "-t find destination alias automatically"
     print "-v verbose"
     print "-V Very verbose"
