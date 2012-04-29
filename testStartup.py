@@ -183,7 +183,7 @@ def test(alias, dest, connection, identifynode, verbose) :
     if reply == None :
         print "NodeInit reply not received"
         return 7
-    if not reply.startswith(":X19087") :
+    if not reply.startswith(":X18887") :
         print "NodeInit reply not correct"
         return 37
     if reply[7:10] != testAlias :
@@ -200,11 +200,11 @@ def test(alias, dest, connection, identifynode, verbose) :
     while (True) :
         reply = connection.network.receive()
         if (reply == None ) : break
-        if (reply.startswith(":X1926B")) :
+        if (reply.startswith(":X1826B")) :
             event = canolcbutils.bodyArray(reply)
             if verbose : print "consumes ", event
             consumed = consumed+[event]
-        elif (reply.startswith(":X192AB")) :
+        elif (reply.startswith(":X182AB")) :
             event = canolcbutils.bodyArray(reply)
             if verbose : print "produces ", event
             produced = produced+[event]

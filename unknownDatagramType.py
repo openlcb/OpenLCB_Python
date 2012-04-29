@@ -67,7 +67,7 @@ def test(alias, dest, connection, verbose) :
     import datagram
     for type in range(0,256) :
         if type in knownType : continue
-        connection.network.send(datagram.makefinalframe(alias, dest, [type]))
+        connection.network.send(datagram.makeonlyframe(alias, dest, [type]))
         reply = connection.network.receive()
         if reply == None : 
             print "Expected reply not received for", type

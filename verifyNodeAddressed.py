@@ -79,7 +79,7 @@ def test(alias, dest, nodeID, connection, verbose) :
     if (reply == None ) : 
         print "Expected reply not received"
         return 2
-    elif not reply.startswith(":X180B7") :
+    elif not reply.startswith(":X188B7") :
         print "Unexpected reply received ", reply
         return 1
 
