@@ -189,6 +189,15 @@ def test(alias, dest, connection, verbose) :
     if type(retval) is int and retval != 0 :
         return retval+20
 
+    # send a final segment without a start segment
+    if verbose : print "  test final segment without a start segment" 
+    connection.network.send(makefinalframe(alias, dest, [0x20,0x42,0,0,0,0,8]))
+    # check response, expect error
+    frame = connection.network.receive()
+    if not isNAK(frame) :
+        print "Unexpected reply to final segment without a start segment", frame
+        return 101
+
     # send a short read-request datagram in two segments with another from somebody else in between
     # interposed one could get rejected or processed; here we assume rejected
     if verbose : print "  test two segments with another datagram interposed" 
