@@ -169,6 +169,13 @@ def test(alias, dest, nodeID, event, connection, verbose, complete, repeat, iden
             print "Error in testDatagram", retval
             if not complete : exit(retval)
         
+        import testOverlappingDatagrams
+        if verbose : print "testOverlappingDatagrams"
+        retval = testOverlappingDatagrams.test(alias, dest, 10, connection, verbose)
+        if retval != 0 :
+            print "Error in testOverlappingDatagrams", retval
+            if not complete : exit(retval)
+
         import simpleNodeIdentificationInformation
         if verbose : print "simpleNodeIdentificationInformation"
         retval = simpleNodeIdentificationInformation.test(alias, dest, connection, verbose)
