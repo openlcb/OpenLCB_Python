@@ -74,6 +74,8 @@ def main():
     
 def test(alias, dest, nodeID, event, connection, verbose, complete, repeat, identifynode):
 
+    result = 0;
+    
     while True :
 
         if identifynode :
@@ -86,6 +88,7 @@ def test(alias, dest, nodeID, event, connection, verbose, complete, repeat, iden
         if retval != 0 :
             print "Error in aliasMapEnquiry"
             if not complete : exit(retval)
+            result |= retval
     
         import verifyNodeGlobal
         if verbose : print "verifyNodeGlobal w no NodeID"
@@ -93,11 +96,13 @@ def test(alias, dest, nodeID, event, connection, verbose, complete, repeat, iden
         if retval != 0 :
             print "Error in verifyNodeGlobal w no NodeID"
             if not complete : exit(retval)
+            result |= retval
         if verbose : print "verifyNodeGlobal with NodeID"
         retval = verifyNodeGlobal.test(alias, nodeID, connection)
         if retval != 0 :
             print "Error in verifyNodeGlobal w NodeID"
             if not complete : exit(retval)
+            result |= retval
     
         import verifyNodeAddressed
         if verbose : print "verifyNodeAddressed"
@@ -105,6 +110,7 @@ def test(alias, dest, nodeID, event, connection, verbose, complete, repeat, iden
         if retval != 0 :
             print "Error in verifyNodeAddressed"
             if not complete : exit(retval)
+            result |= retval
     
         import protocolIdentProtocol
         if verbose : print "protocolIdentProtocol"
@@ -112,6 +118,7 @@ def test(alias, dest, nodeID, event, connection, verbose, complete, repeat, iden
         if retval != 0 :
             print "Error in protocolIdentProtocol"
             if not complete : exit(retval)
+            result |= retval
     
         import identifyEventsGlobal
         if verbose : print "identifyEventsGlobal"
@@ -119,13 +126,15 @@ def test(alias, dest, nodeID, event, connection, verbose, complete, repeat, iden
         if retval != 0 :
             print "Error in identifyEventsGlobal"
             if not complete : exit(retval)
+            result |= retval
     
         import identifyEventsAddressed
         if verbose : print "identifyEventsAddressed"
         retval = identifyEventsAddressed.test(alias, dest, connection, verbose)
         if retval != 0 :
             print "Error in identifyEventsAddressed"
-            exit(retval)
+            if not complete : exit(retval)
+            result |= retval
     
         import identifyConsumers
         if verbose : print "identifyConsumers"
@@ -133,6 +142,7 @@ def test(alias, dest, nodeID, event, connection, verbose, complete, repeat, iden
         if retval != 0 :
             print "Error in identifyConsumers"
             if not complete : exit(retval)
+            result |= retval
     
         import identifyProducers
         if verbose : print "identifyProducers"
@@ -140,6 +150,7 @@ def test(alias, dest, nodeID, event, connection, verbose, complete, repeat, iden
         if retval != 0 :
             print "Error in identifyProducers"
             if not complete : exit(retval)
+            result |= retval
     
         import testProducerConsumerNotification
         if verbose : print "testProducerConsumerNotification"
@@ -147,6 +158,7 @@ def test(alias, dest, nodeID, event, connection, verbose, complete, repeat, iden
         if retval != 0 :
             print "Error in testProducerConsumerNotification"
             if not complete : exit(retval)
+            result |= retval
     
         import datagram
         if verbose : print "datagram"
@@ -154,6 +166,7 @@ def test(alias, dest, nodeID, event, connection, verbose, complete, repeat, iden
         if retval != 0 :
             print "Error in datagram"
             if not complete : exit(retval)
+            result |= retval
         
         import testConfigurationProtocol
         if verbose : print "testConfigurationProtocol"
@@ -161,6 +174,7 @@ def test(alias, dest, nodeID, event, connection, verbose, complete, repeat, iden
         if retval != 0 :
             print "Error in testConfigurationProtocol", retval
             if not complete : exit(retval)
+            result |= retval
     
         import testDatagram
         if verbose : print "testDatagram"
@@ -168,6 +182,7 @@ def test(alias, dest, nodeID, event, connection, verbose, complete, repeat, iden
         if retval != 0 :
             print "Error in testDatagram", retval
             if not complete : exit(retval)
+            result |= retval
         
         import testOverlappingDatagrams
         if verbose : print "testOverlappingDatagrams"
@@ -175,6 +190,7 @@ def test(alias, dest, nodeID, event, connection, verbose, complete, repeat, iden
         if retval != 0 :
             print "Error in testOverlappingDatagrams", retval
             if not complete : exit(retval)
+            result |= retval
 
         import simpleNodeIdentificationInformation
         if verbose : print "simpleNodeIdentificationInformation"
@@ -182,6 +198,7 @@ def test(alias, dest, nodeID, event, connection, verbose, complete, repeat, iden
         if retval != 0 :
             print "Error in simpleNodeIdentificationInformation"
             if not complete : exit(retval)
+            result |= retval
         
         import testCDI
         if verbose : print "testCDI"
@@ -189,6 +206,7 @@ def test(alias, dest, nodeID, event, connection, verbose, complete, repeat, iden
         if retval != 0 :
             print "Error in testCDI"
             if not complete : exit(retval)
+            result |= retval
         
         import testReservedBits
         if verbose : print "testReservedBits"
@@ -196,7 +214,7 @@ def test(alias, dest, nodeID, event, connection, verbose, complete, repeat, iden
         if retval != 0 :
             print "Error in testReservedBits"
             if not complete : exit(retval)
-        
+            result |= retval        
         
         import unknownDatagramType
         if verbose : print "unknownDatagramType"
@@ -204,6 +222,7 @@ def test(alias, dest, nodeID, event, connection, verbose, complete, repeat, iden
         if retval != 0 :
             print "Error in unknownDatagramType"
             if not complete : exit(retval)
+            result |= retval
         
         import unknownMtiAddressed
         if verbose : print "unknownMtiAddressed"
@@ -211,10 +230,15 @@ def test(alias, dest, nodeID, event, connection, verbose, complete, repeat, iden
         if retval != 0 :
             print "Error in unknownMtiAddressed"
             if not complete : exit(retval)
+            result |= retval
         
         import testStandardFrame
         if verbose : print "testStandardFrame"
         retval = testStandardFrame.test(connection, verbose)
+        if retval != 0 :
+            print "Error in testStandardFrame"
+            if not complete : exit(retval)
+            result |= retval
         
         # done last, as changes alias in use
         import testAliasConflict
@@ -223,6 +247,7 @@ def test(alias, dest, nodeID, event, connection, verbose, complete, repeat, iden
         if retval != 0 :
             print "Error in testAliasConflict"
             if not complete : exit(retval)
+            result |= retval
 
         if not repeat : break
         if verbose : print "End of pass, repeat"
@@ -230,7 +255,10 @@ def test(alias, dest, nodeID, event, connection, verbose, complete, repeat, iden
         
     if verbose : print "Note: Did not perform testStartup, which is manual"
     if verbose : print "Note: Did not perform testForZeroAlias.py, which is slow"
-    
+    if verbose :
+        if result != 0 : print "Encountered errors"
+        else : print "Normal end"
+
     return
 
 if __name__ == '__main__':
