@@ -83,11 +83,11 @@ def test(alias, dest, connection, verbose) :
     while (True) :
         reply = connection.network.receive()
         if (reply == None ) : break
-        if (reply.startswith(":X1926B")) :
+        if (reply.startswith(":X1826B")) :
             event = canolcbutils.bodyArray(reply)
             if verbose : print "  consumes ", event
             consumed = consumed+[event]
-        elif (reply.startswith(":X192AB")) :
+        elif (reply.startswith(":X182AB")) :
             event = canolcbutils.bodyArray(reply)
             if verbose : print "  produces ", event
             produced = produced+[event]
@@ -100,27 +100,33 @@ def test(alias, dest, connection, verbose) :
         reply = connection.network.receive()
         if (reply == None ) : 
             print "no reply for consumer ", c
-        elif ( not reply.startswith(":X1926B") ) :
+            return 20
+        elif ( not reply.startswith(":X1826B") ) :
             print "Unexpected reply "+reply
+            return 21
         # here is OK, go around to next
         while True :
             reply = connection.network.receive()
             if (reply == None ) : break
-            elif ( not reply.startswith(":X1926B") ) :
+            elif ( not reply.startswith(":X1826B") ) :
                 print "Unexpected reply "+reply
+                return 22
     for p in produced :
         connection.network.send(identifyProducers.makeframe(alias, p))
         reply = connection.network.receive()
         if (reply == None ) : 
             print "no reply for producer ", p
-        elif ( not reply.startswith(":X192AB")) :
+            return 30
+        elif ( not reply.startswith(":X182AB")) :
             print "Unexpected reply "+reply
+            return 31
         # here is OK, go around to next
         while True :
             reply = connection.network.receive()
             if (reply == None ) : break
-            elif ( not reply.startswith(":X192AB") ) :
+            elif ( not reply.startswith(":X182AB") ) :
                 print "Unexpected reply "+reply
+                return 32
     connection.network.timeout = timeout
     return 0
 
