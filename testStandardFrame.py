@@ -57,7 +57,9 @@ def test(connection, verbose) :
     reply = connection.network.receive()
     if reply == None : 
         return 0
-    print "Unexpected reply recieved to standard frame", hex(header), " was ", reply
+    while reply != None :
+        print "Unexpected reply recieved to standard frame", hex(header), " was ", reply
+        reply = connection.network.receive()
     return 4
 
 if __name__ == '__main__':
