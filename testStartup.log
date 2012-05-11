@@ -1,4 +1,5 @@
-   starting  pyOlcbBasicNode  from  ../C/libraries/OlcbTestCAN/obj/test/
+   connect to  /dev/cu.usbserial-A900fLVC  at  230400
+   waiting 5 seconds for adapter restart
 Restart node now
    receive  :X17020573N;
 Start checking node output
@@ -6,23 +7,23 @@ Start checking node output
    receive  :X15050573N;
    receive  :X14607573N;
    receive  :X10700573N;
-delay was  0.209855079651
+delay was  0.194455862045
    receive  :X10701573N020304050607;
-   receive  :X19087573N020304050607;
-   receive  :X192AB573N0203040506070001;
+   receive  :X18887573N020304050607;
+   receive  :X182AB573N0203040506070001;
 produces  [2, 3, 4, 5, 6, 7, 0, 1]
-   receive  :X192AB573N0203040506070002;
+   receive  :X182AB573N0203040506070002;
 produces  [2, 3, 4, 5, 6, 7, 0, 2]
-   receive  :X192AB573N0203040506070003;
+   receive  :X182AB573N0203040506070003;
 produces  [2, 3, 4, 5, 6, 7, 0, 3]
-   receive  :X192AB573N0203040506070004;
+   receive  :X182AB573N0203040506070004;
 produces  [2, 3, 4, 5, 6, 7, 0, 4]
-   receive  :X1926B573N0203040506070005;
+   receive  :X1826B573N0203040506070005;
 consumes  [2, 3, 4, 5, 6, 7, 0, 5]
-   receive  :X1926B573N0203040506070006;
+   receive  :X1826B573N0203040506070006;
 consumes  [2, 3, 4, 5, 6, 7, 0, 6]
-   receive  :X1926B573N0203040506070007;
+   receive  :X1826B573N0203040506070007;
 consumes  [2, 3, 4, 5, 6, 7, 0, 7]
-   receive  :X1926B573N0203040506070008;
+   receive  :X1826B573N0203040506070008;
 consumes  [2, 3, 4, 5, 6, 7, 0, 8]
    receive  <none>
