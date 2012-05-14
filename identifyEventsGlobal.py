@@ -9,7 +9,7 @@ import connection as connection
 import canolcbutils
 
 def makeframe(alias) :
-    return canolcbutils.makeframestring(0x182B7000+alias, None)
+    return canolcbutils.makeframestring(0x18AB7000+alias, None)
     
 def usage() :
     print ""
@@ -64,7 +64,7 @@ def test(alias, connection, verbose) :
     while (True) :
         reply = connection.network.receive()
         if (reply == None ) : break
-        if not (reply.startswith(':X192AB') or reply.startswith(':X1926B')):
+        if not (reply.startswith(':X1826B') or reply.startswith(':X182AB')):
             print "Wrong reply received", reply
             return 4
         count = count + 1
