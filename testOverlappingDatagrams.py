@@ -226,14 +226,20 @@ def test(alias, dest, num, connection, verbose) :
         if tempalias == dest : 
             tempalias = (tempalias + 1 ) & 0xFFF
         connection.network.send(makefinalframe(tempalias, dest, [0,0,8]))
-        # last should be rejected, no buffer
-        frame = connection.network.receive()
-        if frame == None :
-            print "missing reply to final segment"
-            return 83
-        if  not (frame.startswith(":X1E") and frame[4:7] == hex(tempalias)[2:].upper() and frame[11:13] == "4D" and (frame[13:15] == "20" or frame[13:15] == "60") ) :
-              print "expected NAK-buffer-unavailable reply to final frame of final datagram but received", frame
-              return 85
+        if n == num :
+            # last should be rejected, no buffer
+            frame = connection.network.receive()
+            if frame == None :
+                print "missing reply to final segment"
+                return 83
+            if  not (frame.startswith(":X1E") and frame[4:7] == hex(tempalias)[2:].upper() and frame[11:13] == "4D" and (frame[13:15] == "20" or frame[13:15] == "60") ) :
+                  print "expected NAK-buffer-unavailable reply to final frame of final datagram but received", frame
+                  return 85
+        else :	 
+            # expect it's OK before last	 
+            retval = checkreply(tempalias, dest, connection, verbose)	 
+            if type(retval) is int and retval != 0 :	 
+                return retval+30
     return 0
 
 if __name__ == '__main__':
