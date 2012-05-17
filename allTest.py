@@ -186,7 +186,7 @@ def test(alias, dest, nodeID, event, connection, verbose, complete, repeat, iden
         
         import testOverlappingDatagrams
         if verbose : print "testOverlappingDatagrams"
-        retval = testOverlappingDatagrams.test(alias, dest, 10, connection, verbose)
+        retval = testOverlappingDatagrams.test(alias, dest, 1, connection, verbose)
         if retval != 0 :
             print "Error in testOverlappingDatagrams", retval
             if not complete : exit(retval)
