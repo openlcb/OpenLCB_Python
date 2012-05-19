@@ -183,7 +183,7 @@ def test(alias, dest, connection, identifynode, verbose) :
     if reply == None :
         print "NodeInit reply not received"
         return 7
-    if not reply.startswith(":X18887") :
+    if not reply.startswith(":X18087") :
         print "NodeInit reply not correct"
         return 37
     if reply[7:10] != testAlias :
