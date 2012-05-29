@@ -73,6 +73,15 @@ def test(alias, dest, connection, verbose) :
         if (connection.network.receive() == None ) : break
         count = count + 1
     if verbose : print "  Found",count,"events"
+    
+    # check that there's no reply to another node id
+    if verbose : print "  checking for no reply to request to another node"
+    connection.network.send(makeframe(alias,dest^alias))
+    reply = connection.network.receive()
+    if (reply == None ) : return 0
+    print "unexpected reply: "+reply
+    return 12
+
     return 0
 
 if __name__ == '__main__':
