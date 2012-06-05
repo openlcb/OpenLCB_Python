@@ -110,9 +110,9 @@ def test(alias, dest, connection, verbose) :
     connection.network.timeout = 1.0
     reply = connection.network.receive()  # RID
     connection.network.timeout = timeout
-    reply = connection.network.receive()
-    reply = connection.network.receive()
-    reply = connection.network.receive()
+    # dump everything until nothing heard
+    while (reply != None) :
+        reply = connection.network.receive()
     
     # Sending a global message (that normally does get a response)
     if verbose : print "  check response-inducing global message with alias conflict"
@@ -146,9 +146,9 @@ def test(alias, dest, connection, verbose) :
     connection.network.timeout = 1.0
     reply = connection.network.receive()  # RID
     connection.network.timeout = timeout
-    reply = connection.network.receive()
-    reply = connection.network.receive()
-    reply = connection.network.receive()
+    # dump everything until nothing heard
+    while (reply != None) :
+        reply = connection.network.receive()
     
     # Sending an addressed message to some other alias (note arguments backwards, on purpose)
     if verbose : print "  check addressed message with alias conflict"
@@ -182,9 +182,9 @@ def test(alias, dest, connection, verbose) :
     connection.network.timeout = 1.0
     reply = connection.network.receive()  # RID
     connection.network.timeout = timeout
-    reply = connection.network.receive()
-    reply = connection.network.receive()
-    reply = connection.network.receive()
+    # dump everything until nothing heard
+    while (reply != None) :
+        reply = connection.network.receive()
 
     # send a CheckID   
     if verbose : print "  check CheckID with alias conflict"
@@ -232,9 +232,9 @@ def test(alias, dest, connection, verbose) :
     connection.network.timeout = 1.0
     reply = connection.network.receive()  # RID
     connection.network.timeout = timeout
-    reply = connection.network.receive()
-    reply = connection.network.receive()
-    reply = connection.network.receive()
+    # dump everything until nothing heard
+    while (reply != None) :
+        reply = connection.network.receive()
 
     return 0
 
