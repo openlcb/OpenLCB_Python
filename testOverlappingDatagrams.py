@@ -160,7 +160,7 @@ def checkreply(alias, dest, connection, verbose) :
     if type(retval) is int : 
         # pass error code up
         return retval
-    if retval[0:3] != [0x20,0x52,0] :
+    if retval[0:3] != [0x20,0x51,0] :
         print "Unexpected message instead of read reply datagram ", retval
         return 3
 
@@ -178,8 +178,8 @@ def checkrejection(alias, dest, connection, verbose) :
 
 def test(alias, dest, num, connection, verbose) :    
 
-    # going to send a [0x20,0x42,0,0,0,0,8] read datagram in three parts:
-    #     [0x20]   [0x42,0,0]   [0,0,8]
+    # going to send a [0x20,0x41,0,0,0,0,8] read datagram in three parts:
+    #     [0x20]   [0x41,0,0]   [0,0,8]
 
     if verbose : print "testing datagram parsing with ",num," buffer(s)"
 
@@ -199,7 +199,7 @@ def test(alias, dest, num, connection, verbose) :
     
     
     if connection.network.verbose : print "finish 1st datagram frames & check reply"
-    connection.network.send(makemiddleframe(alias, dest, [0x42,0,0]))
+    connection.network.send(makemiddleframe(alias, dest, [0x41,0,0]))
     connection.network.send(makefinalframe(alias, dest, [0,0,8]))
     # check response
     retval = checkreply(alias, dest, connection, verbose)
@@ -212,7 +212,7 @@ def test(alias, dest, num, connection, verbose) :
         tempalias = (tempalias + 1 ) & 0xFFF
         if tempalias == dest : 
             tempalias = (tempalias + 1 ) & 0xFFF
-        connection.network.send(makemiddleframe(tempalias, dest, [0x42,0,0]))
+        connection.network.send(makemiddleframe(tempalias, dest, [0x41,0,0]))
     # do not expect reply at this point
     frame = connection.network.receive()
     if frame != None :

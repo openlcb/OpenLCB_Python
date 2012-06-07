@@ -154,7 +154,7 @@ def checkreply(alias, dest, connection, verbose) :
     if type(retval) is int : 
         # pass error code up
         return retval
-    if retval[0:3] != [0x20,0x52,0] :
+    if retval[0:3] != [0x20,0x51,0] :
         print "Unexpected message instead of read reply datagram ", retval
         return 3
 
@@ -172,7 +172,7 @@ def checkrejection(alias, dest, connection, verbose) :
 def test(alias, dest, connection, verbose) :    
     # send a short read-request datagram in two segments
     if verbose : print "  test two segments"
-    connection.network.send(makefirstframe(alias, dest, [0x20,0x42,0,0,0]))
+    connection.network.send(makefirstframe(alias, dest, [0x20,0x41,0,0,0]))
     connection.network.send(makefinalframe(alias, dest, [0,8]))
     # check response to make sure it was received and interpreted OK
     retval = checkreply(alias, dest, connection, verbose)
@@ -181,8 +181,8 @@ def test(alias, dest, connection, verbose) :
     
     # send a short read-request datagram in two segments with another to somebody else in between
     if verbose : print "  test two segments with extraneous one interposed" 
-    connection.network.send(makefirstframe(alias, dest, [0x20,0x42,0,0,0]))
-    connection.network.send(makeonlyframe(alias, (~dest)&0xFFF, [0x20,0x42,0,0,0]))
+    connection.network.send(makefirstframe(alias, dest, [0x20,0x41,0,0,0]))
+    connection.network.send(makeonlyframe(alias, (~dest)&0xFFF, [0x20,0x41,0,0,0]))
     connection.network.send(makefinalframe(alias, dest, [0,8]))
     # check response
     retval = checkreply(alias, dest, connection, verbose)
@@ -191,7 +191,7 @@ def test(alias, dest, connection, verbose) :
 
     # send a final segment without a start segment
     if verbose : print "  test final segment without a start segment" 
-    connection.network.send(makefinalframe(alias, dest, [0x20,0x42,0,0,0,0,8]))
+    connection.network.send(makefinalframe(alias, dest, [0x20,0x41,0,0,0,0,8]))
     # check response, expect error
     frame = connection.network.receive()
     if not isNAK(frame) :
@@ -201,11 +201,11 @@ def test(alias, dest, connection, verbose) :
     # send a short read-request datagram in two segments with another from somebody else in between
     # interposed one could get rejected or processed; here we assume rejected
     if verbose : print "  test two segments with another datagram interposed" 
-    connection.network.send(makefirstframe(alias, dest, [0x20,0x42,0,0,0]))
+    connection.network.send(makefirstframe(alias, dest, [0x20,0x41,0,0,0]))
     newalias = (~alias)&0xFFF
     if newalias == dest:
 	newalias = (newalias - 1)&0xFFF;
-    connection.network.send(makeonlyframe(newalias, dest, [0x20,0x42,0,0,0,0,8]))
+    connection.network.send(makeonlyframe(newalias, dest, [0x20,0x41,0,0,0,0,8]))
     # check for reject of this one
     frame = connection.network.receive()
     if frame == None or not (frame.startswith(":X1E") and frame[4:7] == hex(newalias)[2:].upper() and frame[11:13] == "4D") :
@@ -220,7 +220,7 @@ def test(alias, dest, connection, verbose) :
 
     # NAK the response datagram & check for retransmission
     if verbose : print "  send NAK to response"
-    connection.network.send(makeonlyframe(alias, dest, [0x20,0x42,0,0,0,0,1]))
+    connection.network.send(makeonlyframe(alias, dest, [0x20,0x41,0,0,0,0,1]))
     frame = connection.network.receive()
     if frame == None : 
         print "Did not receive reply"
@@ -243,7 +243,7 @@ def test(alias, dest, connection, verbose) :
     if type(retval) is int : 
         # pass error code up
         return retval
-    if retval[0:3] != [0x20,0x52,0] :
+    if retval[0:3] != [0x20,0x51,0] :
         print "Unexpected message instead of read reply datagram ", retval
         return 37
         
@@ -256,7 +256,7 @@ def test(alias, dest, connection, verbose) :
     # send AMR for that node
     connection.network.send(canolcbutils.makeframestring(0x10703000+alias,None))
     # send correct datagram
-    connection.network.send(makefinalframe(alias, dest, [0x20,0x42,0,0,0,0,8]))
+    connection.network.send(makefinalframe(alias, dest, [0x20,0x41,0,0,0,0,8]))
     # check response
     retval = checkrejection(alias, dest, connection, verbose)
     if type(retval) is int and retval != 0 :
@@ -271,7 +271,7 @@ def test(alias, dest, connection, verbose) :
     # send AMR for that node
     connection.network.send(canolcbutils.makeframestring(0x10701000+alias,None))
     # send correct datagram
-    connection.network.send(makefinalframe(alias, dest, [0x20,0x42,0,0,0,0,8]))
+    connection.network.send(makefinalframe(alias, dest, [0x20,0x41,0,0,0,0,8]))
     # check response
     retval = checkrejection(alias, dest, connection, verbose)
     if type(retval) is int and retval != 0 :
@@ -285,7 +285,7 @@ def test(alias, dest, connection, verbose) :
     connection.network.send(canolcbutils.makeframestring(0x10703000+(alias^dest),None))
     connection.network.send(canolcbutils.makeframestring(0x10701000+(alias^dest),None))
     # send 2nd part datagram
-    connection.network.send(makefinalframe(alias, dest, [0x42,0,0,0,0,8]))
+    connection.network.send(makefinalframe(alias, dest, [0x41,0,0,0,0,8]))
     # check response
     retval = checkreply(alias, dest, connection, verbose)
     if type(retval) is int and retval != 0 :
