@@ -97,7 +97,7 @@ def test(alias, dest, connection, verbose) :
     highSpace = retval[5]
     
     # One byte read from config space
-    retval = datagram.sendOneDatagram(alias, dest, [0x20,0x42,0,0,0,0,1], connection, verbose)
+    retval = datagram.sendOneDatagram(alias, dest, [0x20,0x41,0,0,0,0,1], connection, verbose)
     if retval != 0 :
         return retval
     # read data response
@@ -111,7 +111,7 @@ def test(alias, dest, connection, verbose) :
     if verbose : print "  Read one byte result", retval[6:7]
     
     # Eight byte read from config space
-    retval = datagram.sendOneDatagram(alias, dest, [0x20,0x42,0,0,0,0,8], connection, verbose)
+    retval = datagram.sendOneDatagram(alias, dest, [0x20,0x41,0,0,0,0,8], connection, verbose)
     if retval != 0 :
         return retval
     # read data response
