@@ -46,11 +46,10 @@ def main():
     alias = connection.thisNodeAlias;
     dest = connection.testNodeAlias;
     verbose = False
-    identifynode = False
     
     # argument processing
     try:
-        opts, remainder = getopt.getopt(sys.argv[1:], "d:a:vVt", ["alias=", "dest="])
+        opts, remainder = getopt.getopt(sys.argv[1:], "d:a:vV", ["alias=", "dest="])
     except getopt.GetoptError, err:
         # print help information and exit:
         print str(err) # will print something like "option -a not recognized"
@@ -66,15 +65,13 @@ def main():
             alias = int(arg) # needs hex decode
         elif opt in ("-d", "--dest"):
             dest = int(arg) # needs hex decode
-        elif opt == "-t":
-            identifynode = True
         else:
             assert False, "unhandled option"
 
-    retval = test(alias, dest, connection, identifynode, verbose)
+    retval = test(alias, dest, connection, verbose)
     return retval
     
-def test(alias, dest, connection, identifynode, verbose) :
+def test(alias, dest, connection, verbose) :
     # wait for reset
     
     # expect RIF sequence (check timing)
@@ -98,7 +95,7 @@ def test(alias, dest, connection, identifynode, verbose) :
         
     connection.network.timeout = timeout
     testAlias = reply[7:10]
-    if int(testAlias) == 0 :
+    if testAlias == "000" :
         print "node using alias == 0"
         return 331
         
