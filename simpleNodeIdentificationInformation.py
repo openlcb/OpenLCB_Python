@@ -75,6 +75,9 @@ def test(alias, dest, connection, verbose) :
     userComment = ""
     fill = 0   # 0 is format byte, 1 is name, 2 is type, 3 is vers
     
+    # assume always sends the same number of frames
+    count = 0
+    
     while (True) :
         reply = connection.network.receive()
         if reply == None :
@@ -84,6 +87,7 @@ def test(alias, dest, connection, verbose) :
             return 1
         # process content
         val = canolcbutils.bodyArray(reply)
+        count = count + 1
         for c in val[1:] :
             if fill == 0 :
                 fill = 1
@@ -127,11 +131,48 @@ def test(alias, dest, connection, verbose) :
     if verbose : print "  address other node, expect no reply"
     connection.network.send(makeframe(alias, (~dest)&0xFFF))
     reply = connection.network.receive()
-    if reply == None : 
-        return 0
-    else :
+    if reply != None : 
         print "Unexpected reply received ", reply
         
+    if verbose : print "  check three simultaneous requests"
+    alias2 = (alias+1)&0xFFF
+    if alias2 == dest : alias2 = (alias2+1)&0xFFF
+    alias3 = (alias+10)&0xFFF
+    if alias3 == dest : alias3 = (alias3+10)&0xFFF
+    
+    frame = makeframe(alias, dest)+makeframe(alias2, dest)+makeframe(alias3, dest)
+    connection.network.send(makeframe(alias, dest))
+    connection.network.send(makeframe(alias2, dest))
+    connection.network.send(makeframe(alias3, dest))
 
+    count1 = 0
+    count2 = 0
+    count3 = 0
+    while (True) :
+        reply = connection.network.receive()
+        if reply == None :
+            break
+        if (reply.startswith(":X1E") and int(reply[4:7],16)==alias and int(reply[7:10],16)==dest and reply[11:13]=="53") :
+            count1 = count1+1
+        if (reply.startswith(":X1E") and int(reply[4:7],16)==alias and int(reply[7:10],16)==dest and reply[11:13]=="0C") :
+            count1 = count1-100
+        if (reply.startswith(":X1E") and int(reply[4:7],16)==alias2 and int(reply[7:10],16)==dest and reply[11:13]=="53") :
+            count2 = count2+1
+        if (reply.startswith(":X1E") and int(reply[4:7],16)==alias2 and int(reply[7:10],16)==dest and reply[11:13]=="0C") :
+            count2 = count2-100
+        if (reply.startswith(":X1E") and int(reply[4:7],16)==alias3 and int(reply[7:10],16)==dest and reply[11:13]=="53") :
+            count3 = count3+1
+        if (reply.startswith(":X1E") and int(reply[4:7],16)==alias3 and int(reply[7:10],16)==dest and reply[11:13]=="0C") :
+            count3 = count3-100
+    if count != count1 and count1 != -100: 
+        print "got ",count1," frames for request 1 instead of ",count
+        return 101
+    if count != count2 and count2 != -100: 
+        print "got ",count2," frames for request 2 instead of ",count
+        return 102
+    if count != count3 and count3 != -100: 
+        print "got ",count3," frames for request 3 instead of ",count
+        return 103
+    
 if __name__ == '__main__':
     main()
