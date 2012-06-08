@@ -74,13 +74,14 @@ def main():
 def test(alias, dest, connection, verbose) :
     for mti in range(0,256) :
         if mti in knownMti : continue
-        connection.network.send(makeframe(alias, dest, mti))
+        frame = makeframe(alias, dest, mti)
+        connection.network.send(frame)
         reply = connection.network.receive()
         if reply == None : 
             print "Expected reply not received for", mti
             return 2
-        if  (not reply.startswith(":X1E")) or reply[11:13] != "0C"  : 
-            print "Wrong reply received for", mti
+        if  (not reply.startswith(":X1E")) or reply[11:13] != "0C" or reply[4:7] != frame[7:10] or reply[7:10] != frame[4:7] : 
+            print "Wrong reply received for", mti, "was", reply
             return 4
     return 0
 
