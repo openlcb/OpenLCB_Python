@@ -173,6 +173,8 @@ def test(alias, dest, connection, verbose) :
     if count != count3 and count3 != -100: 
         print "got ",count3," frames for request 3 instead of ",count
         return 103
+
+    return 0
     
 if __name__ == '__main__':
     main()
