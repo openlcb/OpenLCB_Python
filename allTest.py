@@ -233,13 +233,15 @@ def test(alias, dest, nodeID, event, connection, verbose, complete, repeat, iden
             result |= retval
         
         import testStandardFrame
+        import time
         if verbose : print "testStandardFrame"
         retval = testStandardFrame.test(connection, verbose)
         if retval != 0 :
             print "Error in testStandardFrame"
             if not complete : exit(retval)
             result |= retval
-        
+        time.sleep(3)
+ 
         # done last, as changes alias in use
         import testAliasConflict
         if verbose : print "testAliasConflict"
