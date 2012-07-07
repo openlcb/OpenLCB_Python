@@ -93,7 +93,7 @@ def test(alias, dest, connection, verbose) :
     if verbose : print "   Read CDI result was ", len(result), " bytes"
     if connection.network.verbose : print "  Read CDI result ++++++++++\n", result,"\n++++++++++++++++"
         
-    executable = "xmllint --noout -schema ../xml/schema/cdi.xsd - "
+    executable = "xmllint --noout --schema ../xml/schema/cdi.xsd - "
 
     import subprocess
     process = subprocess.Popen(executable,1,None,subprocess.PIPE,subprocess.PIPE, 
