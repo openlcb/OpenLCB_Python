@@ -97,11 +97,9 @@ def test(alias, dest, connection, verbose) :
     highSpace = retval[5]
     
     # One byte read from config space
-    retval = datagram.sendOneDatagram(alias, dest, [0x20,0x41,0,0,0,0,1], connection, verbose)
-    if retval != 0 :
-        return retval
+    retval = datagram.sendOneDatagramNoWait(alias, dest, [0x20,0x41,0,0,0,0,1], connection, verbose)
     # read data response
-    retval = datagram.receiveOneDatagram(alias, dest, connection, verbose)
+    retval = datagram.receiveDatagramReplyAndOneDatagram(alias, dest, connection, verbose)
     if (type(retval) is int) : 
         # pass error code up
         return retval
@@ -111,11 +109,9 @@ def test(alias, dest, connection, verbose) :
     if verbose : print "  Read one byte result", retval[6:7]
     
     # Eight byte read from config space
-    retval = datagram.sendOneDatagram(alias, dest, [0x20,0x41,0,0,0,0,8], connection, verbose)
-    if retval != 0 :
-        return retval
+    retval = datagram.sendOneDatagramNoWait(alias, dest, [0x20,0x41,0,0,0,0,8], connection, verbose)
     # read data response
-    retval = datagram.receiveOneDatagram(alias, dest, connection, verbose)
+    retval = datagram.receiveDatagramReplyAndOneDatagram(alias, dest, connection, verbose)
     if (type(retval) is int) : 
         # pass error code up
         return retval
@@ -127,11 +123,9 @@ def test(alias, dest, connection, verbose) :
     n = highSpace
     while n >= lowSpace-1 :
         # Get Address Space Info from each space
-        retval = datagram.sendOneDatagram(alias, dest, [0x20,0x84,n], connection, verbose)
-        if retval != 0 :
-            return retval
+        retval = datagram.sendOneDatagramNoWait(alias, dest, [0x20,0x84,n], connection, verbose)
         # read data response
-        retval = datagram.receiveOneDatagram(alias, dest, connection, verbose)
+        retval = datagram.receiveDatagramReplyAndOneDatagram(alias, dest, connection, verbose)
         if (type(retval) is int) : 
             # pass error code up
             return retval
