@@ -62,6 +62,8 @@ class EthernetToOlcbLink :
             if (self.verbose) : print "<none>" # blank line to show delay?
             return None
 
+    def close(self) :
+        return
 
 
 import getopt, sys

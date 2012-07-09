@@ -69,6 +69,7 @@ def main():
 
     # now execute
     alias,nodeID = get(alias, nodeID, verbose)
+    connection.network.close()
 
 if __name__ == '__main__':
     main()
