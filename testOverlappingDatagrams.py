@@ -142,8 +142,10 @@ def main():
         import getUnderTestAlias
         dest, nodeID = getUnderTestAlias.get(alias, None, verbose)
 
-    exit( test(alias, dest, num, connection, verbose) )
-
+    retval = test(alias, dest, num, connection, verbose)
+    connection.network.close()
+    exit(retval)
+    
 import datagram
 
 # Check for a reply datagram to a request, and check if it's basically OK

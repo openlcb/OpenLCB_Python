@@ -47,6 +47,7 @@ def main():
             assert False, "unhandled option"
 
     retval = test(connection, verbose)
+    connection.network.close()
     exit(retval)
     
 def test(connection, verbose) :

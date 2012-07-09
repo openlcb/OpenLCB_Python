@@ -66,6 +66,7 @@ def main():
 
     # now execute
     retval = test(alias, nodeID, dest, connection, verbose)
+    connection.network.close()
     exit(retval)    
 
 def makeAddressedFrame(alias, dest, nodeID) :

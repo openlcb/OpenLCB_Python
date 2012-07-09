@@ -68,6 +68,7 @@ def main():
 
     # now execute
     retval = test(alias, n, connection, verbose, parallel)
+    connection.network.close()
     exit(retval)
 
 def once(alias, n, connection, verbose, parallel) :

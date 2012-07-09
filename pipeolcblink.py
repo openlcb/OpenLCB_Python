@@ -95,6 +95,11 @@ class PipeOlcbLink :
         
         return r       
 
+    def close(self) :
+        self.process.kill()
+        self.process.wait()
+        return
+
     def flush(self) : # reads past any pending input
         while True :
             r = self.process.stdout.readline()
