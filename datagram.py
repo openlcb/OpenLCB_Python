@@ -175,8 +175,10 @@ def main():
     if identifynode :
         import getUnderTestAlias
         dest, nodeID = getUnderTestAlias.get(alias, None, verbose)
-
-    exit( test(alias, dest, content, connection, verbose) )
+    
+    retval = test(alias, dest, content, connection, verbose)
+    connection.network.close()
+    exit(retval)
     
 def test(alias, dest, content, connection, verbose) :    
     return sendOneDatagram(alias, dest, content, connection, verbose)
