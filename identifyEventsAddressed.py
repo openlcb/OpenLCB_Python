@@ -64,6 +64,7 @@ def main():
         dest, nodeID = getUnderTestAlias.get(alias, None, verbose)
 
     retval = test(alias, dest, connection, verbose)
+    connection.network.close()
     exit(retval)
     
 def test(alias, dest, connection, verbose) : 

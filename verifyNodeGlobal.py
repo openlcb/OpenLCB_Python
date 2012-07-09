@@ -67,6 +67,7 @@ def main():
 
     # now execute
     retval = test(alias, nodeID, connection)
+    connection.network.close()
     exit(retval)    
     
 def test(alias, nodeID, connection):

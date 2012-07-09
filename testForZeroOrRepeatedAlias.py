@@ -55,6 +55,7 @@ def main():
             assert False, "unhandled option"
 
     retval = test(dest, connection, identifynode, n, verbose)
+    connection.network.close()
     return retval
     
 def once(dest, connection, identifynode, verbose, marks) :

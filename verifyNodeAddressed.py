@@ -71,6 +71,7 @@ def main():
         if nodeID == None : nodeID = otherNodeId
 
     retval = test(alias, dest, nodeID, connection, verbose)
+    connection.network.close()
     exit(retval)
     
 def test(alias, dest, nodeID, connection, verbose) :

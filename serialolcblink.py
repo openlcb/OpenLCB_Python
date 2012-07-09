@@ -93,7 +93,8 @@ class SerialOlcbLink :
         if (self.verbose) : print r,
         return r       
 
-
+    def close(self) :
+        return
 
 import getopt, sys
 
