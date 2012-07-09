@@ -71,6 +71,52 @@ def receiveOneDatagram(alias, dest, conection, verbose) :
             print "Unexpected message instead of datagram segment", reply
             return 3
 
+def sendOneDatagramNoWait(alias, dest, content, connection, verbose) :
+    if len(content) > 8 :
+        first = True
+        while len(content) > 8 :
+            if first :
+                frame = makefirstframe(alias, dest, content[0:8])
+                first = False
+            else :
+                frame = makemiddleframe(alias, dest, content[0:8])
+            connection.network.send(frame)
+            content = content[8:]
+    
+        frame = makefinalframe(alias, dest, content)
+        connection.network.send(frame)
+    else :
+        frame = makeonlyframe(alias, dest, content)
+        connection.network.send(frame)
+        
+def receiveDatagramReplyAndOneDatagram(alias, dest, conection, verbose) :
+    # use after SendOneDatagramNoWait to get both the reply datagram and 
+    # the response to the sent datagram, in either order.
+    retval = []
+    haveReply = False
+    haveDatagram = False
+    while True :
+        reply = connection.network.receive()
+        if (reply == None ) : 
+            print "Missing response"
+            return 4
+        elif isreply(reply) : 
+            haveReply = True
+            if haveDatagram : 
+                return retval
+        elif reply.startswith(":X1B") or reply.startswith(":X1C") :
+            retval = retval + canolcbutils.bodyArray(reply)
+            continue
+        elif reply.startswith(":X1A") or reply.startswith(":X1D") :
+            retval = retval + canolcbutils.bodyArray(reply)
+            connection.network.send(makereply(alias, dest))
+            haveDatagram = True
+            if haveReply :
+                return retval
+        else :
+            print "Unexpected message", reply
+            return 3
+
     
 def usage() :
     print ""
