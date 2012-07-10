@@ -64,11 +64,9 @@ def main():
 def test(alias, dest, connection, verbose) :
 
     # Get Configuration Options
-    retval = datagram.sendOneDatagram(alias, dest, [0x20,0x80], connection, verbose)
-    if retval != 0 :
-        return retval
+    retval = datagram.sendOneDatagramNoWait(alias, dest, [0x20,0x80], connection, verbose)
     # read data response
-    retval = datagram.receiveOneDatagram(alias, dest, connection, verbose)
+    retval = datagram.receiveDatagramReplyAndOneDatagram(alias, dest, connection, verbose)
     if (type(retval) is int) : 
         # pass error code up
         return retval
