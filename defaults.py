@@ -1,5 +1,5 @@
-serial   = False
-ethernet = True
+serial   = True
+ethernet = False
 windows  = False
 local    = False
 
@@ -18,9 +18,9 @@ elif windows and not local :
 elif serial and not local :
     import serialolcblink
     network = serialolcblink.SerialOlcbLink()
-    network.port = "/dev/tty.usbserial-A7007AOC"
+    network.port = "/dev/tty.usbserial-A6007MhL"
     network.speed = 230400
-    network.startdelay = 13
+    network.startdelay = 4
 elif local :
     import pipeolcblink
     network = pipeolcblink.PipeOlcbLink()
