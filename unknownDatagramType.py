@@ -25,7 +25,7 @@ def usage() :
 
 import getopt, sys
 
-knownType = [0x20, 0x30]
+knownType = [0x01, 0x02, 0x20, 0x21, 0x30]
 
 def main():
     # argument processing
