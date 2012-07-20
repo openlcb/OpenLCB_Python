@@ -7,6 +7,8 @@ For pyUnit (we use 1.4.1), see:
 
 http://pyunit.sourceforge.net/
 
+The CDI test uses the xmllint utility.  To install that on Windows, see:
+http://flowingmotion.jojordan.org/2011/10/08/3-steps-to-download-xmllint/
 
 Issues:
     
