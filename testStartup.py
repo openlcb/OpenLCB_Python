@@ -11,12 +11,12 @@ after the script is started.
 @author: Bob Jacobsen
 '''
 
-# Expects:
+# Expects something like:
 # :X17020573N;
 # :X16304573N;
 # :X15050573N;
 # :X10700573N;
-# :X19087573N020304050607;
+# :X19100573N020304050607;
 # :X192AB573N0203040506070001;
 # :X192AB573N0203040506070004;
 # :X1926B573N0203040506070005;
@@ -181,7 +181,7 @@ def test(alias, dest, connection, verbose) :
     if reply == None :
         print "NodeInit reply not received"
         return 7
-    if not reply.startswith(":X18087") :
+    if not reply.startswith(":X19100") :
         print "NodeInit reply not correct"
         return 37
     if reply[7:10] != testAlias :
@@ -198,15 +198,15 @@ def test(alias, dest, connection, verbose) :
     while (True) :
         reply = connection.network.receive()
         if (reply == None ) : break
-        if (reply.startswith(":X1826B")) :
+        if (reply.startswith(":X194C")) :
             event = canolcbutils.bodyArray(reply)
             if verbose : print "consumes ", event
             consumed = consumed+[event]
-        elif (reply.startswith(":X182AB")) :
+        elif (reply.startswith(":X1954")) :
             event = canolcbutils.bodyArray(reply)
             if verbose : print "produces ", event
             produced = produced+[event]
-        elif (reply.startswith(":X18ADF")) :
+        elif (reply.startswith(":X195B4")) :
             event = canolcbutils.bodyArray(reply)
 	    if verbose : print "event produced", event
         else :

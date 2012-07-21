@@ -9,9 +9,9 @@ import connection as connection
 import canolcbutils
 
 def makeframe(alias, dest, nodeID) :
-    body = [0x0A]
+    body = [(dest>>8)&0xFF, dest&0xFF]
     if nodeID != None : body = body+nodeID
-    return canolcbutils.makeframestring(0x1E000000+alias+(dest<<12),body)
+    return canolcbutils.makeframestring(0x19488000+alias,body)
     
 def usage() :
     print ""
@@ -80,7 +80,7 @@ def test(alias, dest, nodeID, connection, verbose) :
     if (reply == None ) : 
         print "Expected reply not received"
         return 2
-    elif not reply.startswith(":X188B7") :
+    elif not reply.startswith(":X19170") :
         print "Unexpected reply received ", reply
         return 1
 

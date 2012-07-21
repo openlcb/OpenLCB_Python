@@ -9,15 +9,19 @@ import connection as connection
 import canolcbutils
 
 def makeframe(alias) :
-    return canolcbutils.makeframestring(0x18AB7000+alias, None)
+    return canolcbutils.makeframestring(0x19970000+alias, None)
     
 def usage() :
     print ""
     print "Called standalone, will send one CAN IdentifyEvents global message"
     print " and display response"
     print ""
-    print "Expect zero or more ConsumerIdentified reply in return"
-    print "e.g. [1926Bsss] nn nn nn nn nn nn"
+    print "Expect zero or more ConsumerIdentified replies in return"
+    print "e.g. [194C4sss] nn nn nn nn nn nn"
+    print "containing dest alias and EventID"
+    print ""
+    print "Expect zero or more ProducerIdentified replies in return"
+    print "e.g. [19954sss] nn nn nn nn nn nn"
     print "containing dest alias and EventID"
     print ""
     print "Default connection detail taken from connection.py"
@@ -65,7 +69,7 @@ def test(alias, connection, verbose) :
     while (True) :
         reply = connection.network.receive()
         if (reply == None ) : break
-        if not (reply.startswith(':X1826B') or reply.startswith(':X182AB')):
+        if not (reply.startswith(':X194C4') or reply.startswith(':X19544')):
             print "Wrong reply received", reply
             return 4
         count = count + 1

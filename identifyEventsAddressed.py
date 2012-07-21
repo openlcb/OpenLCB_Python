@@ -9,7 +9,8 @@ import connection as connection
 import canolcbutils
 
 def makeframe(alias, dest) :
-    return canolcbutils.makeframestring(0x1E000000+alias+(dest<<12), [0x2B])
+    body = [(dest>>8)&0xFF, dest&0xFF]
+    return canolcbutils.makeframestring(0x19968000+alias,body)
     
 def usage() :
     print ""

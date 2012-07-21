@@ -9,7 +9,7 @@ import connection as connection
 import canolcbutils
 
 def makeframe(alias, eventID) :
-    return canolcbutils.makeframestring(0x18A8F000+alias,eventID)
+    return canolcbutils.makeframestring(0x19914000+alias,eventID)
     
 def usage() :
     print ""
@@ -17,7 +17,7 @@ def usage() :
     print " and display response"
     print ""
     print "Expect zero or more ProducerIdentified reply in return"
-    print "e.g. [1926Bsss] nn nn nn nn nn nn"
+    print "e.g. [19544sss] nn nn nn nn nn nn"
     print "containing dest alias and EventID"
     print ""
     print "Default connection detail taken from connection.py"

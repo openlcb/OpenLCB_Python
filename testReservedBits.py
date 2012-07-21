@@ -70,34 +70,34 @@ def main():
     exit(retval)    
 
 def makeAddressedFrame(alias, dest, nodeID) :
-    body = [0x0A]
+    body = [(dest>>8)&0xFF, dest&0xFF]
     if nodeID != None : body = body+nodeID
-    return canolcbutils.makeframestring(0x0E000000+alias+(dest<<12),body)
+    return canolcbutils.makeframestring(0x09488000+alias,body)
 
 def test(alias, nodeID, dest, connection, verbose):
     if verbose : print "  test against verifyNodeGlobal"
     # first, send to this node
-    connection.network.send(canolcbutils.makeframestring(0x088A7000+alias,nodeID))
+    connection.network.send(canolcbutils.makeframestring(0x09490000+alias,nodeID))
     reply = connection.network.receive()
     if reply == None : 
         print "Global verify with matching node ID did not receive expected reply"
         return 2
-    elif not reply.startswith(":X188B7") :
+    elif not reply.startswith(":X19170") :
         print "Global verify with matching node ID received wrong reply message", reply
         return 4
 
     # send without node ID
-    connection.network.send(canolcbutils.makeframestring(0x088A7000+alias, None))
+    connection.network.send(canolcbutils.makeframestring(0x09490000+alias, None))
     reply = connection.network.receive()
     if reply == None : 
         print "Global verify without node ID did not receive expected reply"
         return 12
-    elif not reply.startswith(":X188B7") :
+    elif not reply.startswith(":X19170") :
         print "Global verify without node ID received wrong reply message ", reply
         return 14
 
     # send with wrong node ID
-    connection.network.send(canolcbutils.makeframestring(0x088A7000+alias, [0,0,0,0,0,1]))
+    connection.network.send(canolcbutils.makeframestring(0x09490000+alias, [0,0,0,0,0,1]))
     reply = connection.network.receive()
     if reply != None : 
         print "Global verify with wrong node ID should not receive reply but did: ", reply
@@ -109,7 +109,7 @@ def test(alias, nodeID, dest, connection, verbose):
     if reply == None : 
         print "Expected reply not received"
         return 2
-    elif not reply.startswith(":X188B7") :
+    elif not reply.startswith(":X19170") :
         print "Unexpected reply received ", reply
         return 1
 

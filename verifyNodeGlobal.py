@@ -9,7 +9,7 @@ import connection as connection
 import canolcbutils
 
 def makeframe(alias, nodeID) :
-    return canolcbutils.makeframestring(0x188A7000+alias,nodeID)
+    return canolcbutils.makeframestring(0x19490000+alias,nodeID)
     
 def usage() :
     print ""
@@ -18,7 +18,7 @@ def usage() :
     print "but if you supply the -n or --node option, it will be included."
     print ""
     print "Expect a single VerifiedNode reply in return"
-    print "e.g. [180B7sss] nn nn nn nn nn nn"
+    print "e.g. [19170sss] nn nn nn nn nn nn"
     print "containing dest alias and NodeID"
     print ""
     print "Default connection detail taken from connection.py"
@@ -77,7 +77,7 @@ def test(alias, nodeID, connection):
     if (reply == None ) : 
         print "Global verify with matching node ID did not receive expected reply"
         return 2
-    elif not reply.startswith(":X188B7") :
+    elif not reply.startswith(":X19170") :
         print "Global verify with matching node ID received wrong reply message", reply
         return 4
 
@@ -87,7 +87,7 @@ def test(alias, nodeID, connection):
     if (reply == None ) : 
         print "Global verify without node ID did not receive expected reply"
         return 12
-    elif not reply.startswith(":X188B7") :
+    elif not reply.startswith(":X19170") :
         print "Global verify without node ID received wrong reply message ", reply
         return 14
 

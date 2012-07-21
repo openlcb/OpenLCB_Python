@@ -21,13 +21,14 @@ def makefinalframe(alias, dest, content) :
     return canolcbutils.makeframestring(0x1D000000+alias+(dest<<12),content)
 
 def makereply(alias, dest) :
-    return canolcbutils.makeframestring(0x1E000000+alias+(dest<<12),[0x4C])
+    body = [(dest>>8)&0xFF, dest&0xFF]
+    return canolcbutils.makeframestring(0x19A28000+alias,body)
 
 def isreply(frame) :
-    return frame.startswith(":X1E") and frame[11:13] == "4C"
+    return frame.startswith(":X19A28") or frame.startswith(":X19A48")
 
 def isNAK(frame) :
-    return frame.startswith(":X1E") and frame[11:13] == "4D"
+    return frame.startswith(":X19A48")
 
 def sendOneDatagram(alias, dest, content, connection, verbose) :
     if(len(content) <= 8):
@@ -210,7 +211,7 @@ def test(alias, dest, connection, verbose) :
     connection.network.send(makeonlyframe(newalias, dest, [0x20,0x41,0,0,0,0,8]))
     # check for reject of this one
     frame = connection.network.receive()
-    if frame == None or not (frame.startswith(":X1E") and frame[4:7] == hex(newalias)[2:].upper() and frame[11:13] == "4D") :
+    if frame == None or not isNAK(frame) :
         print "interposed datagram was not rejected due to buffer full:", frame
         return 81
     # send final part of original datagram
@@ -239,7 +240,7 @@ def test(alias, dest, connection, verbose) :
         print "Unexpected message instead of datagram segment BOO", reply
         return 33
     # send NAK asking for retransmit retransmit and see if it's right this time
-    connection.network.send(canolcbutils.makeframestring(0x1E000000+alias+(dest<<12),[0x4D,0x20,00]))
+    connection.network.send(canolcbutils.makeframestring(0x19A48000+alias,[(dest>>8)&0xFF, dest&0xFF,0x20,00]))
     #retval = datagram.receiveOneDatagram(alias, dest, connection, verbose)
     retval = receiveOneDatagram(alias, dest, connection, verbose)
     if type(retval) is int : 
