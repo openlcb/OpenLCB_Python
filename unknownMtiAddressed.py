@@ -11,7 +11,7 @@ import connection as connection
 import canolcbutils
 
 def makeframe(alias, dest, mti) :
-    return canolcbutils.makeframestring(0x1E000000+alias+(dest<<12),[mti])
+    return canolcbutils.makeframestring(0x19000000+alias+(mti<<12),[(dest>>8)&0xFF, dest&0xFF])
     
 def usage() :
     print ""
@@ -33,7 +33,7 @@ def usage() :
 
 import getopt, sys
 
-knownMti = [0x0A, 0x0C, 0x0D, 0x2B, 0x2E, 0x2F, 0x4C, 0x4D, 0x4E, 0x4F, 0x52, 0x53, 0x6A, 0x6B]
+knownMti = [0x488, 0x068, 0x0A8, 0x828, 0x628, 0x968, 0xDE8, 0xA08, 0xA28, 0xA48, 0xCC8, 0x868, 0x888, 0x8A8]
 
 def main():
     # argument processing
@@ -73,15 +73,16 @@ def main():
     exit(retval)
     
 def test(alias, dest, connection, verbose) :
-    for mti in range(0,256) :
+    for mti in range(0,4095) :
         if mti in knownMti : continue
+        if (mti&0x08) == 0 : continue
         frame = makeframe(alias, dest, mti)
         connection.network.send(frame)
         reply = connection.network.receive()
         if reply == None : 
             print "Expected reply not received for", mti
             return 2
-        if  (not reply.startswith(":X1E")) or reply[11:13] != "0C" or reply[4:7] != frame[7:10] or reply[7:10] != frame[4:7] : 
+        if  (not reply.startswith(":X19068")) or reply[12:15] != frame[7:10] or reply[7:10] != frame[12:15] : 
             print "Wrong reply received for", mti, "was", reply
             return 4
     return 0

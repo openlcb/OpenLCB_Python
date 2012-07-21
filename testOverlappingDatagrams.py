@@ -20,20 +20,20 @@ def makefirstframe(alias, dest, content) :
 
 def makemiddleframe(alias, dest, content) :
     return canolcbutils.makeframestring(0x1C000000+alias+(dest<<12),content)
-
+    
 def makefinalframe(alias, dest, content) :
     return canolcbutils.makeframestring(0x1D000000+alias+(dest<<12),content)
 
 def makereply(alias, dest) :
-    return canolcbutils.makeframestring(0x1E000000+alias+(dest<<12),[0x4C])
+    body = [(dest>>8)&0xFF, dest&0xFF]
+    return canolcbutils.makeframestring(0x19A28000+alias,body)
 
 def isreply(frame) :
-    return frame.startswith(":X1E") and frame[11:13] == "4C"
+    return frame.startswith(":X19A28") or frame.startswith(":X19A48")
 
 def isNAK(frame) :
-    return frame.startswith(":X1E") and frame[11:13] == "4D"
+    return frame.startswith(":X19A48")
 
-def sendOneDatagram(alias, dest, content, connection, verbose) :
     if(len(content) <= 8):
         frame = makeonlyframe(alias, dest, content)
         connection.network.send(frame)
@@ -234,7 +234,7 @@ def test(alias, dest, num, connection, verbose) :
             if frame == None :
                 print "missing reply to final segment"
                 return 83
-            if  not (frame.startswith(":X1E") and frame[4:7] == hex(tempalias)[2:].upper() and frame[11:13] == "4D" and (frame[13:15] == "20" or frame[13:15] == "60") ) :
+            if  not (isNAK(frame) and (frame[15:17] == "20" or frame[15:17] == "60") ) :
                   print "expected NAK-buffer-unavailable reply to final frame of final datagram but received", frame
                   return 85
         else :	 

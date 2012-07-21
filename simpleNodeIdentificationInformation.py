@@ -9,8 +9,8 @@ import connection as connection
 import canolcbutils
 
 def makeframe(alias, dest) :
-    body = [0x52]
-    return canolcbutils.makeframestring(0x1E000000+alias+(dest<<12),body)
+    body = [(dest>>8)&0xFF, dest&0xFF]
+    return canolcbutils.makeframestring(0x19DE8000+alias,body)
     
 def usage() :
     print ""
@@ -83,13 +83,13 @@ def test(alias, dest, connection, verbose) :
         reply = connection.network.receive()
         if reply == None :
             break
-        if not (reply.startswith(":X1E") and int(reply[4:7],16)==alias and int(reply[7:10],16)==dest and reply[11:13]=="53") :
+        if not (reply.startswith(":X19A08") and int(reply[7:10],16)==dest and int(reply[11:15],16)==alias) :
             print "Unexpected reply received ", reply
             return 1
         # process content
         val = canolcbutils.bodyArray(reply)
         count = count + 1
-        for c in val[1:] :
+        for c in val[2:] :
             if fill == 0 :
                 fill = 1
                 if c != 1 :
@@ -141,7 +141,8 @@ def test(alias, dest, connection, verbose) :
     alias3 = (alias+10)&0xFFF
     if alias3 == dest : alias3 = (alias3+10)&0xFFF
     
-    frame = makeframe(alias, dest)+makeframe(alias2, dest)+makeframe(alias3, dest)
+    #frame = makeframe(alias, dest)+makeframe(alias2, dest)+makeframe(alias3, dest)
+    #connection.network.send(frame)
     connection.network.send(makeframe(alias, dest))
     connection.network.send(makeframe(alias2, dest))
     connection.network.send(makeframe(alias3, dest))
@@ -153,17 +154,17 @@ def test(alias, dest, connection, verbose) :
         reply = connection.network.receive()
         if reply == None :
             break
-        if (reply.startswith(":X1E") and int(reply[4:7],16)==alias and int(reply[7:10],16)==dest and reply[11:13]=="53") :
+        if (reply.startswith(":X19A08") and int(reply[7:10],16)==dest and int(reply[11:15],16)==alias) :
             count1 = count1+1
-        if (reply.startswith(":X1E") and int(reply[4:7],16)==alias and int(reply[7:10],16)==dest and reply[11:13]=="0C") :
+        if (reply.startswith(":X19068") and int(reply[7:10],16)==dest and int(reply[11:15],16)==alias) :
             count1 = count1-100
-        if (reply.startswith(":X1E") and int(reply[4:7],16)==alias2 and int(reply[7:10],16)==dest and reply[11:13]=="53") :
+        if (reply.startswith(":X19A08") and int(reply[7:10],16)==dest and int(reply[11:15],16)==alias2) :
             count2 = count2+1
-        if (reply.startswith(":X1E") and int(reply[4:7],16)==alias2 and int(reply[7:10],16)==dest and reply[11:13]=="0C") :
+        if (reply.startswith(":X19068") and int(reply[7:10],16)==dest and int(reply[11:15],16)==alias2) :
             count2 = count2-100
-        if (reply.startswith(":X1E") and int(reply[4:7],16)==alias3 and int(reply[7:10],16)==dest and reply[11:13]=="53") :
+        if (reply.startswith(":X19A08") and int(reply[7:10],16)==dest and int(reply[11:15],16)==alias3) :
             count3 = count3+1
-        if (reply.startswith(":X1E") and int(reply[4:7],16)==alias3 and int(reply[7:10],16)==dest and reply[11:13]=="0C") :
+        if (reply.startswith(":X19068") and int(reply[7:10],16)==dest and int(reply[11:15],16)==alias3) :
             count3 = count3-100
     if count != count1 and count1 != -100: 
         print "got ",count1," frames for request 1 instead of ",count
