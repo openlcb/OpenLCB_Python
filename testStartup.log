@@ -1,29 +1,12 @@
-   connect to  /dev/cu.usbserial-A900fLVC  at  230400
-   waiting 5 seconds for adapter restart
-Restart node now
-   receive  :X17020573N;
-Start checking node output
-   receive  :X16304573N;
-   receive  :X15050573N;
-   receive  :X14607573N;
-   receive  :X10700573N;
-delay was  0.194455862045
-   receive  :X10701573N020304050607;
-   receive  :X18887573N020304050607;
-   receive  :X182AB573N0203040506070001;
-produces  [2, 3, 4, 5, 6, 7, 0, 1]
-   receive  :X182AB573N0203040506070002;
-produces  [2, 3, 4, 5, 6, 7, 0, 2]
-   receive  :X182AB573N0203040506070003;
-produces  [2, 3, 4, 5, 6, 7, 0, 3]
-   receive  :X182AB573N0203040506070004;
-produces  [2, 3, 4, 5, 6, 7, 0, 4]
-   receive  :X1826B573N0203040506070005;
-consumes  [2, 3, 4, 5, 6, 7, 0, 5]
-   receive  :X1826B573N0203040506070006;
-consumes  [2, 3, 4, 5, 6, 7, 0, 6]
-   receive  :X1826B573N0203040506070007;
-consumes  [2, 3, 4, 5, 6, 7, 0, 7]
-   receive  :X1826B573N0203040506070008;
-consumes  [2, 3, 4, 5, 6, 7, 0, 8]
-   receive  <none>
+option -t not recognized
+
+Called standalone, tests a nodes startup processing.
+Reset the node (or force startup) after the script starts
+
+Default connection detail taken from connection.py
+
+-a --alias source alias
+-d --dest destination (target node) starting alias
+-t find destination alias automatically
+-v verbose
+-V very verbose
