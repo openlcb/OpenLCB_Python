@@ -62,11 +62,23 @@ def receiveOneDatagram(alias, dest, conection, verbose) :
     reply = connection.network.receive()
 
     if reply.startswith(":X1A"):
+      if not int(reply[4:7],16) == alias:
+        print "Improper dest alias in reply", reply
+        return 3
+      if not int(reply[7:10],16) == dest:
+        print "Improper source alias in reply", reply
+        return 3
       retval = retval + canolcbutils.bodyArray(reply)
       connection.network.send(makereply(alias, dest))
       return retval
 
     if reply.startswith(":X1B"):
+      if not int(reply[4:7],16) == alias:
+        print "Improper dest alias in reply", reply
+        return 3
+      if not int(reply[7:10],16) == dest:
+        print "Improper source alias in reply", reply
+        return 3
       retval = retval + canolcbutils.bodyArray(reply)
     else:
       print "Unexpected message instead of first datagram segment", reply
@@ -152,7 +164,6 @@ def checkreply(alias, dest, connection, verbose) :
         print "Unexpected message received instead of reply"
         return 2
     # read reply
-#    retval = datagram.receiveOneDatagram(alias, dest, connection, verbose)
     retval = receiveOneDatagram(alias, dest, connection, verbose)
     if type(retval) is int : 
         # pass error code up
