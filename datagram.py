@@ -52,6 +52,12 @@ def sendOneDatagram(alias, dest, content, connection, verbose) :
     if not isreply(frame) :
         print "Unexpected message received instead of reply"
         return 2
+    if not int(frame[12:15],16) == alias:
+        print "Improper dest alias in reply", frame
+        return 3
+    if not int(frame[7:10],16) == dest:
+        print "Improper source alias in reply", frame
+        return 3
     return 0
 
 def receiveOneDatagram(alias, dest, conection, verbose) :
