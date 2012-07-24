@@ -140,7 +140,7 @@ def test(alias, dest, connection, verbose) :
     id = id+reply[4:7]
     
     # expect CIF (check timing)
-    connection.network.timeout = 0.5
+    connection.network.timeout = 1 
     reply = connection.network.receive()
     end = time.time()
     connection.network.timeout = timeout
@@ -159,6 +159,10 @@ def test(alias, dest, connection, verbose) :
     if end-start < 0.15 :
         # some tolerance on check...
         print "did not wait long enough ", end-start
+        return 22
+    if end-start > .55 :
+        # some tolerance on check...
+        print "waited too long ", end-start
         return 22
 
     # expect AMD

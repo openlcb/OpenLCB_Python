@@ -23,7 +23,7 @@ body is an array of 0 to 8 bytes of data for the frame body.
 '''
 def makeframestring(CRIS, command, body) :
     retval = ":S"
-    retval += "%0.4X" % ((CRIS<<3)+command)
+    retval += "%0.8X" % ((CRIS<<3)+command)
     retval += "N"
     if (body != None) :
         for a in body :

@@ -248,7 +248,7 @@ def test(alias, dest, connection, verbose) :
         print "No datagram segment received"
         return 34
     elif not reply.startswith(":X1A") :
-        print "Unexpected message instead of datagram segment BOO", reply
+        print "Unexpected message instead of datagram segment", reply
         return 33
     # send NAK asking for retransmit retransmit and see if it's right this time
     connection.network.send(canolcbutils.makeframestring(0x19A48000+alias,[(dest>>8)&0xFF, dest&0xFF,0x20,00]))

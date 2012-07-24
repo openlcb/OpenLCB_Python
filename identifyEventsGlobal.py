@@ -69,7 +69,7 @@ def test(alias, connection, verbose) :
     while (True) :
         reply = connection.network.receive()
         if (reply == None ) : break
-        if not (reply.startswith(':X194C4') or reply.startswith(':X19544')):
+        if not (reply.startswith(':X194C7') or reply.startswith(':X194C4') or reply.startswith(':X194C5') or reply.startswith(':X19547') or reply.startswith(':X19544') or reply.startswith(':X19545')):
             print "Wrong reply received", reply
             return 4
         count = count + 1

@@ -7,6 +7,7 @@ Run a series of tests with an attached node
 
 import connection as connection
 import canolcbutils
+import defaults
     
 def usage() :
     print ""
@@ -32,7 +33,7 @@ def main():
     nodeID = connection.testNodeID
     alias = connection.thisNodeAlias
     dest = connection.testNodeAlias
-    event = [1,2,3,4,5,6,7,8]
+    event = defaults.testEventID
     verbose = False
     identifynode = False
     complete = False

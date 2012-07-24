@@ -7,6 +7,7 @@ Send identifyProducers message
 
 import connection as connection
 import canolcbutils
+import defaults
 
 def makeframe(alias, eventID) :
     return canolcbutils.makeframestring(0x19914000+alias,eventID)
@@ -31,7 +32,7 @@ import getopt, sys
 
 def main():
     alias = connection.thisNodeAlias
-    event = [1,2,3,4,5,6,7,8]
+    event = defaults.testEventID
     verbose = False
     
     # argument processing
