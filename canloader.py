@@ -21,21 +21,29 @@ CAN_ERROR = 0x06
 BOOTLOADER_VERSION = 0xA5
 
 def selectNode(CRIS, NNB, connection, verbose) :
+    print "In selectNode"
     frame = makeframestring(CRIS, CAN_SELECT_NODE, [NNB])
     response = False
     resp_frame = ''
     counter = 100
     while (not response) and counter:
+      print "sending CAN_SELECT_NODE"
       connection.network.send(frame)
       resp_frame = connection.network.receive()
       if (resp_frame != None) and isFrameType(resp_frame, CAN_SELECT_NODE, CRIS):
+        print "node selected!"
 	response = True
       else:
 	counter -= 1
     if(counter == 0): return False
     #now examine the response more carefully
     data = bodyArray(resp_frame)
-    if(data[0] >= BOOTLOADER_VERSION) and (data[1] == 1): return True
+    print "data contains ",
+    print data
+    if(data[0] >= BOOTLOADER_VERSION) and (data[1] == 1):
+      print "selectNode success! Done"
+      return True
+    print "selectNode fail!"
     return False
 
 def expect(good, bad, connection, verbose) :
@@ -75,8 +83,10 @@ def selectMemoryPage(page, CRIS, connection, verbose):
     return expect(expected_response, error_response, connection, verbose)
 
 def eraseMemory(CRIS, connection, verbose) :
+    print "eraseMemory"
     frame = makeframestring(CRIS, CAN_PROG_START, [0x80, 0xFF, 0xFF])
     expected_response = makeframestring(CRIS, CAN_PROG_START, [0x00])
+    print expected_response
     error_response = makeframestring(CRIS, CAN_ERROR, [0x00])
     connection.network.send(frame)
     return expect(expected_response, error_response, connection, verbose)
@@ -211,7 +221,7 @@ if __name__ == '__main__':
 #    selectMemoryPage(0, CRIS, connection, verbose)
 
     #now, read the HEX file, and start writing
-    ih = IntelHex('Io_16P_16C_default-RC3.hex')
+    ih = IntelHex('Io_16P_16C_default.hex')
     address = ih.minaddr()
     max = ih.maxaddr()
     if(max > 0xFFFF): #have to do this in two pages
@@ -226,4 +236,10 @@ if __name__ == '__main__':
     #finally, set bootloader flag, and start application
     selectMemorySpace(EEPROM_SPACE, CRIS, connection, verbose)
     writeMemory([0x00, 0x00], 0x00, 0x0FF8, 0x0FF9, CRIS, connection, verbose)
+    frame = makeframestring(CRIS, CAN_DISPLAY_DATA, [0x00, 0x0F, 0xF7, 0x0F, 0xFF])
+    connection.network.send(frame)
+    resp_frame = connection.network.receive()
+    resp_frame = connection.network.receive()
+
+
     startApplication(CRIS, connection, verbose)

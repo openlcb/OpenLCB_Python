@@ -18,7 +18,7 @@ elif windows and not local :
 elif serial and not local :
     import serialolcblink
     network = serialolcblink.SerialOlcbLink()
-    network.port = "/dev/tty.usbserial-A6007MhL"
+    network.port = "/dev/tty.usbserial-AE015IZK"
     network.speed = 230400
     network.startdelay = 4
 elif local :
@@ -31,3 +31,5 @@ thisNodeAlias = 0xAAA
 testNodeID = [2,3,4,5,6,1]
 testNodeAlias = 0xDDD
 
+
+testEventID = [0x05, 0x02, 0x01, 0x02, 0x02, 0x00, 0x00, 0x00]
