@@ -95,12 +95,13 @@ def usage() :
     print "Test of the specific case of overlapping datagrams,"
     print "created as part of the study of the missing start bit."
     print ""
-    print "Default connection detail taken from connection.py"
+    print "Sends enough datagrams to force a buffer-full reject message,"
+    print "then checks processing of that."
     print ""
     print "-a --alias source alias (default 0x"+hex(connection.thisNodeAlias).upper()+")"
+    print "-b number of buffers to test (sends b+1 requests) default 1, -1 if node has variable number"
     print "-d --dest dest alias (default 0x"+hex(connection.testNodeAlias).upper()+")"
     print "-t find destination alias automatically"
-    print "-n number of buffers to test (sends n+1 requests) default 1"
     print "-v verbose"
     print "-V Very verbose"
 
@@ -115,7 +116,7 @@ def main():
     verbose = False
     
     try:
-        opts, remainder = getopt.getopt(sys.argv[1:], "d:a:n:vVt", ["dest=", "alias=", "content="])
+        opts, remainder = getopt.getopt(sys.argv[1:], "d:a:b:vVt", ["dest=", "alias=", "content="])
     except getopt.GetoptError, err:
         # print help information and exit:
         print str(err) # will print something like "option -a not recognized"
@@ -129,7 +130,7 @@ def main():
             verbose = True
         elif opt in ("-a", "--alias"):  # needs hex processing
             alias = int(arg)
-        elif opt in ("-n"):
+        elif opt in ("-b"):
             num = int(arg)
         elif opt in ("-d", "--dest"):  # needs hex processing
             dest = int(arg)
@@ -180,12 +181,17 @@ def checkrejection(alias, dest, connection, verbose) :
 
 def test(alias, dest, num, connection, verbose) :    
 
+    # num < 0 encodes "variable number of buffers, skip"
+    if num < 0 : 
+        if verbose : print "  skipping datagram parsing test"
+        return
+
     # going to send a [0x20,0x41,0,0,0,0,8] read datagram in three parts:
     #     [0x20]   [0x41,0,0]   [0,0,8]
 
-    if verbose : print "testing datagram parsing with ",num," buffer(s)"
-
-    if connection.network.verbose : print "send initial frame from first source, plus",num,"more that should be ignored"
+    if verbose : print "  testing datagram parsing with ",num," buffer(s)"
+    
+    if connection.network.verbose : print "  send initial frame from first source, plus",num,"more that should be ignored"
     tempalias = alias
     for n in range(0,num+1) :
         connection.network.send(makefirstframe(tempalias, dest, [0x20]))
@@ -200,7 +206,7 @@ def test(alias, dest, num, connection, verbose) :
         return 81
     
     
-    if connection.network.verbose : print "finish 1st datagram frames & check reply"
+    if connection.network.verbose : print "  finish 1st datagram frames & check reply"
     connection.network.send(makemiddleframe(alias, dest, [0x41,0,0]))
     connection.network.send(makefinalframe(alias, dest, [0,0,8]))
     # check response
@@ -208,7 +214,7 @@ def test(alias, dest, num, connection, verbose) :
     if type(retval) is int and retval != 0 :
         return retval+20
 
-    if connection.network.verbose : print "send intermediate frame of remaining",num,"datagram(s), expect no answers"
+    if connection.network.verbose : print "  send intermediate frame of remaining",num,"datagram(s), expect no answers"
     tempalias = alias
     for n in range(1,num+1) :
         tempalias = (tempalias + 1 ) & 0xFFF
@@ -221,7 +227,7 @@ def test(alias, dest, num, connection, verbose) :
         print "unexpected reply to middle segments", frame
         return 82
     
-    if connection.network.verbose : print "send final of other datagrams"
+    if connection.network.verbose : print "  send final of other datagrams"
     tempalias = alias
     for n in range(1,num+1) :
         tempalias = (tempalias + 1 ) & 0xFFF

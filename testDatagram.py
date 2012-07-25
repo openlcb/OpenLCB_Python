@@ -30,6 +30,9 @@ def isreply(frame) :
 def isNAK(frame) :
     return frame.startswith(":X19A48")
 
+def isAck(frame) :
+    return frame.startswith(":X19A28")
+
 def sendOneDatagram(alias, dest, content, connection, verbose) :
     if(len(content) <= 8):
         frame = makeonlyframe(alias, dest, content)
@@ -108,6 +111,7 @@ def usage() :
     print "Default connection detail taken from connection.py"
     print ""
     print "-a --alias source alias (default 0x"+hex(connection.thisNodeAlias).upper()+")"
+    print "-b number of buffers to test (sends b+1 requests) default 1, -1 if node has variable number"
     print "-d --dest dest alias (default 0x"+hex(connection.testNodeAlias).upper()+")"
     print "-t find destination alias automatically"
     print "-v verbose"
@@ -123,7 +127,7 @@ def main():
     verbose = False
     
     try:
-        opts, remainder = getopt.getopt(sys.argv[1:], "d:a:vVt", ["dest=", "alias=", "content="])
+        opts, remainder = getopt.getopt(sys.argv[1:], "d:a:b:vVt", ["dest=", "alias=", "content="])
     except getopt.GetoptError, err:
         # print help information and exit:
         print str(err) # will print something like "option -a not recognized"
@@ -137,6 +141,8 @@ def main():
             verbose = True
         elif opt in ("-a", "--alias"):  # needs hex processing
             alias = int(arg)
+        elif opt in ("-b"):
+            num = int(arg)
         elif opt in ("-d", "--dest"):  # needs hex processing
             dest = int(arg)
         elif opt == "-t":
@@ -148,7 +154,7 @@ def main():
         import getUnderTestAlias
         dest, nodeID = getUnderTestAlias.get(alias, None, verbose)
 
-    retval = test(alias, dest, connection, verbose)
+    retval = test(alias, dest, connection, num, verbose)
     connection.network.close()
     exit(retval)
     
@@ -183,7 +189,7 @@ def checkrejection(alias, dest, connection, verbose) :
         return 2
     return 0
    
-def test(alias, dest, connection, verbose) :    
+def test(alias, dest, connection, num, verbose) :    
     # send a short read-request datagram in two segments
     if verbose : print "  test two segments"
     connection.network.send(makefirstframe(alias, dest, [0x20,0x41,0,0,0]))
@@ -222,9 +228,18 @@ def test(alias, dest, connection, verbose) :
     connection.network.send(makeonlyframe(newalias, dest, [0x20,0x41,0,0,0,0,8]))
     # check for reject of this one
     frame = connection.network.receive()
-    if frame == None or not isNAK(frame) :
-        print "interposed datagram was not rejected due to buffer full:", frame
+    if frame == None :
+        print "no reply to interposed datagram"
         return 81
+    elif num == 1 and isAck(frame) :
+        print "interposed datagram was not rejected due to buffer full:", frame
+        return 82
+    elif num > 1 and isNAK(frame) :
+        print "Unexpected reject of interposed datagram:", frame
+        return 83
+    elif not (isNAK(frame) or isAck(frame)) : 
+        print "Unexpected response to interposed datagram:", frame
+        return 84
     # send final part of original datagram
     connection.network.send(makefinalframe(alias, dest, [0,8]))
     # check response
