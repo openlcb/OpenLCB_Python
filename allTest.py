@@ -18,11 +18,12 @@ def usage() :
     print ""
     print "-a --alias source alias (default 123)"
     print "-d --dest dest alias (default 123)"
-    print "-t find destination alias automatically"
-    print "-n --node dest nodeID (default 01.02.03.04.05.06)"
-    print "-e --event eventID as 1.2.3.4.5.6.7.8 form"
+    print "-b number of datagram buffers to test (sends b+1 requests) default 1"
     print "-c continue after error; (attempts to) run to completion even if error encountered"
+    print "-e --event eventID as 1.2.3.4.5.6.7.8 form"
+    print "-n --node dest nodeID (-t option sets automatically, format is 01.02.03.04.05.06)"
     print "-r run until error; repeats until failure"
+    print "-t find destination alias automatically"
     print "-v verbose"
     print "-V Very verbose"
 
@@ -38,9 +39,10 @@ def main():
     identifynode = False
     complete = False
     repeat = False
+    bufnum = 1
     
     try:
-        opts, remainder = getopt.getopt(sys.argv[1:], "e:n:a:d:vVtcr", ["event=", "alias=", "node=", "dest="])
+        opts, remainder = getopt.getopt(sys.argv[1:], "e:n:b:a:d:vVtcr", ["event=", "alias=", "node=", "dest="])
     except getopt.GetoptError, err:
         # print help information and exit:
         print str(err) # will print something like "option -a not recognized"
@@ -52,32 +54,34 @@ def main():
         elif opt == "-V":
             connection.network.verbose = True
             verbose = True
-        elif opt == "-c":
-            complete = True
-        elif opt == "-r":
-            repeat = True
         elif opt in ("-a", "--alias"):
             alias = int(arg)
+        elif opt in ("-b"):
+            bufnum = int(arg)
+        elif opt == "-c":
+            complete = True
         elif opt in ("-d", "--dest"):
             dest = int(arg) # needs hex decode
-        elif opt == "-t":
-            identifynode = True
-        elif opt in ("-n", "--node"):
-            nodeID = canolcbutils.splitSequence(arg)
         elif opt in ("-e", "--event"):
             event = canolcbutils.splitSequence(arg)
+        elif opt in ("-n", "--node"):
+            nodeID = canolcbutils.splitSequence(arg)
+        elif opt == "-r":
+            repeat = True
+        elif opt == "-t":
+            identifynode = True
         else:
             assert False, "unhandled option"
 
     # now execute
-    retval = test(alias, dest, nodeID, event, connection, verbose, complete, repeat, identifynode)
+    retval = test(alias, dest, nodeID, event, connection, verbose, complete, repeat, identifynode, bufnum)
     done(retval)    
 
 def done(retval) :
     connection.network.close()
     exit(retval)
     
-def test(alias, dest, nodeID, event, connection, verbose, complete, repeat, identifynode):
+def test(alias, dest, nodeID, event, connection, verbose, complete, repeat, identifynode, bufnum):
 
     result = 0;
     
@@ -183,7 +187,7 @@ def test(alias, dest, nodeID, event, connection, verbose, complete, repeat, iden
     
         import testDatagram
         if verbose : print "testDatagram"
-        retval = testDatagram.test(alias, dest, connection, verbose)
+        retval = testDatagram.test(alias, dest, connection, bufnum, verbose)
         if retval != 0 :
             print "Error in testDatagram", retval
             if not complete : done(retval)
@@ -191,7 +195,7 @@ def test(alias, dest, nodeID, event, connection, verbose, complete, repeat, iden
         
         import testOverlappingDatagrams
         if verbose : print "testOverlappingDatagrams"
-        retval = testOverlappingDatagrams.test(alias, dest, 1, connection, verbose)
+        retval = testOverlappingDatagrams.test(alias, dest, bufnum, connection, verbose)
         if retval != 0 :
             print "Error in testOverlappingDatagrams", retval
             if not complete : done(retval)
