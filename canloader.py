@@ -171,11 +171,12 @@ if __name__ == '__main__':
     import getopt, sys
     # argument processing
     dest = connection.testNodeAlias
+    hexfile = 'Io_16P_16C_default.hex'
    
     verbose = False
     identifynode = False 
     try:
-        opts, remainder = getopt.getopt(sys.argv[1:], "d:vVt", ["dest=", "alias=", "content="])
+        opts, remainder = getopt.getopt(sys.argv[1:], "f:d:vVt", ["dest=", "alias=", "content="])
     except getopt.GetoptError, err:
         # print help information and exit:
         print str(err) # will print something like "option -a not recognized"
@@ -191,6 +192,8 @@ if __name__ == '__main__':
             dest = int(arg)
         elif opt == "-t":
             identifynode = True
+        elif opt == "-f":
+	    hexfile = arg
         else:
             assert False, "unhandled option"
 
@@ -221,7 +224,7 @@ if __name__ == '__main__':
 #    selectMemoryPage(0, CRIS, connection, verbose)
 
     #now, read the HEX file, and start writing
-    ih = IntelHex('Io_16P_16C_default.hex')
+    ih = IntelHex(hexfile)
     address = ih.minaddr()
     max = ih.maxaddr()
     if(max > 0xFFFF): #have to do this in two pages
