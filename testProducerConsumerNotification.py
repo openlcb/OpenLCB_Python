@@ -109,13 +109,13 @@ def test(alias, dest, connection, verbose) :
         while True :
             reply = connection.network.receive()
             if (reply == None ) : break
-            elif ( not reply.startswith(":X1826B") ) :
+            elif ( not reply.startswith(":X194C7") ) :
                 print "Unexpected reply "+reply
                 return 22
     for p in produced :
         connection.network.send(identifyProducers.makeframe(alias, p))
         reply = connection.network.receive()
-        if (reply == None ) : 
+        if (reply == None ) :
             print "no reply for producer ", p
             return 30
         elif not ( reply.startswith(":X19547") or reply.startswith(":X19544") or reply.startswith(":X19545") ):
@@ -125,7 +125,7 @@ def test(alias, dest, connection, verbose) :
         while True :
             reply = connection.network.receive()
             if (reply == None ) : break
-            elif ( not reply.startswith(":X182AB") ) :
+            elif ( not reply.startswith(":X19547") ) :
                 print "Unexpected reply "+reply
                 return 32
     connection.network.timeout = timeout
