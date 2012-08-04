@@ -125,6 +125,7 @@ def main():
     dest = connection.testNodeAlias
     identifynode = False
     verbose = False
+    num = 1
     
     try:
         opts, remainder = getopt.getopt(sys.argv[1:], "d:a:b:vVt", ["dest=", "alias=", "content="])
