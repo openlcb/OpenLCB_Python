@@ -65,24 +65,63 @@ def main():
     exit(retval)
     
 def test(alias, dest, connection, verbose) :
-    if verbose : print "  check OK"
     connection.network.send(makeframe(alias, dest))
     reply = connection.network.receive()
     if (reply == None ) : 
-        print "Expected reply not received"
+        print "Expected reply to good request not received"
+        return 2
+    if not (reply.startswith(":X19668") and int(reply[11:15],16)==alias and int(reply[7:10],16)==dest) :
+        print "Unexpected reply received ", reply
+        return 1
+    if verbose : 
+        print "  Node supports:"
+        value = canolcbutils.bodyArray(reply)
+        if (value[2] & 0x80) != 0 : print "      Protocol Identification"
+        if (value[2] & 0x40) != 0 : print "      Datagram Protocol"
+        if (value[2] & 0x20) != 0 : print "      Stream Protocol"
+        if (value[2] & 0x10) != 0 : print "      Memory Configuration Protocol"
+        if (value[2] & 0x08) != 0 : print "      Reservation Protocol"
+        if (value[2] & 0x04) != 0 : print "      Event Exchange (P/C) Protocol"
+        if (value[2] & 0x02) != 0 : print "      Identification Protocol"
+        if (value[2] & 0x01) != 0 : print "      Teaching/Learning Protocol"
+        if (value[3] & 0x80) != 0 : print "      Remote Button Protocol"
+        if (value[3] & 0x40) != 0 : print "      Abbreviated Default CDI Protocol"
+        if (value[3] & 0x20) != 0 : print "      Display Protocol"
+        if (value[3] & 0x10) != 0 : print "      Simple Node Information Protocol"
+        if (value[3] & 0x08) != 0 : print "      Configuration Description Information"
+
+    if verbose : print "  not addressed, expect no reply"
+    connection.network.send(makeframe(alias, (~dest)&0xFFF))
+    reply = connection.network.receive()
+    if (reply != None ) : 
+        print "Unexpected reply received to request to different node ", reply
+        return 1
+
+    # test expansion by sending a start-only, then an end-only frame
+        
+    body = [((dest>>8)&0xFF)|0x10, dest&0xFF,0,0, 0,0,0,0]
+    frame = canolcbutils.makeframestring(0x19828000+alias,body)
+    connection.network.send(frame)
+
+    reply = connection.network.receive()
+
+    body = [((dest>>8)&0xFF)|0x20, dest&0xFF,0,0, 0,0,0,0]
+    frame = canolcbutils.makeframestring(0x19828000+alias,body)
+    connection.network.send(frame)
+
+    if (reply == None ) : # if no reply to 1st frame, see if reply to 2nd frame; either OK
+        reply = connection.network.receive()
+
+    if (reply == None ) : 
+        print "Expected reply to double frame not received"
         return 2
     if not (reply.startswith(":X19668") and int(reply[11:15],16)==alias and int(reply[7:10],16)==dest) :
         print "Unexpected reply received ", reply
         return 1
 
-    if verbose : print "  not addressed, no reply"
-    connection.network.send(makeframe(alias, (~dest)&0xFFF))
     reply = connection.network.receive()
-    if (reply == None ) : 
-        return 0
-    else :
-        print "Unexpected reply received ", reply
-        return 1
+    if (reply != None ) : 
+        print "  Suggestion: PIP should handle start-end bits in requests for future expansion"
 
     return 0
 
