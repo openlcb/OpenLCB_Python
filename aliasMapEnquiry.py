@@ -70,10 +70,21 @@ def main():
     exit(retval)
     
 def test(alias, nodeID, connection, verbose) :
+    # check with node id in frame
     connection.network.send(makeframe(alias, nodeID))
     reply = connection.network.receive()
     if (reply == None ) : 
         print "Expected reply when node ID matches not received"
+        return 2
+    elif not reply.startswith(":X10701") :
+        print "Unexpected reply received ", reply
+        return 1
+
+    # check without node id in frame 
+    connection.network.send(canolcbutils.makeframestring(0x10702000+alias,None))
+    reply = connection.network.receive()
+    if (reply == None ) : 
+        print "Expected reply when no node ID in body not received"
         return 2
     elif not reply.startswith(":X10701") :
         print "Unexpected reply received ", reply
