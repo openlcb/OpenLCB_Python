@@ -36,7 +36,6 @@ def usage() :
     print ""
     print "-a --alias source alias"
     print "-d --dest destination (target node) starting alias"
-    print "-t find destination alias automatically"
     print "-v verbose"
     print "-V very verbose"
 
