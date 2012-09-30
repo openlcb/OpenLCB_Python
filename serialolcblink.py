@@ -17,6 +17,7 @@ class SerialOlcbLink :
         self.speed = 115200
         self.timeout = 0.1     # try to keep operations fast
         self.verbose = False
+        self.parallel = False
         self.startdelay = 0    # set to 12 if your hardware resets on connection
         self.ser = None
         return
@@ -36,7 +37,7 @@ class SerialOlcbLink :
         self.ser.setRTS(True)
         
         # from http://bytes.com/topic/python/answers/170478-uart-parity-setting-mark-space-using-pyserial
-        if self.speed == 230400 :
+        if self.speed == 230400 and not self.parallel :
             self.ser.parity = serial.PARITY_EVEN
             self.ser.stopbits = serial.STOPBITS_TWO
             import termios
