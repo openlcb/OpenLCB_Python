@@ -91,7 +91,7 @@ class SerialOlcbLink :
             if (self.verbose) : print "<none>" # blank line to show delay?
             return None
         # if verbose, display what's received 
-        if (self.verbose) : print r,
+        if (self.verbose) : print r.replace("\x0A", "").replace("\x0D", "")
         return r       
 
     def close(self) :
