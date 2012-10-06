@@ -1,12 +1,43 @@
-option -t not recognized
-
-Called standalone, tests a nodes startup processing.
-Reset the node (or force startup) after the script starts
-
-Default connection detail taken from connection.py
-
--a --alias source alias
--d --dest destination (target node) starting alias
--t find destination alias automatically
--v verbose
--V very verbose
+   connect to  /dev/cu.usbserial-A500XBTQ  at  125000
+   waiting 5 seconds for adapter restart
+Restart node now
+   receive  :X17050051N;
+Start checking node output
+   receive  :X16201051N;
+   receive  :X15020051N;
+   receive  :X14220051N;
+   receive  :X10700051N;
+delay was  0.235636949539
+   receive  :X10701051N050201020220;
+   receive  :X19100051N050201020220;
+   receive  :X194C4051N0502010202200001;
+consumes  [5, 2, 1, 2, 2, 32, 0, 1]
+   receive  :X194C4051N0502010202200002;
+consumes  [5, 2, 1, 2, 2, 32, 0, 2]
+   receive  :X194C4051N0502010202200005;
+consumes  [5, 2, 1, 2, 2, 32, 0, 5]
+   receive  :X194C4051N0502010202200008;
+consumes  [5, 2, 1, 2, 2, 32, 0, 8]
+   receive  :X194C4051N050201020220000B;
+consumes  [5, 2, 1, 2, 2, 32, 0, 11]
+   receive  :X194C4051N050201020220000E;
+consumes  [5, 2, 1, 2, 2, 32, 0, 14]
+   receive  :X19544051N0502010202200011;
+produces  [5, 2, 1, 2, 2, 32, 0, 17]
+   receive  :X19544051N0502010202200014;
+produces  [5, 2, 1, 2, 2, 32, 0, 20]
+   receive  :X19544051N0502010202200017;
+produces  [5, 2, 1, 2, 2, 32, 0, 23]
+   receive  :X19544051N050201020220001A;
+produces  [5, 2, 1, 2, 2, 32, 0, 26]
+   receive  :X19544051N050201020220001C;
+produces  [5, 2, 1, 2, 2, 32, 0, 28]
+   receive  :X19544051N050201020220001F;
+produces  [5, 2, 1, 2, 2, 32, 0, 31]
+   receive  :X194C4051N0502010202200003;
+consumes  [5, 2, 1, 2, 2, 32, 0, 3]
+   receive  :X194C4051N0502010202200004;
+consumes  [5, 2, 1, 2, 2, 32, 0, 4]
+   receive  :X194C4051N0502010202200006;
+consumes  [5, 2, 1, 2, 2, 32, 0, 6]
+   receive  <none>
