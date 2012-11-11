@@ -64,6 +64,8 @@ def receiveOneDatagram(alias, dest, conection, verbose) :
     retval = []
     reply = connection.network.receive()
 
+    if reply == None :
+        return None
     if reply.startswith(":X1A"):
       retval = retval + canolcbutils.bodyArray(reply)
       connection.network.send(makereply(alias, dest))
@@ -160,6 +162,8 @@ def checkreply(alias, dest, connection, verbose) :
         return 2
     # read reply
     retval = receiveOneDatagram(alias, dest, connection, verbose)
+    if retval == None :
+        return 13
     if type(retval) is int : 
         # pass error code up
         return retval
@@ -199,11 +203,15 @@ def test(alias, dest, num, connection, verbose) :
         if tempalias == dest : 
             tempalias = (tempalias + 1 ) & 0xFFF
         
-    # do not expect reply at this point
+    # reply at this point should only be error to 2nd_or_later message, check for that
     frame = connection.network.receive()
+    gotNAK = False  # Assumes we only send one past the number of buffers
     if frame != None :
-        print "unexpected reply to initial segments", frame
-        return 81
+        if  not (isNAK(frame) and (frame[15:17] == "20" or frame[15:17] == "60") ) :
+              print "expected NAK-buffer-unavailable reply to final frame of final datagram but received", frame
+              return 81
+        # OK NAK, remember
+        gotNAK = True
     
     
     if connection.network.verbose : print "  finish 1st datagram frames & check reply"
@@ -236,6 +244,7 @@ def test(alias, dest, num, connection, verbose) :
         connection.network.send(makefinalframe(tempalias, dest, [0,0,8]))
         if n == num :
             # last should be rejected, no buffer
+            if gotNAK : continue
             frame = connection.network.receive()
             if frame == None :
                 print "missing reply to final segment"
