@@ -24,8 +24,11 @@ def makereply(alias, dest) :
     body = [(dest>>8)&0xFF, dest&0xFF]
     return canolcbutils.makeframestring(0x19A28000+alias,body)
 
-def isreply(frame) :
-    return frame.startswith(":X19A28") or frame.startswith(":X19A48")
+def isNakReply(frame) :
+    return frame.startswith(":X19A48")
+
+def isOkReply(frame) :
+    return frame.startswith(":X19A28")
 
 def sendOneDatagram(alias, dest, content, connection, verbose) :
     if len(content) > 8 :
@@ -49,8 +52,8 @@ def sendOneDatagram(alias, dest, content, connection, verbose) :
     if frame == None : 
         print "Did not receive reply"
         return 1
-    if not isreply(frame) :
-        print "Unexpected message received instead of reply"
+    if not isOkReply(frame) :
+        print "Unexpected message received instead of Datagram Received OK"
         return 2
     if not int(frame[12:15],16) == alias:
         print "Improper dest alias in reply", frame
@@ -107,7 +110,7 @@ def receiveDatagramReplyAndOneDatagram(alias, dest, conection, verbose) :
         if (reply == None ) : 
             print "Missing response"
             return 4
-        elif isreply(reply) : 
+        elif isOkReply(reply) : 
             haveReply = True
             if haveDatagram : 
                 return retval
