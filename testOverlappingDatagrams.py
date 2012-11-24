@@ -28,37 +28,37 @@ def makereply(alias, dest) :
     body = [(dest>>8)&0xFF, dest&0xFF]
     return canolcbutils.makeframestring(0x19A28000+alias,body)
 
-def isreply(frame) :
-    return frame.startswith(":X19A28") or frame.startswith(":X19A48")
+def isACK(frame) :
+    return frame.startswith(":X19A28")
 
 def isNAK(frame) :
     return frame.startswith(":X19A48")
 
-    if(len(content) <= 8):
-        frame = makeonlyframe(alias, dest, content)
-        connection.network.send(frame)
-        return
-
-    frame = makefirstframe(alias, dest, content[0:8])
-    connection.network.send(frame)
-    content = content[8:]
-
-    while len(content) > 8 :
-        frame = makemiddleframe(alias, dest, content[0:8])
-        connection.network.send(frame)
-        content = content[8:]
-
-    frame = makefinalframe(alias, dest, content)
-    connection.network.send(frame)
-
-    frame = connection.network.receive()
-    if frame == None :
-        print "Did not receive reply"
-        return 1
-    if not isreply(frame) :
-        print "Unexpected message received instead of reply"
-        return 2
-    return 0
+#     if(len(content) <= 8):
+#         frame = makeonlyframe(alias, dest, content)
+#         connection.network.send(frame)
+#         return
+# 
+#     frame = makefirstframe(alias, dest, content[0:8])
+#     connection.network.send(frame)
+#     content = content[8:]
+# 
+#     while len(content) > 8 :
+#         frame = makemiddleframe(alias, dest, content[0:8])
+#         connection.network.send(frame)
+#         content = content[8:]
+# 
+#     frame = makefinalframe(alias, dest, content)
+#     connection.network.send(frame)
+# 
+#     frame = connection.network.receive()
+#     if frame == None :
+#         print "Did not receive reply"
+#         return 1
+#     if not isreply(frame) :
+#         print "Unexpected message received instead of reply"
+#         return 2
+#     return 0
 
 def receiveOneDatagram(alias, dest, conection, verbose) :
     retval = []
@@ -157,7 +157,7 @@ def checkreply(alias, dest, connection, verbose) :
     if frame == None : 
         print "Did not receive reply"
         return 1
-    if not isreply(frame) :
+    if not isACK(frame) :
         print "Unexpected message received instead of reply"
         return 2
     # read reply

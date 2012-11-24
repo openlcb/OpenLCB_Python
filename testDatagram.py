@@ -24,9 +24,6 @@ def makereply(alias, dest) :
     body = [(dest>>8)&0xFF, dest&0xFF]
     return canolcbutils.makeframestring(0x19A28000+alias,body)
 
-def isreply(frame) :
-    return frame.startswith(":X19A28") or frame.startswith(":X19A48")
-
 def isNAK(frame) :
     return frame.startswith(":X19A48")
 
@@ -55,7 +52,7 @@ def sendOneDatagram(alias, dest, content, connection, verbose) :
     if frame == None : 
         print "Did not receive reply"
         return 1
-    if not isreply(frame) :
+    if not isAck(frame) :
         print "Unexpected message received instead of reply"
         return 2
     return 0
@@ -167,7 +164,7 @@ def checkreply(alias, dest, connection, verbose) :
     if frame == None : 
         print "Did not receive reply"
         return 1
-    if not isreply(frame) :
+    if not isAck(frame) :
         print "Unexpected message received instead of reply"
         return 2
     # read reply
@@ -255,7 +252,7 @@ def test(alias, dest, connection, num, verbose) :
     if frame == None : 
         print "Did not receive reply"
         return 31
-    if not isreply(frame) :
+    if not isAck(frame) :
         print "Unexpected message received instead of reply"
         return 32
     # read reply, should be a resend of same
