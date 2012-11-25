@@ -81,7 +81,7 @@ def test(alias, dest, connection, address, count, space, verbose) :
         cmd = 0x42
     if space == 0xFD :
         cmd = 0x41
-    retval = datagram.sendOneDatagram(alias, dest, [0x20,cmd,0,0,0,address,count], connection, verbose)
+    retval = datagram.sendOneDatagram(alias, dest, [0x20,cmd,(address/256/256/256)&0xFF,(address/256/256)&0xFF,(address/256)&0xFF,address&0xFF,count], connection, verbose)
     if retval != 0 :
         return retval
     # read data response
@@ -89,7 +89,7 @@ def test(alias, dest, connection, address, count, space, verbose) :
     if (type(retval) is int) : 
         # pass error code up
         return retval
-    if retval[0:6] != [0x20,cmd|0x10,0x00,0x00,0x00,address] :
+    if retval[0:6] != [0x20,cmd|0x10,(address/256/256/256)&0xFF,(address/256/256)&0xFF,(address/256)&0xFF,address&0xFF] :
         print "Unexpected message instead of read reply datagram ", retval
         return 3
     if verbose : print "read value", retval[6:]
