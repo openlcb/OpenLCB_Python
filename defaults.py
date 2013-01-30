@@ -18,12 +18,19 @@ elif windows and not local :
 elif serial and not local :
     import serialolcblink
     network = serialolcblink.SerialOlcbLink()
-    network.port = "/dev/tty.usbserial-AE015IZK"
-    network.speed = 230400
-    network.startdelay = 4
+    #network.port = "/dev/cu.usbserial-A900fLVC"
+    #network.port = "/dev/cu.usbmodemff1331"
+    #network.port = "/dev/cu.usbserial-AE015IZE" # Ioduino
+    network.port = "/dev/cu.usbserial-A500XBTQ" # TCH parallel
+    network.speed = 125000
+    network.parallel = True
+    network.startdelay = 5
 elif local :
     import pipeolcblink
     network = pipeolcblink.PipeOlcbLink()
+    network.name = "pyOlcbBasicNode"
+else :
+    print "Please set one of the options to True"
 
 
 thisNodeID = [1,2,3,4,5,6]
