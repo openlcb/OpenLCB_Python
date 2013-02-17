@@ -36,7 +36,6 @@ Pull body bytes from frame as array
 '''
 def bodyArray(frame) :
     string = frame[11:];
-    string = string[:-1]
     result = []
     while (string[0] != ';') :
         result = result+[int(string[:2],16)]
