@@ -169,14 +169,6 @@ def test(alias, dest, nodeID, event, connection, verbose, complete, repeat, iden
             if not complete : done(retval)
             result |= retval
     
-        import datagram
-        if verbose : print "datagram"
-        retval = datagram.test(alias, dest, [1,2,3,4], connection, verbose)
-        if retval != 0 :
-            print "Error in datagram"
-            if not complete : done(retval)
-            result |= retval
-        
         import testConfigurationProtocol
         if verbose : print "testConfigurationProtocol"
         retval = testConfigurationProtocol.test(alias, dest, connection, verbose)
