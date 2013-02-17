@@ -73,7 +73,7 @@ def main():
     exit(retval)
     
 def test(alias, dest, connection, verbose) :
-    for mti in range(0,4095) :
+    for mti in range(0,4096) :
         if mti in knownMti : continue
         if (mti&0x08) == 0 : continue
         frame = makeframe(alias, dest, mti)

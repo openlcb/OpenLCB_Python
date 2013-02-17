@@ -51,7 +51,7 @@ def main():
     exit(retval)
     
 def test(connection, verbose) :
-    for header in range(0,2047) :
+    for header in range(0,2048) :
         connection.network.send(makeframe(header))
         
     # see if any replies
