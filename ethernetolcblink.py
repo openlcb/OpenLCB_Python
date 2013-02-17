@@ -21,6 +21,7 @@ class EthernetToOlcbLink :
         self.timeout = 1.0
         self.verbose = False
         self.socket = None
+        self.rcvData = ""
         return
     
     def connect(self) :
@@ -50,17 +51,16 @@ class EthernetToOlcbLink :
         if (self.verbose) : print "   receive ",
             
         self.socket.settimeout(self.timeout)
-        line = "";
-        try:
-            r = self.socket.recv(1024)
-            # assuming we get frame in a single message
-            while r:
-                # if verbose, display what's received 
-                if (self.verbose) : print r,
-                return r
-        except socket.timeout, err:
-            if (self.verbose) : print "<none>" # blank line to show delay?
-            return None
+        while (self.rcvData.find('\n') < 0) :
+            try:
+                self.rcvData = self.rcvData+self.socket.recv(1024)
+            except socket.timeout, err:
+                if (self.verbose) : print "<none>" # blank line to show delay?
+                return None
+        r = self.rcvData[0:self.rcvData.find('\n')]
+        self.rcvData = self.rcvData[self.rcvData.find('\n')+1:]
+        if (self.verbose) : print r
+        return r
 
     def close(self) :
         return
