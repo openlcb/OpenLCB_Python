@@ -54,7 +54,8 @@ def main():
         elif opt in ("-e", "--event"):
             event = canolcbutils.splitSequence(arg)
         else:
-            assert False, "unhandled option"
+            usage()
+            return
     
     retval = test(alias,event,connection,verbose)
     connection.network.close()
