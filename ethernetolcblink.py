@@ -38,9 +38,6 @@ class EthernetToOlcbLink :
         if self.startdelay > 0 :
             if self.verbose : print "   waiting", self.startdelay, "seconds for adapter restart"
             time.sleep(self.startdelay)
-            # dump all messages
-            while self.ser.inWaiting() > 0 :
-                self.ser.readline()
 
         return
         
