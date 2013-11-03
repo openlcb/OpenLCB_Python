@@ -20,6 +20,7 @@ class EthernetToOlcbLink :
         self.port = 23
         self.timeout = 1.0
         self.verbose = False
+        self.startdelay = 0
         self.socket = None
         self.rcvData = ""
         return
@@ -31,6 +32,15 @@ class EthernetToOlcbLink :
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.socket.connect((self.host, self.port))
         
+        # wait for link startup
+        # after (possible) reset due to serial startup
+        if self.startdelay > 0 :
+            if self.verbose : print "   waiting", self.startdelay, "seconds for adapter restart"
+            time.sleep(self.startdelay)
+            # dump all messages
+            while self.ser.inWaiting() > 0 :
+                self.ser.readline()
+
         return
         
     def send(self, frame) :
