@@ -8,6 +8,7 @@ argparse is new in Jython 2.7, so dont use here
 @author: Bob Jacobsen
 '''
 import socket
+import time
 
 class EthernetToOlcbLink :
     def __init__(self) :
