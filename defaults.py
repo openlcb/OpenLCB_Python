@@ -1,5 +1,5 @@
-serial   = True
-ethernet = False
+serial   = False
+ethernet = True
 windows  = False
 local    = False
 
@@ -7,8 +7,9 @@ local    = False
 if ethernet and not local:
     import ethernetolcblink
     network = ethernetolcblink.EthernetToOlcbLink()
-    network.host = "10.00.01.98"
-    network.port = 23
+    network.host = "0.0.0.0"
+    network.port = 12022
+    network.startdelay = 3
 elif windows and not local :
     import serialolcblink
     network = serialolcblink.SerialOlcbLink()
@@ -21,10 +22,10 @@ elif serial and not local :
     #network.port = "/dev/cu.usbserial-A900fLVC"
     #network.port = "/dev/cu.usbmodemff1331"
     #network.port = "/dev/cu.usbserial-AE015IZE" # Ioduino
-    network.port = "/dev/cu.usbserial-A500XBTQ" # TCH parallel
-    network.speed = 125000
+    network.port = "/dev/cu.usbserial-A5VRG6OF" # TCH parallel
+    network.speed = 230400
     network.parallel = True
-    network.startdelay = 5
+    network.startdelay = 2
 elif local :
     import pipeolcblink
     network = pipeolcblink.PipeOlcbLink()
