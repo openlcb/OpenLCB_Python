@@ -1,15 +1,23 @@
 serial   = False
+tcp      = True
 ethernet = False
 windows  = False
-local    = True
+local    = False
 
 
-if ethernet and not local:
+if tcp and not local:
+    import tcpolcblink
+    network = tcpolcblink.TcpToOlcbLink()
+    network.host = "174.18.137.234"
+    network.host = "localhost"
+    #network.host = "propername.local."
+    network.port = 12021
+elif ethernet and not local:
     import ethernetolcblink
     network = ethernetolcblink.EthernetToOlcbLink()
-    network.host = "10.00.01.35"
+    network.host = "174.18.137.234"
     #network.host = "propername.local."
-    network.port = 23
+    network.port = 12021
 elif windows and not local :
     import serialolcblink
     network = serialolcblink.SerialOlcbLink()
