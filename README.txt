@@ -63,5 +63,7 @@ Other terms appearing on this web site may be trademarks belonging to others.
 
 Authors include:
 
+    Tim Hatch <tim@nratonpass.com>
     Bob Jacobsen jacobsen@mac.com
+    Jim Kueneman <jimkueneman@yahoo.com>
 
