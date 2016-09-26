@@ -151,7 +151,7 @@ def usage() :
 def args(host, port, frame, verbose) :
     # argument processing
     usage = "usage: %prog [options] arg1\n\n" + \
-            "Python module for connecting to an OpenLCB via an TCP native " + \
+            "Python module for connecting to an OpenLCB via a TCP native " + \
             "connection.\n" + \
             "Called standalone, will send one message frame.\n\n" + \
             "valid usages (default values):\n" + \
