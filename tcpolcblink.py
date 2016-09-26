@@ -18,13 +18,14 @@ class TcpToOlcbLink :
         #self.socket.timeout(10)
         
         # defaults (generally overridden by system-wide defaults elsewhere)
-        self.host = "10.00.01.98" # Arduino adapter default
-        self.port = 23
+        self.host = "172.168.1.10" # Arduino adapter default
+        self.port = 12021
         self.timeout = 1.0
-        self.verbose = False
+        self.verbose = True
         self.startdelay = 0
         self.socket = None
         self.rcvData = ""
+        self.rcvIndex = 0
         return
     
     def connect(self) :
@@ -46,7 +47,8 @@ class TcpToOlcbLink :
         if (self.socket == None) : self.connect()
         
         # if verbose, print
-        if (self.verbose) : print "   send    ",tcpolcbutils.format(string)
+        if (self.verbose) :
+            print "   send   ",string
     
         # send
         self.socket.send(string)
@@ -59,33 +61,43 @@ class TcpToOlcbLink :
     def receive(self) : # returns frame
         if (self.socket == None) : self.connect()
         
-        # if verbose, print
-        if (self.verbose) : print "   receive ",
-            
         self.socket.settimeout(self.timeout)
-        maxLength = 2+3
-        lengthSet = False
-        self.rcvData = ""
+
+        if (self.rcvIndex >= len(self.rcvData)) :
+            self.rcvIndex = 0
+            self.rcvData = ""
+
+        result = ""
+        i = 0
         while (True) :
-            try:
-                result = self.socket.recv(maxLength-len(self.rcvData))
-                self.rcvData = self.rcvData+result
-                for a in result :
-                    print ("00"+(hex(ord(a)&0xFF).upper()[2:]))[-2:]+" ",
-                if not lengthSet and len(self.rcvData) >= 2+3 :
-                    maxLength = 2+3+((ord(self.rcvData[2])*256)+ord(self.rcvData[3])*256)+ord(self.rcvData[4])
-                    print "(Length set to ",maxLength,") ",
-                    lengthSet = True
-                if lengthSet and len(self.rcvData) == maxLength :
-                    print
-                    # convert to array of bytes
-                    retval =[]
-                    for a in self.rcvData :
-                        retval.append(ord(a))
-                    return [retval[5:10], retval[17:]]
-            except socket.timeout, err:
-                if (self.verbose) : print "<none>" # blank line to show delay?
-                return None
+            if (len(self.rcvData) == 0) :
+                # get more data
+                try:
+                    self.rcvData = self.socket.recv(1024)
+                    self.rcvIndex = 0
+                except socket.timeout, err:
+                    if (self.verbose) :
+                        print "<none>" # blank line to show delay?
+                    return None
+            else :
+                # parse our data
+                while (True) :
+                    if (self.rcvData[self.rcvIndex] == ':') :
+                        result = ""
+                        i = 0
+                    result = result + self.rcvData[self.rcvIndex]
+                    if (self.rcvData[self.rcvIndex] == ';') :
+                        self.rcvIndex = self.rcvIndex + 1
+                        # if verbose, print
+                        if (self.verbose) :
+                            print "   receive",result
+                        return result
+                    i = i + 1
+                    self.rcvIndex = self.rcvIndex + 1
+                    if (self.rcvIndex >= len(self.rcvData)) :
+                        self.rcvIndex = 0
+                        self.rcvData = ""
+                        break
         # shouldn't reach here
         
     def close(self) :
