@@ -132,22 +132,6 @@ def main():
     
     return  # done with example
 
-def usage() :
-    print ""
-    print "Python module for connecting to an OpenLCB via an Tcp native connection."
-    print "Called standalone, will send one message frame."
-    print ""
-    print "valid options:"
-    print "  -v for verbose; also displays any responses"
-    print "  -h, --host for host name or IP address"
-    print "  -p, --port for port number"
-    print ""
-    print "valid usages (default values):"
-    print "  ./etcpolcblink.py --host=10.00.01.98"
-    print "  ./tcpolcblink.py --host=10.00.01.98 --port=23"
-    print "  ./tcpolcblink.py --host=10.00.01.98 --port=23 :X182DF123N0203040506080001\;"
-    print ""
-    
 def args(host, port, frame, verbose) :
     # argument processing
     usage = "usage: %prog [options] arg1\n\n" + \
