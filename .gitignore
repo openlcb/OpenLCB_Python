@@ -1,0 +1,6 @@
+# Editor artifacts
+*~
+*.swp
+
+# Python build artifacts
+*.pyc
