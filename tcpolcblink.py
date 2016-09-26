@@ -103,8 +103,8 @@ class TcpToOlcbLink :
     def close(self) :
         return
 
-
-import getopt, sys
+import sys
+from optparse import OptionParser
 
 def main():
     global frame
@@ -150,25 +150,34 @@ def usage() :
     
 def args(host, port, frame, verbose) :
     # argument processing
-    try:
-        opts, remainder = getopt.getopt(sys.argv[1:], "h:p:v", ["host=", "port="])
-    except getopt.GetoptError, err:
-        # print help information and exit:
-        print str(err) # will print something like "option -a not recognized"
-        usage()
-        sys.exit(2)
-    for opt, arg in opts:
-        if opt == "-v":
-            verbose = True
-        elif opt in ("-h", "--host"):
-            host = arg
-        elif opt in ("-p", "--port"):
-            port = int(arg)
-        else:
-            assert False, "unhandled option"
-    if (len(remainder) > 0) : 
-        frame = remainder[0]
-    return (host, port, frame, verbose)
+    usage = "usage: %prog [options] arg1\n\n" + \
+            "Python module for connecting to an OpenLCB via an Tcp native" + \
+            "connection.\n" + \
+            "Called standalone, will send one message frame.\n\n" + \
+            "valid usages (default values):\n" + \
+            "  ./tcpolcblink.py --ip=localhost\n" + \
+            "  ./tcpolcblink.py --ip=localhost --port=12021\n" + \
+            "  ./tcpolcblink.py --ip=localhost " + \
+            "--port=12021 :X182DF123N0203040506080001\;" \
+
+    parser = OptionParser(usage=usage)
+    parser.add_option("-i", "--ip", dest="host", metavar="IP",
+                      default="localhost",
+                      help="host name or ip address")
+    parser.add_option("-p", "--port", dest="port", metavar="PORT",
+                      default=12021,
+                      help="port number")
+    parser.add_option("-v", "--verbose",
+                      action="store_true", dest="verbose", default=False,
+                      help="print verbose debug information")
+
+    args = sys.argv[1:]
+    (options, args) = parser.parse_args(args=args)
+
+    if (len(args) > 0) :
+        frame = args[0]
+
+    return (options.host, options.port, frame, options.verbose)
     
 if __name__ == '__main__':
     main()
