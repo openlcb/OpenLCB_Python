@@ -127,7 +127,7 @@ class TcpToOlcbLink :
             elif (startswith != None and result != None) :
                 if (result.startswith(startswith)) :
                     return result
-            else :
+            elif (exact == None and startswith == None and data == None) :
                 return result
 
             if (timeout != 0) :
