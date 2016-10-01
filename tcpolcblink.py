@@ -5,6 +5,7 @@ Drive an OpenLCB link via TCP (native protocol)
 argparse is new in Jython 2.7, so dont use here
 
 @author: Bob Jacobsen
+@author: Stuart Baker - cleaned up and modernized
 '''
 import socket
 import time
@@ -99,7 +100,32 @@ class TcpToOlcbLink :
                         self.rcvData = ""
                         break
         # shouldn't reach here
-        
+
+    '''
+    Continue receiving data until the we get the expected result or timeout.
+    @param exact if != None, look for result with exact string
+    @param startswith if != None, look for result starting with string
+    @param timeout timeout in seconds, if timeout != 0, return None on timeout
+    @return resulting message on success, None on timeout
+    '''
+    def expect(self, exact=None, startswith=None, timeout=1) :
+        start = time.time()
+        while (True) :
+            result = self.receive()
+            if (exact != None) :
+                if (result == exact) :
+                    return result
+            elif (startswith != None) :
+                if (result.startswith(startswith)) :
+                    return result
+            else :
+                return result
+            if (timeout != 0) :
+                if (time.time() > (start + timeout)) :
+                    if (self.verbose) :
+                        print "Timeout"
+                    return None
+
     def close(self) :
         return
 
@@ -155,8 +181,7 @@ def args(host, port, frame, verbose) :
                       action="store_true", dest="verbose", default=False,
                       help="print verbose debug information")
 
-    args = sys.argv[1:]
-    (options, args) = parser.parse_args(args=args)
+    (options, args) = parser.parse_args()
 
     if (len(args) > 0) :
         frame = args[0]
