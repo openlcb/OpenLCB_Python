@@ -19,13 +19,13 @@ Make an Alias Map Enquery (AME) frame.
 def makeframe(alias, nodeID) :
     return canolcbutils.makeframestring(0x10702000+alias,nodeID)
 
-import sys
 from optparse import OptionParser
 
 '''
 Program entry point.
 '''
 def main():
+    # argument processing
     usage = "usage: %prog [options]\n\n" + \
             "Called standalone, will send one CAN AliasMapEquiry frame \n" + \
             "and display response\n\n" + \
@@ -47,7 +47,8 @@ def main():
     parser.add_option("-d", "--dest", dest="dest", metavar="ALIAS",
                       default=connection.testNodeAlias, type = int,
                       help="destination alias")
-    parser.add_option("-n", "--node", dest="nodeid", metavar="ID",
+    parser.add_option("-n", "--node", dest="nodeid",
+                      metavar="0x1 0x2 0x3 0x4 0x5 0x6",
                       default=connection.testNodeID, type=int, nargs=6,
                       help="destination Node ID")
     parser.add_option("-t", "--auto", action="store_true", dest="identifynode",
