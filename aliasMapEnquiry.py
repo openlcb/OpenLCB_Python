@@ -3,97 +3,104 @@
 OpenLCB AliasMapEquiry frame
 
 @author: Bob Jacobsen
+@author: Stuart Baker - cleaned up and modernized
 '''
 
 import connection as connection
 import canolcbutils
 
+'''
+Make an Alias Map Enquery (AME) frame.
+
+@param alias alias of self
+@param nodeID node id to enquire about
+@return string of CAN Grid Connect bytes to send
+'''
 def makeframe(alias, nodeID) :
     return canolcbutils.makeframestring(0x10702000+alias,nodeID)
-    
-def usage() :
-    print ""
-    print "Called standalone, will send one CAN AliasMapEquiry frame"
-    print " and display response"
-    print ""
-    print "Expect a single frame in return"
-    print "e.g. [180B7sss] nn nn nn nn nn nn"
-    print "containing dest alias and NodeID"
-    print ""
-    print "Default connection detail taken from connection.py"
-    print ""
-    print "-a --alias source alias (default 0x"+hex(connection.thisNodeAlias).upper()+")"
-    print "-d --dest dest alias (default 0x"+hex(connection.testNodeAlias).upper()+")"
-    print "-n --node dest nodeID (default None, format 01.02.03.04.05.06)"
-    print "-t find destination alias and NodeID automatically"
-    print "-v verbose"
-    print "-V Very verbose"
 
-import getopt, sys
+import sys
+from optparse import OptionParser
 
+'''
+Program entry point.
+'''
 def main():
-    # argument processing
-    nodeID = None
-    alias = connection.thisNodeAlias
-    identifynode = False
-    verbose = False
-    
-    try:
-        opts, remainder = getopt.getopt(sys.argv[1:], "n:a:vVt", ["alias=", "node="])
-    except getopt.GetoptError, err:
-        # print help information and exit:
-        print str(err) # will print something like "option -a not recognized"
-        usage()
-        sys.exit(2)
-    for opt, arg in opts:
-        if opt == "-v":
-            verbose = True
-        elif opt == "-V":
-            connection.network.verbose = True
-            verbose = True
-        elif opt in ("-a", "--alias"): # needs hex processing
-            alias = int(arg)
-        elif opt in ("-n", "--node"):
-            nodeID = canolcbutils.splitSequence(arg)
-        elif opt == "-t":
-            identifynode = True
-        else:
-            assert False, "unhandled option"
+    usage = "usage: %prog [options]\n\n" + \
+            "Called standalone, will send one CAN AliasMapEquiry frame \n" + \
+            "and display response\n\n" + \
+            "Expect a single frame in return\n" + \
+            "  e.g. [180B7sss] nn nn nn nn nn nn\n" + \
+            "containing dest alias and NodeID\n\n" + \
+            "valid usages (default values):\n" + \
+            "  ./aliasMapEnquiry.py\n" + \
+            "  ./aliasMapEnquiry.py -a 0xAAA\n" + \
+            "  ./aliasMapEnquiry.py -a 0xAAA -d 0x5F9\n" + \
+            "  ./aliasMapEnquiry.py -a 0xAAA -d 0x5F9 " + \
+            "-n 0x2 0x1 0x99 0xff 0x00 0x1e\n\n" + \
+            "Default connection detail taken from connection.py"
 
-    if identifynode :
-        import getUnderTestAlias
-        dest, otherNodeId = getUnderTestAlias.get(alias, None, verbose)
-        if nodeID == None : nodeID = otherNodeId
+    parser = OptionParser(usage=usage)
+    parser.add_option("-a", "--alias", dest="alias", metavar="ALIAS",
+                      default=connection.thisNodeAlias, type = int,
+                      help="source alias")
+    parser.add_option("-d", "--dest", dest="dest", metavar="ALIAS",
+                      default=connection.testNodeAlias, type = int,
+                      help="destination alias")
+    parser.add_option("-n", "--node", dest="nodeid", metavar="ID",
+                      default=connection.testNodeID, type=int, nargs=6,
+                      help="destination Node ID")
+    parser.add_option("-t", "--auto", action="store_true", dest="identifynode",
+                      default=False,
+                      help="find destination alias and NodeID automatically")
+    parser.add_option("-v", "--verbose", action="store_true", dest="verbose",
+                      default=False,
+                      help="print verbose debug information")
+    parser.add_option("-V", "--veryverbose",
+                      action="store_true", dest="veryverbose",
+                      default=False,
+                      help="print very verbose debug information")
 
-    retval = test(alias, nodeID, connection, verbose)
+    (options, args) = parser.parse_args()
+
+    if options.veryverbose :
+        connection.network.verbose = True
+
+    '''
+    @todo identifynode option not currently implemented
+    '''
+    #if options.identifynode :
+    #    import getUnderTestAlias
+    #    options.dest, otherNodeId = getUnderTestAlias.get(options.alias,
+    #                                                      None,
+    #                                                      options.verbose)
+    #    if options.nodeid == None :
+    #        options.nodeid = otherNodeId
+
+    retval = test(options.alias, options.dest, options.nodeid, connection,
+                  options.verbose)
     connection.network.close()
     exit(retval)
     
-def test(alias, nodeID, connection, verbose) :
+def test(alias, dest, nodeID, connection, verbose) :
     # check with node id in frame
     connection.network.send(makeframe(alias, nodeID))
-    reply = connection.network.receive()
-    if (reply == None ) : 
+    expect = canolcbutils.makeframestring(0x10701000 + dest, nodeID)
+    if (connection.network.expect(exact=expect) == None) :
         print "Expected reply when node ID matches not received"
         return 2
-    elif not reply.startswith(":X10701") :
-        print "Unexpected reply received ", reply
-        return 1
 
     # check without node id in frame 
     connection.network.send(canolcbutils.makeframestring(0x10702000+alias,None))
-    reply = connection.network.receive()
-    if (reply == None ) : 
-        print "Expected reply when no node ID in body not received"
+    expect = canolcbutils.makeframestring(0x10701000 + dest, nodeID)
+    if (connection.network.expect(exact=expect) == None) :
+        print "Expected reply when node ID matches not received"
         return 2
-    elif not reply.startswith(":X10701") :
-        print "Unexpected reply received ", reply
-        return 1
 
     # test non-matching NodeID using a reserved one
     connection.network.send(makeframe(alias, [0,0,0,0,0,1]))
     reply = connection.network.receive()
-    if (reply != None ) : 
+    if (connection.network.expect(exact=expect) != None) :
         print "Unexpected reply received when node ID didnt match ", reply
         return 2
         

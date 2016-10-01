@@ -93,7 +93,7 @@ def test(alias, dest, nodeID, event, connection, verbose, complete, repeat, iden
 
         import aliasMapEnquiry
         if verbose : print "aliasMapEnquiry"
-        retval = aliasMapEnquiry.test(alias, nodeID, connection, verbose)
+        retval = aliasMapEnquiry.test(alias, dest, nodeID, connection, verbose)
         if retval != 0 :
             print "Error in aliasMapEnquiry"
             if not complete : done(retval)
