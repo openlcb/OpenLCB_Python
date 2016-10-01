@@ -81,14 +81,14 @@ def test(alias, nodeID, connection):
 
     # send without node ID
     connection.network.send(makeframe(alias, None))
-    reply = connection.network.receive()
     if (connection.network.expect(startswith=":X19170", data=nodeID) == None) :
         print "Global verify without node ID did not receive expected reply"
         return 12
 
     # send with wrong node ID
     connection.network.send(makeframe(alias, [0,0,0,0,0,1]))
-    if (connection.network.expect(startswith=":X19170") == None) :
+    reply = connection.network.expect(startswith=":X19170")
+    if (reply == None) :
         return 0
     else :
         print "Global verify with wrong node ID should not receive reply but did: ", reply
