@@ -108,18 +108,28 @@ class TcpToOlcbLink :
     @param timeout timeout in seconds, if timeout != 0, return None on timeout
     @return resulting message on success, None on timeout
     '''
-    def expect(self, exact=None, startswith=None, timeout=1) :
+    def expect(self, exact=None, startswith=None, data=None, timeout=1) :
         start = time.time()
         while (True) :
             result = self.receive()
-            if (exact != None) :
+            if (data != None and result != None) :
+                if (len(data) == ((len(result) - 12) / 2)) :
+                    i = 0
+                    j = 11
+                    while (data[i] == int('0x' + result[j] + result[j + 1], 16)) :
+                        i = i + 1
+                        j = j + 2
+                        if (i == len(data)) :
+                            return result
+            elif (exact != None) :
                 if (result == exact) :
                     return result
-            elif (startswith != None) :
+            elif (startswith != None and result != None) :
                 if (result.startswith(startswith)) :
                     return result
             else :
                 return result
+
             if (timeout != 0) :
                 if (time.time() > (start + timeout)) :
                     if (self.verbose) :
