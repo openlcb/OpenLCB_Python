@@ -8,93 +8,87 @@ Handle OpenLCB verifyNodeGlobal
 import connection as connection
 import canolcbutils
 
+'''
+Make a Verify Node ID Global frame.
+
+@param alias alias of self
+@param nodeID node id to enquire about
+@return string of CAN Grid Connect bytes to send
+'''
 def makeframe(alias, nodeID) :
     return canolcbutils.makeframestring(0x19490000+alias,nodeID)
-    
-def usage() :
-    print ""
-    print "Called standalone, will send  CAN VerifyNode (Global) message."
-    print "By default, this carries no Node ID information in the body, "
-    print "but if you supply the -n or --node option, it will be included."
-    print ""
-    print "Expect a single VerifiedNode reply in return"
-    print "e.g. [19170sss] nn nn nn nn nn nn"
-    print "containing dest alias and NodeID"
-    print ""
-    print "Default connection detail taken from connection.py"
-    print ""
-    print "-a --alias source alias (default 123)"
-    print "-n --node dest nodeID (default None, format 01.02.03.04.05.06)"
-    print "-t find NodeID automatically"
-    print "-v verbose"
-    print "-V Very verbose"
 
-import getopt, sys
+from optparse import OptionParser
 
 def main():
     # argument processing
-    nodeID = None
-    alias = connection.thisNodeAlias
-    identifynode = False
-    verbose = False
-    
-    try:
-        opts, remainder = getopt.getopt(sys.argv[1:], "tn:a:vV", ["alias=", "node="])
-    except getopt.GetoptError, err:
-        # print help information and exit:
-        print str(err) # will print something like "option -a not recognized"
-        usage()
-        sys.exit(2)
-    for opt, arg in opts:
-        if opt == "-v":
-            verbose = True
-        elif opt == "-V":
-            verbose = True
-            connection.network.verbose = True
-        elif opt in ("-a", "--alias"):
-            alias = int(arg)
-        elif opt in ("-n", "--node"):
-            nodeID = canolcbutils.splitSequence(arg)
-        elif opt == "-t":
-            identifynode = True
-        else:
-            assert False, "unhandled option"
+    usage = "usage: %prog [options]\n\n" + \
+            "Called standalone, will send one CAN VerifyNode (Global) " + \
+            "message.\n\n" + \
+            "Expect a single VerifiedNode reply in return\n" + \
+            "  e.g. [180B7sss] nn nn nn nn nn nn\n" + \
+            "containing dest alias and NodeID\n\n" + \
+            "valid usages (default values):\n" + \
+            "  ./verifyNodeGlobal.py\n" + \
+            "  ./verifyNodeGlobal.py -a 0xAAA\n" + \
+            "  ./verifyNodeGlobal.py -a 0xAAA " + \
+            "-n 0x2 0x1 0x99 0xff 0x00 0x1e\n\n" + \
+            "Default connection detail taken from connection.py"
 
-    if identifynode :
-        import getUnderTestAlias
-        dest, nodeID = getUnderTestAlias.get(alias, None, verbose)
-        if nodeID == None : nodeID = otherNodeId
+    parser = OptionParser(usage=usage)
+    parser.add_option("-a", "--alias", dest="alias", metavar="ALIAS",
+                      default=connection.thisNodeAlias, type = int,
+                      help="source alias")
+    parser.add_option("-n", "--node", dest="nodeid",
+                      metavar="0x1 0x2 0x3 0x4 0x5 0x6",
+                      default=connection.testNodeID, type=int, nargs=6,
+                      help="destination Node ID")
+    parser.add_option("-t", "--auto", action="store_true", dest="identifynode",
+                      default=False,
+                      help="find destination NodeID automatically")
+    parser.add_option("-v", "--verbose", action="store_true", dest="verbose",
+                      default=False,
+                      help="print verbose debug information")
+    parser.add_option("-V", "--veryverbose",
+                      action="store_true", dest="veryverbose",
+                      default=False,
+                      help="print very verbose debug information")
+
+    (options, args) = parser.parse_args()
+
+    if options.veryverbose :
+        connection.network.verbose = True
+
+    '''
+    @todo identifynode option not currently implemented
+    '''
+    #if identifynode :
+    #    import getUnderTestAlias
+    #    dest, nodeID = getUnderTestAlias.get(alias, None, verbose)
+    #    if nodeID == None : nodeID = otherNodeId
 
     # now execute
-    retval = test(alias, nodeID, connection)
+    retval = test(options.alias, options.nodeid, connection)
     connection.network.close()
     exit(retval)    
     
 def test(alias, nodeID, connection):
     # first, send to this node
     connection.network.send(makeframe(alias, nodeID))
-    reply = connection.network.receive()
-    if (reply == None ) : 
+    if (connection.network.expect(startswith=":X19170", data=nodeID) == None) :
         print "Global verify with matching node ID did not receive expected reply"
         return 2
-    elif not reply.startswith(":X19170") :
-        print "Global verify with matching node ID received wrong reply message", reply
-        return 4
 
     # send without node ID
     connection.network.send(makeframe(alias, None))
     reply = connection.network.receive()
-    if (reply == None ) : 
+    if (connection.network.expect(startswith=":X19170", data=nodeID) == None) :
         print "Global verify without node ID did not receive expected reply"
         return 12
-    elif not reply.startswith(":X19170") :
-        print "Global verify without node ID received wrong reply message ", reply
-        return 14
 
     # send with wrong node ID
     connection.network.send(makeframe(alias, [0,0,0,0,0,1]))
-    reply = connection.network.receive()
-    if (reply == None ) : 
+    if (connection.network.expect(startswith=":X19170") == None) :
         return 0
     else :
         print "Global verify with wrong node ID should not receive reply but did: ", reply
