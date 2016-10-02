@@ -3,6 +3,7 @@
 OpenLCB VerifyNodeAddressed message
 
 @author: Bob Jacobsen
+@author: Stuart Baker - cleaned up and modernized
 '''
 
 import connection as connection

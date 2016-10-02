@@ -105,6 +105,7 @@ class TcpToOlcbLink :
     Continue receiving data until the we get the expected result or timeout.
     @param exact if != None, look for result with exact string
     @param startswith if != None, look for result starting with string
+    @param data if != None, tuple of data bytes to match
     @param timeout timeout in seconds, if timeout != 0, return None on timeout
     @return resulting message on success, None on timeout
     '''
