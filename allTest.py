@@ -131,7 +131,7 @@ def test(alias, dest, nodeID, event, connection, verbose, complete, repeat, iden
     
         import identifyEventsGlobal
         if verbose : print "identifyEventsGlobal"
-        retval = identifyEventsGlobal.test(alias, connection, verbose)
+        retval = identifyEventsGlobal.test(alias, dest, connection, verbose)
         if retval != 0 :
             print "Error in identifyEventsGlobal"
             if not complete : done(retval)
