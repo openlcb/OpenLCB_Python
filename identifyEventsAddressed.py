@@ -3,6 +3,7 @@
 Send identifyEvents message
 
 @author: Bob Jacobsen
+@author: Stuart Baker - cleaned up and modernized
 '''
 
 import connection as connection
@@ -29,60 +30,121 @@ def usage() :
     print "-v verbose"
     print "-V very verbose"
 
-import getopt, sys
+from optparse import OptionParser
 
+'''
+Program entry point.
+'''
 def main():
-    alias = connection.thisNodeAlias
-    dest = connection.testNodeAlias
-    identifynode = False
-    verbose = False
-
     # argument processing
-    try:
-        opts, remainder = getopt.getopt(sys.argv[1:], "d:a:vVt", ["alias=", "dest="])
-    except getopt.GetoptError, err:
-        # print help information and exit:
-        print str(err) # will print something like "option -a not recognized"
-        usage()
-        sys.exit(2)
-    for opt, arg in opts:
-        if opt == "-v":
-            verbose = True
-        elif opt == "-V":
-            connection.network.verbose = True
-            verbose = True
-        elif opt in ("-a", "--alias"):
-            alias = int(arg) # needs hex decode
-        elif opt in ("-d", "--dest"):
-            dest = int(arg) # needs hex processing
-        elif opt == "-t":
-            identifynode = True
-        else:
-            assert False, "unhandled option"
+    usage = "usage: %prog [options]\n\n" + \
+            "Called standalone, will send one CAN IdentifyEvents " + \
+            "(addressed)\nmessage and display response\n\n" + \
+            "Expect zero or more ConsumerIdenfified replies in return\n" + \
+            "  e.g. [194C4sss] nn nn nn nn nn nn\n" + \
+            "containing dest alias and EventID\n\n" + \
+            "Expect zero or more ProducerIdenfified replies in return\n" + \
+            "  e.g. [19544sss] nn nn nn nn nn nn\n" + \
+            "containing dest alias and EventID\n\n" + \
+            "valid usages (default values):\n" + \
+            "  ./identifyEventsAddressed.py\n" + \
+            "  ./identifyEventsAddressed.py -a 0xAAA\n" + \
+            "  ./identifyEventsAddressed.py -a 0xAAA -d 0x5F9\n\n" + \
+            "Default connection detail taken from connection.py"
 
-    if identifynode :
-        import getUnderTestAlias
-        dest, nodeID = getUnderTestAlias.get(alias, None, verbose)
+    parser = OptionParser(usage=usage)
+    parser.add_option("-a", "--alias", dest="alias", metavar="ALIAS",
+                      default=connection.thisNodeAlias, type = int,
+                      help="source alias")
+    parser.add_option("-d", "--dest", dest="dest", metavar="ALIAS",
+                      default=connection.testNodeAlias, type = int,
+                      help="destination alias")
+    parser.add_option("-t", "--auto", action="store_true", dest="identifynode",
+                      default=False,
+                      help="find destination alias and NodeID automatically")
+    parser.add_option("-v", "--verbose", action="store_true", dest="verbose",
+                      default=False,
+                      help="print verbose debug information")
+    parser.add_option("-V", "--veryverbose",
+                      action="store_true", dest="veryverbose",
+                      default=False,
+                      help="print very verbose debug information")
 
-    retval = test(alias, dest, connection, verbose)
+    (options, args) = parser.parse_args()
+
+    if options.veryverbose :
+        connection.network.verbose = True
+
+    '''
+    @todo identifynode option not currently implemented
+    '''
+    #if identifynode :
+    #    import getUnderTestAlias
+    #    dest, nodeID = getUnderTestAlias.get(alias, None, verbose)
+
+    retval = test(options.alias, options.dest, connection, options.verbose)
     connection.network.close()
     exit(retval)
     
 def test(alias, dest, connection, verbose) : 
     connection.network.send(makeframe(alias,dest))
-    count = 0
+    producerCount = 0
+    consumerCount = 0
+    producerRange = list()
+    consumerRange = list()
     while (True) :
-        if (connection.network.receive() == None ) : break
-        count = count + 1
-    if verbose : print "  Found",count,"events"
-    
-    # check that there's no reply to another node id
-    if verbose : print "  checking for no reply to request to another node"
-    connection.network.send(makeframe(alias,dest^alias))
-    reply = connection.network.receive()
-    if (reply == None ) : return 0
-    print "unexpected reply: "+reply
-    return 12
+        reply = connection.network.expect(startswith=':X19')
+        if (reply == None ) :
+            break
+        if (int(reply[7:10],16) != dest) :
+            continue
+        if (reply.startswith(':X194C7') or reply.startswith(':X194C4') or
+            reply.startswith(':X194C5')) :
+            consumerCount = consumerCount + 1
+        if (reply.startswith(':X19547') or reply.startswith(':X19544') or
+            reply.startswith(':X19545')) :
+            producerCount = producerCount + 1
+        if (reply.startswith(':X194A4')) :
+            consumerRange.append(int(reply[11:27],16))
+        if (reply.startswith(':X19524')) :
+            producerRange.append(int(reply[11:27],16))
+    if (verbose) :
+        print "  Found", consumerCount,"consumer events"
+        print "  Found", producerCount,"producer events"
+        for a in consumerRange :
+            i = 4
+            if ((a % 2) == 0) :
+                while (True) :
+                    if ((a % i) != 0) :
+                        break;
+                    i = i * 2
+            else :
+                while (True) :
+                    if ((a % i) == 0) :
+                        break;
+                    i = i * 2
+            mask = (i / 2) - 1
+            base = a & ~mask
+            print "  Found consumer range", \
+                  '{0:8x}'.format(base), "-", \
+                  '{0:8x}'.format(base + mask)
+        for a in producerRange :
+            i = 4
+            if ((a % 2) == 0) :
+                while (True) :
+                    if ((a % i) != 0) :
+                        break;
+                    i = i * 2
+            else :
+                while (True) :
+                    if ((a % i) == 0) :
+                        break;
+                    i = i * 2
+            mask = (i / 2) - 1
+            base = a & ~mask
+            print "  Found producer range", \
+                  '{0:8x}'.format(base), "-", \
+                  '{0:8x}'.format(base + mask)
 
     return 0
 
