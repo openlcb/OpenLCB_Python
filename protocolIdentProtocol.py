@@ -3,6 +3,7 @@
 OpenLCB ProtocolIdentificationProtocol message
 
 @author: Bob Jacobsen
+@author: Stuart Baker - cleaned up and modernized
 '''
 
 import connection as connection
@@ -12,68 +13,66 @@ def makeframe(alias, dest) :
     body = [(dest>>8)&0xFF, dest&0xFF]
     return canolcbutils.makeframestring(0x19828000+alias,body)
     
-def usage() :
-    print ""
-    print "Called standalone, will send one CAN ProtocolIdentificationProtocol (addressed) message"
-    print " and display response"
-    print ""
-    print "Default connection detail taken from connection.py"
-    print ""
-    print "-a --alias source alias (default 0x"+hex(connection.thisNodeAlias).upper()+")"
-    print "-d --dest dest alias (default 0x"+hex(connection.testNodeAlias).upper()+")"
-    print "-t find destination alias and NodeID automatically"
-    print "-v verbose"
-    print "-V Very verbose"
-
-import getopt, sys
+from optparse import OptionParser
 
 def main():
     # argument processing
-    alias = connection.thisNodeAlias
-    dest = connection.testNodeAlias
-    identifynode = False
-    verbose = False
+    usage = "usage: %prog [options]\n\n" + \
+            "Called standalone, will send one CAN " + \
+            "ProtocolIdentProtocol (addressed) message.\n\n" + \
+            "Expect a single ProtocolIdentProtocol reply in return\n" + \
+            "  e.g. [180B7sss] nn nn nn nn nn nn\n" + \
+            "containing protocols supported\n\n" + \
+            "valid usages (default values):\n" + \
+            "  ./protocolIdentProtocol.py\n" + \
+            "  ./protocolIdentProtocol.py -a 0xAAA\n" + \
+            "  ./protocolIdentProtocol.py -a 0xAAA -d 0x5F9\n\n" + \
+            "Default connection detail taken from connection.py"
+
+    parser = OptionParser(usage=usage)
+    parser.add_option("-a", "--alias", dest="alias", metavar="ALIAS",
+                      default=connection.thisNodeAlias, type = int,
+                      help="source alias")
+    parser.add_option("-d", "--dest", dest="dest", metavar="ALIAS",
+                      default=connection.testNodeAlias, type = int,
+                      help="destination alias")
+    parser.add_option("-t", "--auto", action="store_true", dest="identifynode",
+                      default=False,
+                      help="find destination NodeID automatically")
+    parser.add_option("-v", "--verbose", action="store_true", dest="verbose",
+                      default=False,
+                      help="print verbose debug information")
+    parser.add_option("-V", "--veryverbose",
+                      action="store_true", dest="veryverbose",
+                      default=False,
+                      help="print very verbose debug information")
     
-    try:
-        opts, remainder = getopt.getopt(sys.argv[1:], "d:a:vVt", ["alias=", "dest="])
-    except getopt.GetoptError, err:
-        # print help information and exit:
-        print str(err) # will print something like "option -a not recognized"
-        usage()
-        sys.exit(2)
-    for opt, arg in opts:
-        if opt == "-v":
-            verbose = True
-        elif opt == "-V":
-            connection.network.verbose = True
-            verbose = True
-        elif opt in ("-a", "--alias"): # needs hex processing
-            alias = int(arg)
-        elif opt in ("-d", "--dest"): # needs hex processing
-            dest = int(arg)
-        elif opt == "-t":
-            identifynode = True
-        else:
-            assert False, "unhandled option"
+    (options, args) = parser.parse_args()
 
-    if identifynode :
-        import getUnderTestAlias
-        dest, otherNodeId = getUnderTestAlias.get(alias, None, verbose)
+    if options.veryverbose :
+        connection.network.verbose = True
 
-    retval = test(alias, dest, connection, verbose)
+    '''
+    @todo identifynode option not currently implemented
+    '''
+    #if identifynode :
+    #    import getUnderTestAlias
+    #    dest, otherNodeId = getUnderTestAlias.get(alias, None, verbose)
+
+    retval = test(options.alias, options.dest, connection, options.verbose)
     connection.network.close()
     exit(retval)
     
 def test(alias, dest, connection, verbose) :
     connection.network.send(makeframe(alias, dest))
-    reply = connection.network.receive()
-    if (reply == None ) : 
+    body = [(alias>>8)&0xFF, alias&0xFF]
+    expect = canolcbutils.makeframestring(0x19668000 + dest, body)
+    expect = expect[:-1]
+    reply = connection.network.expect(startswith=expect)
+    if (reply == None) :
         print "Expected reply to good request not received"
         return 2
-    if not (reply.startswith(":X19668") and int(reply[11:15],16)==alias and int(reply[7:10],16)==dest) :
-        print "Unexpected reply received ", reply
-        return 1
-    if verbose : 
+    if (verbose) : 
         print "  Node supports:"
         value = canolcbutils.bodyArray(reply)
         if (value[2] & 0x80) != 0 : print "      Protocol Identification"
@@ -89,39 +88,24 @@ def test(alias, dest, connection, verbose) :
         if (value[3] & 0x20) != 0 : print "      Display Protocol"
         if (value[3] & 0x10) != 0 : print "      Simple Node Information Protocol"
         if (value[3] & 0x08) != 0 : print "      Configuration Description Information"
+        if (value[3] & 0x04) != 0 : print "      Traction Control Protocol"
+        if (value[3] & 0x02) != 0 : print "      Function Description Information"
+        if (value[3] & 0x01) != 0 : print "      DCC Command Station Protocol"
+        if (value[4] & 0x80) != 0 : print "      SimpleTrain Node Information"
+        if (value[4] & 0x40) != 0 : print "      Function Configuration"
+        if (value[4] & 0x20) != 0 : print "      Firmware Upgrade Protocol"
+        if (value[4] & 0x10) != 0 : print "      Firmware Upgrade Active"
 
-    if verbose : print "  not addressed, expect no reply"
+    if (verbose) :
+        print "  not addressed, expect no reply"
     connection.network.send(makeframe(alias, (~dest)&0xFFF))
-    reply = connection.network.receive()
+    body = [(alias>>8)&0xFF, alias&0xFF]
+    expect = canolcbutils.makeframestring(0x19668000 + dest, body)
+    expect = expect[:-1]
+    reply = connection.network.expect(startswith=expect)
     if (reply != None ) : 
         print "Unexpected reply received to request to different node ", reply
         return 1
-
-    # test expansion by sending a start-only, then an end-only frame
-        
-    body = [((dest>>8)&0xFF)|0x10, dest&0xFF,0,0, 0,0,0,0]
-    frame = canolcbutils.makeframestring(0x19828000+alias,body)
-    connection.network.send(frame)
-
-    reply = connection.network.receive()
-
-    body = [((dest>>8)&0xFF)|0x20, dest&0xFF,0,0, 0,0,0,0]
-    frame = canolcbutils.makeframestring(0x19828000+alias,body)
-    connection.network.send(frame)
-
-    if (reply == None ) : # if no reply to 1st frame, see if reply to 2nd frame; either OK
-        reply = connection.network.receive()
-
-    if (reply == None ) : 
-        print "Expected reply to double frame not received"
-        return 2
-    if not (reply.startswith(":X19668") and int(reply[11:15],16)==alias and int(reply[7:10],16)==dest) :
-        print "Unexpected reply received ", reply
-        return 1
-
-    reply = connection.network.receive()
-    if (reply != None ) : 
-        print "  Suggestion: PIP should handle start-end bits in requests for future expansion"
 
     return 0
 
