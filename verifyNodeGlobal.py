@@ -19,6 +19,7 @@ Make a Verify Node ID Global frame.
 def makeframe(alias, nodeID) :
     return canolcbutils.makeframestring(0x19490000+alias,nodeID)
 
+import time
 from optparse import OptionParser
 
 def main():
@@ -85,6 +86,11 @@ def test(alias, nodeID, connection):
     if (connection.network.expect(startswith=":X19170", data=nodeID) == None) :
         print "Global verify without node ID did not receive expected reply"
         return 12
+
+    # allow time for the bus to settle
+    time.sleep(3)
+    while connection.network.receive() != None :
+        continue
 
     # send with wrong node ID
     connection.network.send(makeframe(alias, [0,0,0,0,0,1]))
