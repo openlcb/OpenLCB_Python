@@ -61,7 +61,7 @@ def main():
         elif opt == "-c":
             complete = True
         elif opt in ("-d", "--dest"):
-            dest = int(arg) # needs hex decode
+            dest = int(arg, 0)
         elif opt in ("-e", "--event"):
             event = canolcbutils.splitSequence(arg)
         elif opt in ("-n", "--node"):
