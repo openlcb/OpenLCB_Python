@@ -8,6 +8,9 @@ import time
 import array
 
 import tcpolcblink
+import mtiDefs
+import defaults
+import canolcbutils
 
 ## Mapping between an alias an a Node ID.
 class AliasMap :
@@ -31,7 +34,7 @@ class AliasMap :
     ## Get the alias/Node ID map
     # @return (alias, nodeID) alias that is mapped, Node ID that is mapped
     def get(self) :
-        return alias, nodeID
+        return self.alias, self.nodeID
 
     ## Get the timestamp of last use
     # @return timestamp of last use
@@ -51,17 +54,17 @@ class AliasCache :
             self.cache.append(AliasMap())
 
     ## Get the alias from a Node ID
-    def alias_lookup(nodeID) :
+    def alias_lookup(self, nodeID) :
         for x in self.cache :
             try_alias, try_node_id = x.get()
-            if (try_node_id == NodeID) :
+            if (try_node_id == nodeID) :
                 return try_alias
         return 0
 
     ## purge alias from cache
     # @param alias alias to purge
     # @param nodeID Node ID to purge
-    def alias_purge(alias) :
+    def alias_purge(self, alias) :
         for x in self.cache :
             try_alias, try_node_id = x.get()
             if (try_alias == alias) :
@@ -71,7 +74,7 @@ class AliasCache :
     ## purge Node ID from cache
     # @param alias alias to purge
     # @param nodeID Node ID to purge
-    def node_id_purge(nodeID) :
+    def node_id_purge(self, nodeID) :
         for x in self.cache :
             try_alias, try_node_id = x.get()
             if (try_node_id == nodeID) :
@@ -81,7 +84,7 @@ class AliasCache :
     ## cache an alias/Node ID mapping
     # @param alias alias to cache
     # @param nodeID Node ID to cache
-    def cache(alias, nodeID) :
+    def cache(self, alias, nodeID) :
         oldest = 0
         oldest_time = time.time()
         for x in self.cache :
@@ -94,23 +97,26 @@ class AliasCache :
 class GenericToGC :
     def __init__(self) :
         self.aliasCache = AliasCache()
-        self.aliasSource = AliasCache()
+        self.aliasSource = AliasMap()
+        self.rcvData = ""
+        self.rcvIndex = 0
+        self.verbose = True
         return
 
     ## Write raw data to the interface
     # @param string data to write
     def raw_write(self, string) :
-        pass
+        print string
 
     ## Read raw data from the interface
     # @param size size of data to try and read
     # @return data read
     def raw_read(self, size) :
-        pass
+        return ""
 
     ## Get the alias for the source Node ID, allocate it if necessary
     # @param source source Node ID
-    def source_alias(source) :
+    def source_alias(self, source) :
         src_alias, src_nodeID = self.aliasSource.get()
         if (src_nodeID == source) :
             return src_alias
@@ -128,31 +134,31 @@ class GenericToGC :
 
         # alias not found in any local storage
         for x in xrange(0x001, 0xFFE) :
-            raw_write(canolcbutils.makeframestring(0x17000000 +
+            self.raw_write(canolcbutils.makeframestring(0x17000000 +
                                                    ((source[0] & 0xFF) << 16) +
                                                    ((source[1] & 0xF0) <<  8) +
                                                    x, 
                                                    None))
-            raw_write(canolcbutils.makeframestring(0x16000000 +
+            self.raw_write(canolcbutils.makeframestring(0x16000000 +
                                                    ((source[1] & 0x0F) << 20) +
                                                    ((source[2] & 0xFF) << 12) +
                                                    x, 
                                                    None))
-            raw_write(canolcbutils.makeframestring(0x15000000 +
+            self.raw_write(canolcbutils.makeframestring(0x15000000 +
                                                    ((source[3] & 0xFF) << 16) +
                                                    ((source[4] & 0xF0) <<  8) +
                                                    x, 
                                                    None))
-            raw_write(canolcbutils.makeframestring(0x14000000 +
+            self.raw_write(canolcbutils.makeframestring(0x14000000 +
                                                    ((source[4] & 0x0F) << 20) +
                                                    ((source[5] & 0xFF) << 12) +
                                                    x, 
                                                    None))
             start = time.time()
             success = False;
-            usleep(200000)
+            time.sleep(0.2)
             while (True) :
-                result = self.receive()
+                result = None #self.receive()
                 if (result == None) :
                     # no conflicts found
                     success = True
@@ -162,6 +168,10 @@ class GenericToGC :
                     break
 
             if (success == True) :
+                self.raw_write(canolcbutils.makeframestring(0x10700000 + x, 
+                                                            None))
+                self.raw_write(canolcbutils.makeframestring(0x10701000 + x, 
+                                                            source))
                 self.aliasSource.setup(x, source)
                 return x
             
@@ -171,14 +181,14 @@ class GenericToGC :
     # @param source Node ID making the lookup
     # @param dest destination Node ID we are looking up the alias for
     # @return destination alias, else 0 on error
-    def dest_alias(souce, dest) :
+    def dest_alias(self, souce, dest) :
         alias = aliasCache.lookup(dest)
         if (alias != 0) :
             return alias
 
         # try and find the node alias out on the bus
         src_alias = source_alias(source)
-        raw_write(verifyNodeGlobal.makeframe(src_alias, dest))
+        self.raw_write(verifyNodeGlobal.makeframe(src_alias, dest))
         reply = expect(startswith=':X19170', data=dest, timeout=.3)
         if (reply != None) :
             alias = int(reply[7:10])
@@ -186,36 +196,83 @@ class GenericToGC :
             return alias
 
         assert False, "cannot find alias for Node ID"
+
+    ## Add payload bytes to the string.  Pop the added bytes off the payload
+    # @param string string to add payload bytes to
+    # @param alias destination alias
+    # @param payload list of payload data
+    # @param size number of payload bytes to append
+    # @return (string, payload) appended string, payload less appended items
+    def append_payload(self, string, alias, flags, payload, size) :
+        if (alias != None) :
+            alias += flags << 12
+            retval += hex(alias).upper()[2:]
+        while (size) :
+            string += ("00"+(hex(payload[0]).upper()[2:]))[-2:]
+            payload.pop(0)
+            size = size - 1;
+        return string, payload
+
+    ## Send message.
+    # @param mti generic message MTI
+    # @param source source Node ID
+    # @param paylaod list of payload bytes
+    # @param dest destination Node ID
+    def send(self, mti, source, payload=None, dest=None) :
+        src_alias = self.source_alias(source)
+        flags = 0
+        if (payload == None) :
+            payload = []
+        while (True) :
+            string = ":X"
+            if (mti <= 0x0FFF) :
+                string += "19"
+                string += ("000"+(hex(mti).upper()[2:]))[-3:]
+            #else if (mti == MTI_DATAGRAM) :
+            #else if (mti == MTI_STREAM_DATA_SEND) :
+            else :
+                assert False, "unknown message type"
+
+            string += ("000"+(hex(src_alias).upper()[2:]))[-3:]
+            string += "N"
+            if (dest != None) :
+                dst_alias = dest_alias(source, dest)
+                size = 0
+                if (flags == 0 and len(paylaod) > 6) :
+                    # first
+                    flags = 1
+                    size = 6
+                elif (flags == 1 or flags == 2) :
+                    if (len(payload) > 6) :
+                        # middle
+                        flags = 2
+                        size = 6
+                    else :
+                        # last
+                        flags = 2
+                        size = len(payload)
+                else :
+                    # only
+                    size = len(payload)
+
+                string, payload = self.append_payload(string, dst_alias, flags,
+                                                      payload, size)
+            else :
+                if (payload != None) :
+                    assert (len(payload) <= 8), "Broadcast payload to large"
+                    string, payload = self.append_payload(string, None, 0,
+                                                          payload, len(payload))
+
+            string += ";"
+
+            # if verbose, print
+            if (self.verbose) :
+                print "   send   ",string
         
-
-    ## Get the alias from a Node ID
-    def alias_lookup(nodeID) :
-        alias_lookup = self.aliasCache.alias_lookup(nodeID)
-        if (alias_lookup) :
-            return alias_lookup
-        # Alias not found, try and get it by 
-        self.raw_write(self, "");
-        return 0
-
-    def send(self, mti, source, dest, payload) :
-        #src_alias = 
-        #if (mti <= 0x0FFF) :
-
-        #else if (mti == MTI_DATAGRAM) :
-
-        #else if (mti == MTI_STREAM_DATA_SEND) :
-
-
-        if (self.socket == None) : self.connect()
-        
-        # if verbose, print
-        if (self.verbose) :
-            print "   send   ",string
-    
-        # send
-        self.raw.write(string)
-        
-        return
+            # send
+            self.raw_write(string)
+            if (len(payload) == 0 or dest == None) :
+                return;
         
     # returns multiplet or None on error
     #    transmitter
@@ -232,6 +289,8 @@ class GenericToGC :
                 # get more data
                 try:
                     self.rcvData = self.raw_read(1024)
+                    if (self.rcvData == None) :
+                        return None
                     self.rcvIndex = 0
                 except socket.timeout, err:
                     if (self.verbose) :
@@ -294,14 +353,13 @@ class GenericToGC :
                         print "Timeout"
                     return None
 
-    def close(self) :
-        return
-
 import sys
 from optparse import OptionParser
 
 def main():
     network = GenericToGC()
+    network.send(mtiDefs.INITIALIZATION_COMPLETE, defaults.thisNodeID, defaults.thisNodeID)
+    network.send(mtiDefs.IDENTIFY_EVENTS_GLOBAL, defaults.thisNodeID)
     global frame
     
     # create connection object
