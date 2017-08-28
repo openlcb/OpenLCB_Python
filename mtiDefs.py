@@ -58,3 +58,26 @@ STREAM_DATA_SEND                = 0x1F88
 STREAM_DATA_PROCEED             = 0x0888
 STREAM_DATA_COMPLETE            = 0x08A8
 
+def mti_print(mti, source, dest, event, payload) :
+    if (event != None and payload != None) :
+        assert False, "invalid message event/payload"
+
+    string = "            [0x" + ("000" + (hex(mti).upper()[2:]))[-3:] + "] <"
+    for x in source :
+        string += ("00"+(hex(x).upper()[2:]))[-2:] + "."
+    string = string[:len(string) -1]
+    string += "> "
+    if (dest != None) :
+        string += "<"
+        for x in dest :
+            string += ("00"+(hex(x).upper()[2:]))[-2:] + "."
+        string = string[:len(string) -1]
+        string += "> "
+    if (event) :
+        for x in event :
+            string += ("00"+(hex(x).upper()[2:]))[-2:]
+    elif (payload) :
+        string += payload
+
+    print string
+
