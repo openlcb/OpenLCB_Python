@@ -58,11 +58,69 @@ STREAM_DATA_SEND                = 0x1F88
 STREAM_DATA_PROCEED             = 0x0888
 STREAM_DATA_COMPLETE            = 0x08A8
 
-def mti_print(mti, source, dest, event, payload) :
-    if (event != None and payload != None) :
+## Message structure
+class OlcbMessage :
+    ## Constructor
+    def __init__(self, mti=None, source=None, dest=None, event=[],
+                 payload=[]) :
+        self.mti = mti
+        self.source = source
+        self.dest = dest
+        self.event = list(event)
+        self.payload = list(payload)
+
+    def set_mti(self, mti) :
+        self.mti = mti
+
+    def set_source(self, source) :
+        self.source = source
+
+    def set_dest(self, dest) :
+        self.dest = dest
+
+    def set_event_from_hex_string(self, event) :
+        self.event = [int(event[0:2],   16), int(event[2:4],   16),
+                      int(event[4:6],   16), int(event[6:8],   16),
+                      int(event[8:10],  16), int(event[10:12], 16),
+                      int(event[12:14], 16), int(event[14:16], 16)]
+
+    def append_list_data(self, list_data) :
+        for x in list_data :
+            payload.append(x)
+
+    def append_data(self, data) :
+        for x in range(len(dat)) :
+            payload.append(data[x])
+
+    def get_mti(self) :
+        return self.mti
+
+    def get_source(self) :
+        return self.source
+
+    def get_dest(self) :
+        return self.dest
+
+    def get_event(self) :
+        return self.event
+
+    def get_payload(self) :
+        return self.payload
+
+## Convert an OlcbMessage into a string representation
+# @param message OlcbMessage instance
+# @return string representation
+def olcb_message_to_string(message) :
+    mti = message.get_mti()
+    source = message.get_source()
+    dest = message.get_dest()
+    event = message.get_event()
+    payload = message.get_payload()
+
+    if (event != [] and payload != []) :
         assert False, "invalid message event/payload"
 
-    string = "            [0x" + ("000" + (hex(mti).upper()[2:]))[-3:] + "] <"
+    string = "[0x" + ("000" + (hex(mti).upper()[2:]))[-3:] + "] <"
     for x in source :
         string += ("00"+(hex(x).upper()[2:]))[-2:] + "."
     string = string[:len(string) -1]
@@ -73,11 +131,13 @@ def mti_print(mti, source, dest, event, payload) :
             string += ("00"+(hex(x).upper()[2:]))[-2:] + "."
         string = string[:len(string) -1]
         string += "> "
-    if (event) :
+    if (event != []) :
         for x in event :
             string += ("00"+(hex(x).upper()[2:]))[-2:]
-    elif (payload) :
-        string += payload
+    elif (payload != []) :
+        for x in payload :
+            string += ("00"+(hex(x).upper()[2:]))[-2:]
 
-    print string
+    return string
+
 
