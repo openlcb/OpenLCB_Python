@@ -593,7 +593,7 @@ class GenericToGC :
                     # only frame
                     message.append_data(result[15:len(result)-1])
                 else :
-                    key = (can_dest << 12) + can_source
+                    key = (can_dest << 24) + (can_source << 12) + can_mti
                     if (flags == 1) :
                         # first frame
                         assert self.mfMap[key] == None, \
