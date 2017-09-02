@@ -598,7 +598,8 @@ class GenericToGC :
                         # first frame
                         assert self.mfMap[key] == None, \
                                "multi-frame map already has map"
-                        message.append_data(result[15:len(result)-1])
+                        message.append_data_from_hex_string(
+                                                     result[15:len(result)-1])
                         self.mfMap[key] = message
                         # need more frames
                         continue
@@ -657,38 +658,39 @@ class GenericToGC :
                     return None
 
     ## Continue receiving data until the we get the expected result or timeout.
-    # @param exact if != None, look for result with exact string
+    # @param exact if != None, look for result with exact message
     # @param startswith if != None, look for result starting with string
     # @param data if != None, tuple of data bytes to match
     # @param timeout timeout in seconds, if timeout != 0, return None on timeout
-    # @return resulting message on success, None on timeout
-    def expect(self, exact=None, startswith=None, data=None, timeout=1) :
+    # @return resulting OlcbMessage on success, None on timeout
+    def expect(self, mti=None, source=None, event=None, payload=None, timeout=1) :
+        assert (event == None or payload == None), "event and payload conflict"
         start = time.time()
         while (True) :
-            result = self.receive()
-            if (data != None and result != None) :
-                if (len(data) == ((len(result) - 12) / 2)) :
-                    i = 0
-                    j = 11
-                    while (data[i] == int('0x' + result[j] + result[j + 1], 16)) :
-                        i = i + 1
-                        j = j + 2
-                        if (i == len(data)) :
-                            return result
-            elif (exact != None) :
-                if (result == exact) :
-                    return result
-            elif (startswith != None and result != None) :
-                if (result.startswith(startswith)) :
-                    return result
-            elif (exact == None and startswith == None and data == None) :
-                return result
+            now = time.time() 
+            if ((start + timeout) <= now) :
+                # timeout
+                return None
 
-            if (timeout != 0) :
-                if (time.time() > (start + timeout)) :
-                    if (self.verbose) :
-                        print "Timeout"
-                    return None
+            result = self.recv(timeout - (now - start))
+            if (result == None) :
+                #timeout
+                return None
+
+            if (mti != None) :
+                if (mti != result.get_mti()) :
+                    continue
+            if (source != None) :
+                if (source != result.get_source()) :
+                    continue
+            if (payload != None) :
+                if (mti != result.get_payload()) :
+                    continue
+            if (event != None) :
+                if (event != result.get_event()) :
+                    continue
+
+            return result
 
 import sys
 from optparse import OptionParser
