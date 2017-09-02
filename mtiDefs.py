@@ -58,9 +58,14 @@ STREAM_DATA_SEND                = 0x1F88
 STREAM_DATA_PROCEED             = 0x0888
 STREAM_DATA_COMPLETE            = 0x08A8
 
-## Message structure
+## Message structure.
 class OlcbMessage :
-    ## Constructor
+    ## Constructor.
+    # @param mti Message Type Indication
+    # @param source source Node ID
+    # @param dest destination Node ID
+    # @param event 8-byte event, mutually exclusive with payload
+    # @param payload payload bytes, mutually exclusive with event
     def __init__(self, mti=None, source=None, dest=None, event=[],
                  payload=[]) :
         self.mti = mti
@@ -69,45 +74,75 @@ class OlcbMessage :
         self.event = list(event)
         self.payload = list(payload)
 
+    ## Set the MTI.
+    # @param mti MTI to set
     def set_mti(self, mti) :
         self.mti = mti
 
+    ## Set the source Node ID.
+    # @param source Node ID to set
     def set_source(self, source) :
         self.source = source
 
+    ## Set the destination Node ID.
+    # @param dest Node ID to set
     def set_dest(self, dest) :
         self.dest = dest
 
+    ## Set the event from a hex string representation.
+    # @param event hex string containing event
     def set_event_from_hex_string(self, event) :
         self.event = [int(event[0:2],   16), int(event[2:4],   16),
                       int(event[4:6],   16), int(event[6:8],   16),
                       int(event[8:10],  16), int(event[10:12], 16),
                       int(event[12:14], 16), int(event[14:16], 16)]
 
+    ## Append a list to the end of the data payload.
+    # @param list_data data to append
     def append_list_data(self, list_data) :
         for x in list_data :
             payload.append(x)
 
+    ## Append a data string to the end of the data paylaod.
+    # @param data to append
     def append_data(self, data) :
-        for x in range(len(dat)) :
+        for x in range(len(data)) :
             payload.append(data[x])
 
+    ## Append a data string to the end of the data paylaod.
+    # @param data to append
+    def append_data_from_hex_string(self, data) :
+        x = 0
+        while (x < len(data)) :
+            payload.append(int(data[x:x+2], 16))
+            x += 2
+
+    ## Get the MTI of the message.
+    # @return MTI
     def get_mti(self) :
         return self.mti
 
+    ## Get the source Node ID of the message.
+    # @return Node ID
     def get_source(self) :
         return self.source
 
+    ## Get the destination Node ID of the message.
+    # @return Node ID
     def get_dest(self) :
         return self.dest
 
+    ## Get the event payload of the message.
+    # @return event
     def get_event(self) :
         return self.event
 
+    ## Get the data payload of the message.
+    # @return payload
     def get_payload(self) :
         return self.payload
 
-## Convert an OlcbMessage into a string representation
+## Convert an OlcbMessage into a string representation.
 # @param message OlcbMessage instance
 # @return string representation
 def olcb_message_to_string(message) :
