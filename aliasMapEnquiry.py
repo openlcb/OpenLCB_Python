@@ -80,28 +80,29 @@ def main():
 
     retval = test(options.alias, options.dest, options.nodeid, connection,
                   options.verbose)
-    connection.network.close()
+    #connection.network.close()
     exit(retval)
     
 def test(alias, dest, nodeID, connection, verbose) :
     # check with node id in frame
-    connection.network.send(makeframe(alias, nodeID))
+    connection.network.raw_send(makeframe(alias, nodeID))
     expect = canolcbutils.makeframestring(0x10701000 + dest, nodeID)
-    if (connection.network.expect(exact=expect) == None) :
+    if (connection.network.raw_expect(exact=expect) == None) :
         print "Expected reply when node ID matches not received"
         return 2
 
     # check without node id in frame 
-    connection.network.send(canolcbutils.makeframestring(0x10702000+alias,None))
+    connection.network.raw_send(makeframe(alias, None))
     expect = canolcbutils.makeframestring(0x10701000 + dest, nodeID)
-    if (connection.network.expect(exact=expect) == None) :
+    if (connection.network.raw_expect(exact=expect) == None) :
         print "Expected reply when node ID matches not received"
         return 2
 
     # test non-matching NodeID using a reserved one
-    connection.network.send(makeframe(alias, [0,0,0,0,0,1]))
-    reply = connection.network.receive()
-    if (connection.network.expect(exact=expect) != None) :
+    connection.network.raw_send(makeframe(alias, [0,0,0,0,0,1]))
+    expect = canolcbutils.makeframestring(0x10701000 + dest, nodeID)
+    reply = connection.network.raw_expect(startswith=expect)
+    if (reply != None) :
         print "Unexpected reply received when node ID didnt match ", reply
         return 2
         
