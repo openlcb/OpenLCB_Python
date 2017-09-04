@@ -13,7 +13,7 @@ class RawIoTCP :
     # @param port number to connect on
     # @param timeout receive timeout
     # @param verbose true to print verbose information
-    def __init__(self, host, port, timeout, verbose) :
+    def __init__(self, host, port, timeout=None, verbose=False) :
         self.socket = None
         
         # defaults (generally overridden by system-wide defaults elsewhere)
