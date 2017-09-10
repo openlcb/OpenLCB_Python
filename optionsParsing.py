@@ -89,7 +89,8 @@ def parse(command, simple=True):
     complete = options.complete
     verbose = options.verbose
 
-    connection.establish(nodeID, options.gchost, options.host, options.port,
+    connection.establish([1, 2, 3, 4, 5, 6], options.gchost, options.host,
+                         options.port,
                          options.device, options.verbose, options.veryverbose)
 
     if ((options.gchost != None or options.device != None) and alias == None) :
