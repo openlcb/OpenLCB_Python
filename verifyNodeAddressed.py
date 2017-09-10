@@ -16,7 +16,7 @@ import copy
 def main():
     # argument processing
     (alias, nodeID, connection, verbose, complete, repeat) = \
-        optionsParsing.parse("verifyNodeGobal")
+        optionsParsing.parse("verifyNodeAddressed")
 
     # now execute
     retval = test(nodeID, connection, verbose)
