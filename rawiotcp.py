@@ -33,6 +33,10 @@ class RawIoTCP :
 
         return
 
+    ## Close socket connection
+    def close(self) :
+        self.socket.close()
+
     ## Send data to the TCP socket.
     # @param string data to send
     def send(self, string) :        
