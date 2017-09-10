@@ -19,6 +19,11 @@ import aliasMapEnquiry
 def makeverifynodeglobalframe(alias, nodeID) :
     return canolcbutils.makeframestring(0x19490000+alias,nodeID)
 
+def makeverifynodeaddressedframe(alias, dest, nodeID) :
+    body = [(dest>>8)&0xFF, dest&0xFF]
+    if nodeID != None : body = body+nodeID
+    return canolcbutils.makeframestring(0x19488000+alias,body)
+
 
 ## mapping for multi-frame addressed messages
 class MultiFrameMap(dict) :
@@ -194,6 +199,11 @@ class GenericToGC :
 
         self.exit = False;
         return
+
+    ## Get the Node ID of ourselves.
+    # @return our own Node ID
+    def get_node_id_self(self) :
+        return self.aliasSource.get_node_id()
 
     ## Convert a hex string to a Node ID tuple.
     # @param string hex string to convert
@@ -406,6 +416,9 @@ class GenericToGC :
             if (alias != 0) :
                 return alias
 
+            if (dest == self.aliasSource.get_node_id()) :
+                return self.aliasSource.get_alias()
+
             # try and find the node alias out on the bus
             src_alias = self.source_alias()
             self.internal_raw_send(makeverifynodeglobalframe(src_alias, None))
@@ -424,8 +437,8 @@ class GenericToGC :
 
             # try and find the node id out on the bus
             src_alias = self.source_alias()
-            self.internal_raw_send(verifyNodeAddressed.makeframe(src_alias,
-                                                                 alias, None))
+            self.internal_raw_send(makeverifynodeaddressedframe(src_alias,
+                                                                alias, None))
             time.sleep(.2)
 
         assert False, "cannot find Node ID for alias"
@@ -439,7 +452,7 @@ class GenericToGC :
     def append_payload(self, string, alias, flags, payload, size) :
         if (alias != None) :
             alias += flags << 12
-            retval += hex(alias).upper()[2:]
+            string += ("0000" + (hex(alias).upper()[2:]))[-4:]
         while (size) :
             string += ("00"+(hex(payload[0]).upper()[2:]))[-2:]
             payload.pop(0)
@@ -478,7 +491,7 @@ class GenericToGC :
             if (message.get_dest() != None) :
                 dst_alias = self.dest_alias(message.get_dest())
                 size = 0
-                if (flags == 0 and len(paylaod) > 6) :
+                if (flags == 0 and len(payload) > 6) :
                     # first
                     flags = 1
                     size = 6
