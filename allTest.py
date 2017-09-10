@@ -1,14 +1,16 @@
 #!/usr/bin/env python
-'''
-Run a series of tests with an attached node
+##
+# Run a series of tests with an attached node. Updated by Stuart Baker.
+#
+# @author: Bob Jacobsen
+# @aurhor: Stuart Baker
 
-@author: Bob Jacobsen
-'''
+import optionsParsing
+import connection
+#import canolcbutils
+#import defaults
 
-import connection as connection
-import canolcbutils
-import defaults
-    
+'''
 def usage() :
     print ""
     print "Called standalone, will sequence through a set of tests"
@@ -26,93 +28,70 @@ def usage() :
     print "-t find destination alias automatically"
     print "-v verbose"
     print "-V Very verbose"
-
-import getopt, sys
+'''
 
 def main():
-    # argument processing
-    nodeID = connection.testNodeID
-    alias = connection.thisNodeAlias
-    dest = connection.testNodeAlias
-    event = defaults.testEventID
-    verbose = False
-    identifynode = False
-    complete = False
-    repeat = False
-    bufnum = 1
-    
-    try:
-        opts, remainder = getopt.getopt(sys.argv[1:], "e:n:b:a:d:vVtcr", ["event=", "alias=", "node=", "dest="])
-    except getopt.GetoptError, err:
-        # print help information and exit:
-        print str(err) # will print something like "option -a not recognized"
-        usage()
-        sys.exit(2)
-    for opt, arg in opts:
-        if opt == "-v":
-            verbose = True
-        elif opt == "-V":
-            connection.network.verbose = True
-            verbose = True
-        elif opt in ("-a", "--alias"):
-            alias = int(arg)
-        elif opt in ("-b"):
-            bufnum = int(arg)
-        elif opt == "-c":
-            complete = True
-        elif opt in ("-d", "--dest"):
-            dest = int(arg, 0)
-        elif opt in ("-e", "--event"):
-            event = canolcbutils.splitSequence(arg)
-        elif opt in ("-n", "--node"):
-            nodeID = canolcbutils.splitSequence(arg)
-        elif opt == "-r":
-            repeat = True
-        elif opt == "-t":
-            identifynode = True
-        else:
-            assert False, "unhandled option"
+    (alias, nodeID, connection, verbose, complete, repeat) = \
+        optionsParsing.parse("allTest", False)
 
     # now execute
-    retval = test(alias, dest, nodeID, event, connection, verbose, complete, repeat, identifynode, bufnum)
-    done(retval)    
+    result = test(alias, nodeID, connection, verbose, complete, repeat)
+    done(result)    
 
-def done(retval) :
+## Cleanup the test for exit
+# @param status status result from running the test
+def done(status) :
     connection.network.close()
-    exit(retval)
-    
-def test(alias, dest, nodeID, event, connection, verbose, complete, repeat, identifynode, bufnum):
+    if (status == 0) :
+        print "All tests passed!!!"
+    exit(status)
 
+## Run the tests
+# @param alias destination alias (None if not a Grid Connect connection)
+# @param nodeID destination Node ID
+# @param connection OpenLCB connection
+# @param verbose True to print verbose information
+# @param complete True to run all the tests to completion, regardless of failure
+# @param repeat True to repeate the tests continuously until failure
+def test(alias, nodeID, connection, verbose, complete, repeat):
     result = 0;
-    
+    import verifyNodeGlobal
+    tests = [["verifyNodeGlobal", verifyNodeGlobal]]    
+
+
     while True :
 
-        if identifynode :
-            import getUnderTestAlias
-            dest, nodeID = getUnderTestAlias.get(alias, None, verbose)
-
-        import aliasMapEnquiry
-        if verbose : print "aliasMapEnquiry"
-        retval = aliasMapEnquiry.test(alias, dest, nodeID, connection, verbose)
-        if retval != 0 :
-            print "Error in aliasMapEnquiry"
-            if not complete : done(retval)
-            result |= retval
+        if (alias != None) :
+            # we only perform this test for Grid Connect based nodes
+            import aliasMapEnquiry
+            if (verbose) :
+                print "aliasMapEnquiry"
+            retval = aliasMapEnquiry.test(connection.network.source_alias(),
+                                          alias, nodeID, connection, verbose)
+            if (retval != 0) :
+                print "Error in aliasMapEnquiry"
+                if (complete == False) :
+                    done(retval)
+                result |= retval
     
-        import verifyNodeGlobal
         #if verbose : print "verifyNodeGlobal w no NodeID"
         #retval = verifyNodeGlobal.test(alias, None, connection)
         #if retval != 0 :
         #    print "Error in verifyNodeGlobal w no NodeID"
         #    if not complete : done(retval)
         #    result |= retval
-        if verbose : print "verifyNodeGlobal"
-        retval = verifyNodeGlobal.test(alias, nodeID, connection)
-        if retval != 0 :
-            print "Error in verifyNodeGlobal"
-            if not complete : done(retval)
-            result |= retval
+
+        for x in range(len(tests)) :
+            if (verbose) :
+                print tests[x][0]
+            retval = tests[x][1].test(nodeID, connection)
+            if (retval != 0) :
+                print "Error in ", tests[x][0]
+                if (complete == False) :
+                    done(retval)
+                result |= retval
     
+        '''
         import verifyNodeAddressed
         if verbose : print "verifyNodeAddressed"
         retval = verifyNodeAddressed.test(alias, dest, nodeID, connection, verbose)
@@ -252,17 +231,19 @@ def test(alias, dest, nodeID, event, connection, verbose, complete, repeat, iden
             if not complete : done(retval)
             result |= retval
 
-        if not repeat : break
-        if verbose : print "End of pass, repeat"
-        if verbose : print ""
-        
-    if verbose : print "Note: Did not perform testStartup, which is manual"
-    if verbose : print "Note: Did not perform testForZeroAlias.py, which is slow"
-    if verbose :
-        if result != 0 : print "Encountered errors"
-        else : print "Normal end"
+        '''
+        if (repeat != True) :
+            break
+        if (verbose == True) :
+            print "End of pass, repeat\n"
+            print "Note: Did not perform testStartup, which is manual"
+            print "Note: Did not perform testForZeroAlias.py, which is slow"
+            if (result != 0) :
+                print "Encountered errors"
+            else :
+                print "Normal end"        
 
-    return
+    return result
 
 if __name__ == '__main__':
     main()
