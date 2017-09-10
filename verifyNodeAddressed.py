@@ -10,13 +10,7 @@ import connection
 import mtiDefs
 import optionsParsing
 
-import time
 import copy
-
-#def makeframe(alias, dest, nodeID) :
-#    body = [(dest>>8)&0xFF, dest&0xFF]
-#    if nodeID != None : body = body+nodeID
-#    return canolcbutils.makeframestring(0x19488000+alias,body)
 
 ## run this test only
 def main():
@@ -25,14 +19,15 @@ def main():
         optionsParsing.parse("verifyNodeGobal")
 
     # now execute
-    retval = test(nodeID, connection)
+    retval = test(nodeID, connection, verbose)
     connection.network.close()
     exit(retval)    
     
 ## run test
 # @param nodeID destination Node ID
 # @param connection OpenLCB connection
-def test(nodeID, connection) :
+# @param verbose True to print verbose information
+def test(nodeID, connection, verbose) :
     # send correct address, node ID in the body
     connection.network.send(mtiDefs.OlcbMessage(mtiDefs.VERIFY_NODE_ID_ADDRESSED,
                                                 dest = nodeID, payload = nodeID))

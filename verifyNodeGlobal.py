@@ -18,14 +18,15 @@ def main():
         optionsParsing.parse("verifyNodeGobal")
 
     # now execute
-    retval = test(nodeID, connection)
+    retval = test(nodeID, connection, verbose)
     connection.network.close()
     exit(retval)    
 
 ## run test
 # @param nodeID destination Node ID
 # @param connection OpenLCB connection
-def test(nodeID, connection):
+# @param verbose True to print verbose information
+def test(nodeID, connection, verbose):
     # first, send to this node
     connection.network.send(mtiDefs.OlcbMessage(mtiDefs.VERIFY_NODE_ID_GLOBAL,
                                                 payload = nodeID))
