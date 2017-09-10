@@ -30,7 +30,7 @@ def main():
             "Called standalone, will send one CAN AliasMapEquiry frame \n" + \
             "and display response\n\n" + \
             "Expect a single frame in return\n" + \
-            "  e.g. [180B7sss] nn nn nn nn nn nn\n" + \
+            "  e.g. [10701sss] nn nn nn nn nn nn\n" + \
             "containing dest alias and NodeID\n\n" + \
             "valid usages (default values):\n" + \
             "  ./aliasMapEnquiry.py\n" + \
@@ -80,7 +80,7 @@ def main():
 
     retval = test(options.alias, options.dest, options.nodeid, connection,
                   options.verbose)
-    #connection.network.close()
+    connection.network.close()
     exit(retval)
     
 def test(alias, dest, nodeID, connection, verbose) :
