@@ -101,20 +101,20 @@ class OlcbMessage :
     # @param list_data data to append
     def append_list_data(self, list_data) :
         for x in list_data :
-            payload.append(x)
+            self.payload.append(x)
 
     ## Append a data string to the end of the data paylaod.
     # @param data to append
     def append_data(self, data) :
         for x in range(len(data)) :
-            payload.append(data[x])
+            self.payload.append(data[x])
 
     ## Append a data string to the end of the data paylaod.
     # @param data to append
     def append_data_from_hex_string(self, data) :
         x = 0
         while (x < len(data)) :
-            payload.append(int(data[x:x+2], 16))
+            self.payload.append(int(data[x:x+2], 16))
             x += 2
 
     ## Get the MTI of the message.
