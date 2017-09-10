@@ -137,6 +137,16 @@ class OlcbMessage :
     def get_event(self) :
         return self.event
 
+    ## Get the event payload of the message.
+    # @return event
+    def get_event_value(self) :
+        value = 0
+        j = 48
+        for i in range(8) :
+            value += self.event[i] << j
+            j -= 8
+        return value
+
     ## Get the data payload of the message.
     # @return payload
     def get_payload(self) :
