@@ -1,46 +1,26 @@
 #!/usr/bin/env python
-'''
+## Helper method for establishing a connection to an OpenLCB network
+# 
+# @author: Bob Jacobsen
+# @author: Stuart Baker - extensively modified
 
-Provides a basic connection definition for the OpenLCB python test suite
+network = None
 
-Works with the (mutable) defaults.py file, which contains specific values
-
-@author: Bob Jacobsen
-'''
-
-import defaults
-
-network         = defaults.network
-
-thisNodeID      = defaults.thisNodeID 
-thisNodeAlias   = defaults.thisNodeAlias
-testNodeID      = defaults.testNodeID 
-testNodeAlias   = defaults.testNodeAlias
-
-
-def main():
-    usage()
-    
-    return  # done with example
-    
-def list() :
-    print "network.host = "+network.host
-    print "network.port = "+str(network.port)
-    print "thisNodeID = ",thisNodeID
-    print "thisNodeAlias = "+hex(thisNodeAlias)
-    print "testNodeID = ",testNodeID
-    print "testNodeAlias = "+hex(testNodeAlias)
-    return
-
-def usage() :
-    print ""
-    print "Python module for defining the layout connection."
-    print ""
-    print "Invoked by other routines to know how to send, "
-    print "not intended to be invoked standalone"
-    print ""
-    list()
-    return
-    
-if __name__ == '__main__':
-    main()
+def establish(nodeid, gchost=None, host=None, port=None, device=None,
+              verbose=False, veryverbose=False) :
+    if (gchost != None and port != None) :
+        import generictogc
+        import rawiotcp
+        raw_io = rawiotcp.RawIoTCP(gchost, port)
+        global network
+        network = generictogc.GenericToGC(nodeid, raw_io, verbose, veryverbose)
+    elif (host != None and port != None) :
+        assert False, "Native TCP connections not [yet] supported."
+    elif (device != None) :
+        import generictogc
+        import rawIoSerial
+        raw_io = rawIoSerial.RawIoSerial(device)
+        global network
+        network = generictogc.GenericToGC(nodeid, raw_io, verbose, veryverbose)
+    else :
+        assert False, "Invalid connection parameters."
