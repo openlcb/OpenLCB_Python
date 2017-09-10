@@ -56,7 +56,9 @@ def done(status) :
 def test(alias, nodeID, connection, verbose, complete, repeat):
     result = 0;
     import verifyNodeGlobal
-    tests = [["verifyNodeGlobal", verifyNodeGlobal]]    
+    import verifyNodeAddressed
+    tests = [["verifyNodeGlobal",    verifyNodeGlobal],
+             ["verifyNodeAddressed", verifyNodeAddressed]]
 
 
     while True :
