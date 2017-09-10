@@ -58,9 +58,11 @@ def test(alias, nodeID, connection, verbose, complete, repeat):
     import verifyNodeGlobal
     import verifyNodeAddressed
     import protocolIdentProtocol
+    import identifyEventsGlobal
     tests = [["verifyNodeGlobal",      verifyNodeGlobal],
              ["verifyNodeAddressed",   verifyNodeAddressed],
-             ["protocolIdentProtocol", protocolIdentProtocol]]
+             ["protocolIdentProtocol", protocolIdentProtocol],
+             ["identifyEventsGlobal",  identifyEventsGlobal]]
 
 
     while True :
@@ -96,14 +98,6 @@ def test(alias, nodeID, connection, verbose, complete, repeat):
                 result |= retval
     
         '''
-        import protocolIdentProtocol
-        if verbose : print "protocolIdentProtocol"
-        retval = protocolIdentProtocol.test(alias, dest, connection, verbose)
-        if retval != 0 :
-            print "Error in protocolIdentProtocol"
-            if not complete : done(retval)
-            result |= retval
-    
         import identifyEventsGlobal
         if verbose : print "identifyEventsGlobal"
         retval = identifyEventsGlobal.test(alias, dest, connection, verbose)
