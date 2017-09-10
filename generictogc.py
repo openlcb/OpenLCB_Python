@@ -16,6 +16,10 @@ import verifyNodeAddressed
 import verifyNodeGlobal
 import aliasMapEnquiry
 
+def makeverifynodeglobalframe(alias, nodeID) :
+    return canolcbutils.makeframestring(0x19490000+alias,nodeID)
+
+
 ## mapping for multi-frame addressed messages
 class MultiFrameMap(dict) :
     ## Value of a "missing" key
@@ -306,18 +310,29 @@ class GenericToGC :
                         print "  receive ", parsed
 
     ## Request thread exit.
-    def shutdown(self) :
+    def close(self) :
         self.exit = True
         self.sendSem.release()
+        self.sendThread.join()
+        self.recvThread.join()
+        self.rawIO.close()
 
     ## Send data to the interface.
     # @param string data to send
-    def raw_send(self, string, verbose=False) :
+    def internal_raw_send(self, string) :
         self.sendLock.acquire()
         self.sendString += string
         self.sendSem.release()
         self.sendLock.release()
-        if (self.veryVerbose or verbose) :
+        if (self.veryVerbose) :
+            print "  send    ", string
+
+    ## Send data to the interface.
+    # @param string data to send
+    # @param verbose force print
+    def raw_send(self, string) :
+        self.internal_raw_send(string)
+        if (self.verbose) :
             print "  send raw", string
 
     ## Receive data from the interface.
@@ -347,22 +362,22 @@ class GenericToGC :
             self.aliasReserve = x
             self.aliasInUse = False
 
-            self.raw_send(canolcbutils.makeframestring(0x17000000 +
+            self.internal_raw_send(canolcbutils.makeframestring(0x17000000 +
                                                ((src_nodeID[0] & 0xFF) << 16) +
                                                ((src_nodeID[1] & 0xF0) <<  8) +
                                                x, 
                                                None))
-            self.raw_send(canolcbutils.makeframestring(0x16000000 +
+            self.internal_raw_send(canolcbutils.makeframestring(0x16000000 +
                                                ((src_nodeID[1] & 0x0F) << 20) +
                                                ((src_nodeID[2] & 0xFF) << 12) +
                                                x, 
                                                None))
-            self.raw_send(canolcbutils.makeframestring(0x15000000 +
+            self.internal_raw_send(canolcbutils.makeframestring(0x15000000 +
                                                ((src_nodeID[3] & 0xFF) << 16) +
                                                ((src_nodeID[4] & 0xF0) <<  8) +
                                                x, 
                                                None))
-            self.raw_send(canolcbutils.makeframestring(0x14000000 +
+            self.internal_raw_send(canolcbutils.makeframestring(0x14000000 +
                                                ((src_nodeID[4] & 0x0F) << 20) +
                                                ((src_nodeID[5] & 0xFF) << 12) +
                                                x, 
@@ -373,9 +388,10 @@ class GenericToGC :
                 # conflict found, try again
                 continue;
 
-            self.raw_send(canolcbutils.makeframestring(0x10700000 + x, None))
-            self.raw_send(canolcbutils.makeframestring(0x10701000 + x,
-                                                       src_nodeID))
+            self.internal_raw_send(canolcbutils.makeframestring(0x10700000 + x,
+                                                                None))
+            self.internal_raw_send(canolcbutils.makeframestring(0x10701000 + x,
+                                                                src_nodeID))
             self.aliasSource.setup_alias(x)
             return x
             
@@ -392,7 +408,7 @@ class GenericToGC :
 
             # try and find the node alias out on the bus
             src_alias = self.source_alias()
-            self.raw_send(verifyNodeGlobal.makeframe(src_alias, None))
+            self.internal_raw_send(makeverifynodeglobalframe(src_alias, None))
             time.sleep(.2)
 
         assert False, "cannot find alias for Node ID"
@@ -408,7 +424,8 @@ class GenericToGC :
 
             # try and find the node id out on the bus
             src_alias = self.source_alias()
-            self.raw_send(verifyNodeAddressed.makeframe(src_alias, alias, None))
+            self.internal_raw_send(verifyNodeAddressed.makeframe(src_alias,
+                                                                 alias, None))
             time.sleep(.2)
 
         assert False, "cannot find Node ID for alias"
@@ -489,7 +506,7 @@ class GenericToGC :
             string += ";"
 
             # send
-            self.raw_send(string)
+            self.internal_raw_send(string)
             if (self.verbose) :
                 print "  send    ", mtiDefs.olcb_message_to_string(message)
             if (len(payload) == 0 or dest == None) :
@@ -591,7 +608,8 @@ class GenericToGC :
                 flags = int(result[11:12], 16) & 0x3
                 if (flags == 0) :
                     # only frame
-                    message.append_data(result[15:len(result)-1])
+                    message.append_data_from_hex_string(
+                                                     result[15:len(result)-1])
                 else :
                     key = (can_dest << 24) + (can_source << 12) + can_mti
                     if (flags == 1) :
@@ -618,6 +636,8 @@ class GenericToGC :
                             continue
             elif (can_mti & 0x4) :
                 message.set_event_from_hex_string(result[11:27])
+            else :
+                message.append_data_from_hex_string(result[11:len(result)-1])
 
             print "  receive ", mtiDefs.olcb_message_to_string(message)
             return message
@@ -653,7 +673,7 @@ class GenericToGC :
 
             if (timeout != 0) :
                 if (time.time() > (start + timeout)) :
-                    if (self.verbose) :
+                    if (self.veryVerbose) :
                         print "Timeout"
                     return None
 
@@ -684,7 +704,7 @@ class GenericToGC :
                 if (source != result.get_source()) :
                     continue
             if (payload != None) :
-                if (mti != result.get_payload()) :
+                if (payload != result.get_payload()) :
                     continue
             if (event != None) :
                 if (event != result.get_event()) :
@@ -716,7 +736,7 @@ def main():
         print "Expected reply"
         result = 2
 
-    network.shutdown()
+    network.close()
 
     time.sleep(.5)
     return  result # done with example
