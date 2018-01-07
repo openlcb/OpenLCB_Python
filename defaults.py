@@ -4,14 +4,25 @@ ethernet = False
 windows  = False
 local    = False
 
+thisNodeID = [1,2,3,4,5,6]
+thisNodeAlias = 0xAAA
+testNodeID = [0x2,0x1,0x99,0xff,0x00,0x1e]
+testNodeAlias = 0x5F9
+
 
 if tcp and not local:
-    import tcpolcblink
-    network = tcpolcblink.TcpToOlcbLink()
-    network.host = "174.18.137.234"
-    network.host = "localhost"
+    #import tcpolcblink
+    #network = tcpolcblink.TcpToOlcbLink()
+    #network = generictogc
+    #network.host = "172.168.1.10"
+    #network.host = "localhost"
     #network.host = "propername.local."
-    network.port = 12021
+    #network.port = 12021
+    import generictogc
+    import rawiotcp
+    raw_io = rawiotcp.RawIoTCP("localhost", 12021)
+    network = generictogc.GenericToGC(testNodeID, raw_io, True)
+
 elif ethernet and not local:
     import ethernetolcblink
     network = ethernetolcblink.EthernetToOlcbLink()
@@ -41,11 +52,6 @@ elif local :
 else :
     print "Please set one of the options to True"
 
-
-thisNodeID = [1,2,3,4,5,6]
-thisNodeAlias = 0xAAA
-testNodeID = [2,3,4,5,6,1]
-testNodeAlias = 0xDDD
 
 
 testEventID = [0x05, 0x02, 0x01, 0x02, 0x02, 0x00, 0x00, 0x00]
