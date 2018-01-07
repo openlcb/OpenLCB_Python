@@ -46,9 +46,9 @@ def test(nodeID, connection, verbose) :
               reply.get_mti() == mtiDefs.PRODUCER_IDENTIFIED_VALID or
               reply.get_mti() == mtiDefs.PRODUCER_IDENTIFIED_INVALID) :
             producerCount = producerCount + 1
-        elif (reply.get_mti() == CONSUMER_RANGE_IDENTIFIED) :
+        elif (reply.get_mti() == mtiDefs.CONSUMER_RANGE_IDENTIFIED) :
             consumerRange.append(reply.get_event_value())
-        elif (reply.get_mti() == PRODUCER_RANGE_IDENTIFIED) :
+        elif (reply.get_mti() == mtiDefs.PRODUCER_RANGE_IDENTIFIED) :
             producerRange.append(reply.get_event_value())
 
     if (verbose) :
