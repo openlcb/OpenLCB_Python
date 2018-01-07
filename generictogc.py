@@ -527,6 +527,7 @@ class GenericToGC :
 
     ## Receive a message already parsed into Grid Connect format
     # @param timeout timout to wait for a message to araive
+    # @param verbose true to print verbose information
     def recv_parsed(self, timeout=1, verbose=False) :
         start = time.time()
         if (self.rcvIndex >= len(self.rcvData)) :
