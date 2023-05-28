@@ -58,7 +58,7 @@ class EthernetToOlcbLink :
         self.socket.settimeout(self.timeout)
         while (self.rcvData.find('\n') < 0) :
             try:
-                self.rcvData = self.rcvData+self.socket.recv(1024)
+                self.rcvData = self.rcvData+self.socket.recv(1024).decode('UTF8')
             except socket.timeout as err:
                 if (self.verbose) : print ("   receive <none>") # blank line to show delay?
                 return None
@@ -67,6 +67,41 @@ class EthernetToOlcbLink :
         if (self.verbose) : print ("   receive "+r)
         return r
 
+    '''
+    Continue receiving data until the we get the expected result or timeout.
+    @param exact if != None, look for result with exact string
+    @param startswith if != None, look for result starting with string
+    @param data if != None, tuple of data bytes to match
+    @param timeout timeout in seconds, if timeout != 0, return None on timeout
+    @return resulting message on success, None on timeout
+    '''
+    def expect(self, exact=None, startswith=None, data=None, timeout=1) :
+        start = time.time()
+        while (True) :
+            result = self.receive()
+            if (data != None and result != None) :
+                if (len(data) == ((len(result) - 12) / 2)) :
+                    i = 0
+                    j = 11
+                    while (data[i] == int('0x' + result[j] + result[j + 1], 16)) :
+                        i = i + 1
+                        j = j + 2
+                        if (i == len(data)) :
+                            return result
+            elif (exact != None) :
+                if (result == exact) :
+                    return result
+            elif (startswith != None and result != None) :
+                if (result.startswith(startswith)) :
+                    return result
+            elif (exact == None and startswith == None and data == None) :
+                return result
+
+            if (timeout != 0) :
+                if (time.time() > (start + timeout)) :
+                    if (self.verbose) :
+                        print ("Timeout")
+                    return None
     def close(self) :
         return
 

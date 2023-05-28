@@ -13,7 +13,7 @@ class SerialOlcbLink :
     def __init__(self) :
 
         # defaults (generally overridden by system-wide defaults elsewhere)
-        self.port = "/dev/tty.usbserial-A7007AOK"
+        self.port = "/dev/cu.usbmodemCC570001B1"
         self.speed = 115200
         self.timeout = 0.1     # try to keep operations fast
         self.verbose = False
@@ -31,8 +31,8 @@ class SerialOlcbLink :
         self.ser.bytesize = serial.EIGHTBITS
         self.ser.stopbits = serial.STOPBITS_TWO
         #self.ser.setXonXoff(True)
-        #self.ser.rtscts = False
-        #self.ser.dsrdtr = False
+        self.ser.rtscts = False
+        self.ser.dsrdtr = False
         self.ser.setDTR(True)
         self.ser.setRTS(True)
 
@@ -91,6 +91,43 @@ class SerialOlcbLink :
         # if verbose, display what's received
         if (self.verbose) : print ("   receive "+r.replace("\x0A", "").replace("\x0D", ""))
         return r
+
+    '''
+    Continue receiving data until the we get the expected result or timeout.
+    @param exact if != None, look for result with exact string
+    @param startswith if != None, look for result starting with string
+    @param data if != None, tuple of data bytes to match
+    @param timeout timeout in seconds, if timeout != 0, return None on timeout
+    @return resulting message on success, None on timeout
+    '''
+    def expect(self, exact=None, startswith=None, data=None, timeout=1) :
+        start = time.time()
+        while (True) :
+            result = self.receive()
+            if (data != None and result != None) :
+                if (len(data) == ((len(result) - 12) / 2)) :
+                    i = 0
+                    j = 11
+                    while (data[i] == int('0x' + result[j] + result[j + 1], 16)) :
+                        i = i + 1
+                        j = j + 2
+                        if (i == len(data)) :
+                            return result
+            elif (exact != None and result != None) :
+                print ("exact may not be working right?")
+                if (result == exact) :
+                    return result
+            elif (startswith != None and result != None) :
+                if (result.startswith(startswith)) :
+                    return result
+            elif (exact == None and startswith == None and data == None) :
+                return result
+
+            if (timeout != 0) :
+                if (time.time() > (start + timeout)) :
+                    if (self.verbose) :
+                        print ("Timeout")
+                    return None
 
     def close(self) :
         return
