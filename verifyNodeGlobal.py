@@ -72,19 +72,19 @@ def main():
     # now execute
     retval = test(options.alias, options.nodeid, connection)
     connection.network.close()
-    exit(retval)    
-    
+    exit(retval)
+
 def test(alias, nodeID, connection):
     # first, send to this node
     connection.network.send(makeframe(alias, nodeID))
     if (connection.network.expect(startswith=":X19170", data=nodeID) == None) :
-        print "Global verify with matching node ID did not receive expected reply"
+        print ("Global verify with matching node ID did not receive expected reply")
         return 2
 
     # send without node ID
     connection.network.send(makeframe(alias, None))
     if (connection.network.expect(startswith=":X19170", data=nodeID) == None) :
-        print "Global verify without node ID did not receive expected reply"
+        print ("Global verify without node ID did not receive expected reply")
         return 12
 
     # allow time for the bus to settle
@@ -98,7 +98,7 @@ def test(alias, nodeID, connection):
     if (reply == None) :
         return 0
     else :
-        print "Global verify with wrong node ID should not receive reply but did: ", reply
+        print ("Global verify with wrong node ID should not receive reply but did: ", reply)
         return 24
 
 if __name__ == '__main__':
