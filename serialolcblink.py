@@ -77,21 +77,18 @@ class SerialOlcbLink :
     def receive(self) : # returns frame
         if (self.ser == None) : self.connect()
 
-        # if verbose, print
-        if (self.verbose) : print ("   receive "),
-
         self.ser.timeout = self.timeout
         line = "";
         r = self.ser.readline()
         # remove Xoff/Xon characters if present
-        #r = r.replace("\x11", "")
-        #r = r.replace("\x13", "")
+        r = r.decode('utf8').replace("\x11", "")
+        r = r.replace("\x13", "")
         # timeout returns ""
         if r == "" :
-            if (self.verbose) : print ("<none>") # blank line to show delay?
+            if (self.verbose) : print ("   receive <none>") # blank line to show delay?
             return None
         # if verbose, display what's received
-        if (self.verbose) : print (r.replace("\x0A", "").replace("\x0D", ""))
+        if (self.verbose) : print ("   receive "+r.replace("\x0A", "").replace("\x0D", ""))
         return r
 
     def close(self) :
