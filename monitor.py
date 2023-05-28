@@ -11,7 +11,7 @@ import connection as connection
 def main():
     while (True) :
         frame = connection.network.receive()
-        if (frame != None ) : print frame,
+        if (frame != None ) : print (frame),
     return
 
 if __name__ == '__main__':
