@@ -36,6 +36,7 @@ class SerialOlcbLink :
         self.ser.setDTR(True)
         self.ser.setRTS(True)
 
+
         # from http://bytes.com/topic/python/answers/170478-uart-parity-setting-mark-space-using-pyserial
         if self.speed == 230400 and not self.parallel :
             self.ser.parity = serial.PARITY_EVEN
@@ -70,7 +71,7 @@ class SerialOlcbLink :
                 tframe = tframe+c+c
             tframe = tframe+";;"
         # send
-        self.ser.write(tframe)
+        self.ser.write(tframe.encode())
 
         return
 
