@@ -77,31 +77,48 @@ class EthernetToOlcbLink :
     '''
     def expect(self, exact=None, startswith=None, data=None, timeout=1) :
         start = time.time()
-        while (True) :
+        while (True) : # loop to find, timeout or fali
             result = self.receive()
-            if (data != None and result != None) :
+
+            if (result == None) :
+                 if (timeout != 0) :
+                    if (time.time() > (start + timeout)) :
+                        if (self.verbose) :
+                            print ("Timeout")
+                        return None
+                    else :
+                        continue
+                 else : return None
+
+            # here, result was not None - do sequential checks
+            if (exact == None and startswith == None and data == None) :
+                return result   # no test, just get the data
+
+            if (data != None) :
                 if (len(data) == ((len(result) - 12) / 2)) :
                     i = 0
                     j = 11
                     while (data[i] == int('0x' + result[j] + result[j + 1], 16)) :
                         i = i + 1
                         j = j + 2
-                        if (i == len(data)) :
-                            return result
-            elif (exact != None) :
-                if (result == exact) :
-                    return result
-            elif (startswith != None and result != None) :
-                if (result.startswith(startswith)) :
-                    return result
-            elif (exact == None and startswith == None and data == None) :
-                return result
+                        if (i != len(data)) :
+                            return None
 
-            if (timeout != 0) :
-                if (time.time() > (start + timeout)) :
-                    if (self.verbose) :
-                        print ("Timeout")
+            if (exact != None) :
+                print ("exact may not be working right?")
+                print (result)
+                print (exact)
+                print (result == exact)
+                if (result != exact) :
                     return None
+
+            if (startswith != None) :
+                if (not result.startswith(startswith)) :
+                    return None
+
+            # here, we passed all the available tests!
+            return result
+
     def close(self) :
         return
 
