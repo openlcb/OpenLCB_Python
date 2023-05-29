@@ -8,7 +8,7 @@ Read and check the Configuration Definition Information
 import connection as connection
 import canolcbutils
 import datagram
-    
+
 def usage() :
     print("")
     print("Read and check the Configuration Definition Information")
@@ -29,7 +29,7 @@ def main():
     dest = connection.testNodeAlias
     identifynode = False
     verbose = False
-    
+
     try:
         opts, remainder = getopt.getopt(sys.argv[1:], "d:a:vVt", ["dest=", "alias="])
     except getopt.GetoptError as err:
@@ -59,7 +59,7 @@ def main():
     retval = test(alias, dest, connection, verbose)
     connection.network.close()
     exit(retval)
-    
+
 def test(alias, dest, connection, verbose) :
 
     # instead of checking the length of the address space (not cleanly required anyway)
@@ -69,15 +69,15 @@ def test(alias, dest, connection, verbose) :
     result = ""
     chunk = 16
     done = False
-    
-    while True :    
+
+    while True :
         # Read from CDI space
         retval = datagram.sendOneDatagram(alias, dest, [0x20,0x43,(address>>24)&0xFF,(address>>16)&0xFF,(address>>8)&0xFF,address&0xFF,chunk], connection, verbose)
         if retval != 0 :
             return retval
         # read data response
         retval = datagram.receiveOneDatagram(alias, dest, connection, verbose)
-        if (type(retval) is int) : 
+        if (type(retval) is int) :
             # pass error code up
             return retval
         if retval[0:2] != [0x20,0x53] :
@@ -90,17 +90,17 @@ def test(alias, dest, connection, verbose) :
                 break;
         if done : break
         address = address + chunk
-        
+
     if verbose : print("   Read CDI result was ", len(result), " bytes")
     if connection.network.verbose : print("  Read CDI result ++++++++++\n", result,"\n++++++++++++++++")
-        
-    executable = "xmllint --noout --schema ../../specs/schema/cdi.xsd - "
+
+    executable = "xmllint --noout --schema http://openlcb.org/schema/cdi/1/1/cdi.xsd - "
 
     import subprocess
-    process = subprocess.Popen(executable,1,None,subprocess.PIPE,subprocess.PIPE, 
+    process = subprocess.Popen(executable,-1,None,subprocess.PIPE,subprocess.PIPE,
                     subprocess.STDOUT, None, False, True)
-    [stdout, stderr] = process.communicate(result) 
-    
+    [stdout, stderr] = process.communicate(result.encode())
+
     if process.returncode != 0 :
         print("   CDI data did not validate:  ", stdout)
     if process.returncode == 0 and verbose :
