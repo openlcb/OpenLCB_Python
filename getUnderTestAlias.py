@@ -19,13 +19,17 @@ so it expects to have only one node on the network so that replies are unique.
 def get(alias, nodeID, verbose) :
     if verbose : print ("   get alias of node under test")
     connection.network.send(verifyNodeGlobal.makeframe(alias, nodeID))
-    while (True) :
+    loop = 1
+    while (loop < 20) :
+        loop = loop+1
         reply = connection.network.receive()
         if (reply == None ) : continue
         if (reply.startswith(":X19170")) :
             alias,nodeID = int(reply[7:10],16),canolcbutils.bodyArray(reply)
             if verbose : print ("   Found alias "+str(alias)+" ("+hex(alias)+") for node ID "+str(nodeID))
             return alias,nodeID
+    print ("Could not obtain alias, no reply from unit under test")
+    exit(1)
 
 def usage() :
     print ("")
