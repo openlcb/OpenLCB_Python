@@ -30,16 +30,17 @@ elif serial and not local :
     #network.port = "/dev/cu.usbserial-A900fLVC"
     #network.port = "/dev/cu.usbmodem401331"
     #network.port = "/dev/cu.usbserial-AE015IZE" # Ioduino
-    network.port = "/dev/cu.usbserial-A5VRG6OF" # TCH parallel
+    #network.port = "/dev/cu.usbserial-A5VRG6OF" # TCH parallel
+    network.port = "/dev/cu.usbmodemCC570001B1" # RR-Cirkits
     network.speed = 230400
     network.parallel = True
-    network.startdelay = 2
+    network.startdelay = 0 # time to wait at start for adapter to come up, in seconds
 elif local :
     import pipeolcblink
     network = pipeolcblink.PipeOlcbLink()
     network.name = "pyOlcbBasicNode"
 else :
-    print "Please set one of the options to True"
+    print ("Please set one of the options to True")
 
 
 thisNodeID = [1,2,3,4,5,6]
