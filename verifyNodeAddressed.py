@@ -18,6 +18,10 @@ def makeframe(alias, dest, nodeID) :
 from optparse import OptionParser
 
 def main():
+    nodeID = connection.testNodeID
+    alias = connection.thisNodeAlias
+    dest = connection.testNodeAlias
+
     # argument processing
     usage = "usage: %prog [options]\n\n" + \
             "Called standalone, will send one CAN VerifyNode (addressed) " + \
@@ -59,63 +63,59 @@ def main():
 
     if options.veryverbose :
         connection.network.verbose = True
-    
-    '''
-    @todo identifynode option not currently implemented
-    '''
-    #if identifynode :
-    #    import getUnderTestAlias
-    #    dest, otherNodeId = getUnderTestAlias.get(alias, None, verbose)
-    #    if nodeID == None : nodeID = otherNodeId
 
-    retval = test(options.alias, options.dest, options.nodeid, connection,
+    if options.identifynode :
+        import getUnderTestAlias
+        dest, nodeID = getUnderTestAlias.get(alias, None, options.verbose or options.veryverbose)
+
+    retval = test(alias, dest, nodeID, connection,
                   options.verbose)
     connection.network.close()
     exit(retval)
-    
+
 def test(alias, dest, nodeID, connection, verbose) :
     # send correct address, correct node ID in body
     connection.network.send(makeframe(alias, dest, nodeID))
     expect = canolcbutils.makeframestring(0x19170000 + dest, nodeID)
-    if (connection.network.expect(exact=expect) == None) :
-        print "Expected reply to correct alias & correct ID not received"
+    if (connection.network.expect(startswith=expect) == None) :
+        print ("Expected reply "+expect+" to correct alias & correct ID not received")
         return 2
 
     # send correct address, no node ID in body
     connection.network.send(makeframe(alias, dest, None))
     if (connection.network.expect(startswith=":X19170", data=nodeID) == None) :
-        print "Expected reply to correct alias & no ID not received"
+        print ("Expected reply to correct alias & no ID not received")
         return 2
 
     # send correct address, wrong node ID in body
     tnodeID = copy.copy(nodeID)
     tnodeID[0] = tnodeID[0]^1
-    
+
     connection.network.send(makeframe(alias, dest, tnodeID))
     if (connection.network.expect(startswith=":X19170", data=nodeID) == None) :
-        print "Expected reply to correct alias & incorrect ID not received"
+        print ("Expected reply to correct alias & incorrect ID not received")
         return 2
 
     # repeat all three with invalid alias
     connection.network.send(makeframe(alias, (~dest)&0xFFF, nodeID))
     expect = canolcbutils.makeframestring(0x19170000 + dest, nodeID)
-    reply = connection.network.expect(exact=expect)
+    reply = connection.network.expect(startswith=expect)
     if (reply != None) :
-        print "Unexpected reply received on incorrect alias, OK nodeID", reply
+        print ("Unexpected reply received on incorrect alias, OK nodeID", reply)
         return 1
-    
+
     connection.network.send(makeframe(alias, (~dest)&0xFFF, None))
     reply = connection.network.expect(startswith=":X19170", data=nodeID)
     if (reply != None) :
-        print "Unexpected reply received on incorrect alias, no nodeID", reply
+        print ("Unexpected reply received on incorrect alias, no nodeID", reply)
         return 1
-    
+
     connection.network.send(makeframe(alias, (~dest)&0xFFF, tnodeID))
     reply = connection.network.expect(startswith=":X19170", data=nodeID)
     if (reply != None) :
-        print "Unexpected reply received on incorrect alias, wrong nodeID", reply
+        print ("Unexpected reply received on incorrect alias, wrong nodeID", reply)
         return 1
-    
+
     return 0
 
 if __name__ == '__main__':

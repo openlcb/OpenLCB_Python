@@ -17,26 +17,27 @@ so it expects to have only one node on the network so that replies are unique.
 
 '''
 def get(alias, nodeID, verbose) :
+    if verbose : print ("   get alias of node under test")
     connection.network.send(verifyNodeGlobal.makeframe(alias, nodeID))
     while (True) :
         reply = connection.network.receive()
-        if (reply == None ) : return None,None
+        if (reply == None ) : continue
         if (reply.startswith(":X19170")) :
             alias,nodeID = int(reply[7:10],16),canolcbutils.bodyArray(reply)
-            if verbose : print "Found alias "+str(alias)+" ("+hex(alias)+") for node ID ",nodeID
+            if verbose : print ("   Found alias "+str(alias)+" ("+hex(alias)+") for node ID ",nodeID)
             return alias,nodeID
-            
+
 def usage() :
-    print ""
-    print " Assumoing one under-test node present, uses "
-    print " one CAN VerifyNode (Global) message"
-    print " to get that node's alias "
-    print ""
-    print "Default connection detail taken from connection.py"
-    print ""
-    print "-a --alias source alias (default 123)"
-    print "-n --node dest nodeID (default None)"
-    print "-v verbose"
+    print ("")
+    print (" Assumoing one under-test node present, uses ")
+    print (" one CAN VerifyNode (Global) message")
+    print (" to get that node's alias ")
+    print ("")
+    print ("Default connection detail taken from connection.py")
+    print ("")
+    print ("-a --alias source alias (default 123)")
+    print ("-n --node dest nodeID (default None)")
+    print ("-v verbose")
 
 import getopt, sys
 
@@ -47,9 +48,9 @@ def main():
     verbose = False
     try:
         opts, remainder = getopt.getopt(sys.argv[1:], "h:p:n:a:vV", ["alias=", "node=", "host=", "port="])
-    except getopt.GetoptError, err:
+    except getopt.GetoptError as err:
         # print help information and exit:
-        print str(err) # will print something like "option -a not recognized"
+        print (str(err)) # will print something like "option -a not recognized"
         usage()
         sys.exit(2)
     for opt, arg in opts:

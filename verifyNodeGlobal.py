@@ -23,6 +23,10 @@ import time
 from optparse import OptionParser
 
 def main():
+    nodeID = connection.testNodeID
+    alias = connection.thisNodeAlias
+    dest = connection.testNodeAlias
+
     # argument processing
     usage = "usage: %prog [options]\n\n" + \
             "Called standalone, will send one CAN VerifyNode (Global) " + \
@@ -61,16 +65,12 @@ def main():
     if options.veryverbose :
         connection.network.verbose = True
 
-    '''
-    @todo identifynode option not currently implemented
-    '''
-    #if identifynode :
-    #    import getUnderTestAlias
-    #    dest, nodeID = getUnderTestAlias.get(alias, None, verbose)
-    #    if nodeID == None : nodeID = otherNodeId
+    if options.identifynode :
+        import getUnderTestAlias
+        dest, nodeID = getUnderTestAlias.get(alias, None, options.verbose or options.veryverbose)
 
     # now execute
-    retval = test(options.alias, options.nodeid, connection)
+    retval = test(alias, nodeID, connection)
     connection.network.close()
     exit(retval)
 
