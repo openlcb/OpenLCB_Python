@@ -173,7 +173,7 @@ def test(alias, dest, nodeID, event, connection, verbose, complete, repeat, iden
         if verbose : print ("testConfigurationProtocol")
         retval = testConfigurationProtocol.test(alias, dest, connection, verbose)
         if retval != 0 :
-            print ("Error in testConfigurationProtocol", retval)
+            print ("Error in testConfigurationProtocol")
             if not complete : done(retval)
             result |= retval
 
@@ -181,7 +181,7 @@ def test(alias, dest, nodeID, event, connection, verbose, complete, repeat, iden
         if verbose : print ("testDatagram")
         retval = testDatagram.test(alias, dest, connection, bufnum, verbose)
         if retval != 0 :
-            print ("Error in testDatagram", retval)
+            print ("Error in testDatagram")
             if not complete : done(retval)
             result |= retval
 
@@ -189,7 +189,7 @@ def test(alias, dest, nodeID, event, connection, verbose, complete, repeat, iden
         if verbose : print ("testOverlappingDatagrams")
         retval = testOverlappingDatagrams.test(alias, dest, bufnum, connection, verbose)
         if retval != 0 :
-            print ("Error in testOverlappingDatagrams", retval)
+            print ("Error in testOverlappingDatagrams")
             if not complete : done(retval)
             result |= retval
 
