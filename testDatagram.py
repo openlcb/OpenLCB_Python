@@ -81,7 +81,7 @@ def receiveOneDatagram(alias, dest, conection, verbose) :
         return 3
       retval = retval + canolcbutils.bodyArray(reply)
     else:
-      print("Unexpected message "+str(reply)+"instead of first datagram segment")
+      print("Unexpected message "+str(reply)+"instead of first datagram segment in reply to NAK")
       return 3
     while True :
         reply = connection.network.receive()
