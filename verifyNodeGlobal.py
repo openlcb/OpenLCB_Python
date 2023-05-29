@@ -23,9 +23,6 @@ import time
 from optparse import OptionParser
 
 def main():
-    nodeID = connection.testNodeID
-    alias = connection.thisNodeAlias
-    dest = connection.testNodeAlias
 
     # argument processing
     usage = "usage: %prog [options]\n\n" + \
@@ -45,7 +42,7 @@ def main():
     parser.add_option("-a", "--alias", dest="alias", metavar="ALIAS",
                       default=connection.thisNodeAlias, type = int,
                       help="source alias")
-    parser.add_option("-n", "--node", dest="nodeid",
+    parser.add_option("-n", "--node", dest="nodeID",
                       metavar="0x1 0x2 0x3 0x4 0x5 0x6",
                       default=connection.testNodeID, type=int, nargs=6,
                       help="destination Node ID")
@@ -67,10 +64,10 @@ def main():
 
     if options.identifynode :
         import getUnderTestAlias
-        dest, nodeID = getUnderTestAlias.get(alias, None, options.verbose or options.veryverbose)
+        options.dest, options.nodeID = getUnderTestAlias.get(options.alias, None, options.verbose or options.veryverbose)
 
     # now execute
-    retval = test(alias, nodeID, connection)
+    retval = test(options.alias, options.nodeID, connection)
     connection.network.close()
     exit(retval)
 
