@@ -11,7 +11,7 @@ import canolcbutils
 def makeframe(alias, dest) :
     body = [(dest>>8)&0xFF, dest&0xFF]
     return canolcbutils.makeframestring(0x19DE8000+alias,body)
-    
+
 def usage() :
     print("")
     print("Called standalone, will send one CAN Simple Node Identificant Information (addressed) message")
@@ -33,7 +33,7 @@ def main():
     dest = connection.testNodeAlias
     identifynode = False
     verbose = False
-    
+
     try:
         opts, remainder = getopt.getopt(sys.argv[1:], "d:a:vVt", ["alias=", "dest="])
     except getopt.GetoptError as err:
@@ -63,11 +63,11 @@ def main():
     retval = test(alias, dest, connection, verbose)
     connection.network.close()
     exit(retval)
-    
+
 def test(alias, dest, connection, verbose) :
-    if verbose : print("  check valid request") 
+    if verbose : print("  check valid request")
     connection.network.send(makeframe(alias, dest))
-    
+
     mfgName = ""
     mfgType = ""
     mfgHVers = ""
@@ -75,15 +75,15 @@ def test(alias, dest, connection, verbose) :
     userName = ""
     userComment = ""
     fill = 0   # 0 is format byte, 1 is name, 2 is type, 3 is vers
-    
+
     # assume always sends the same number of frames
     count = 0
-    
+
     while (True) :
         reply = connection.network.receive()
         if reply == None :
             break
-        if not (reply.startswith(":X19A08") and int(reply[7:10],16)==dest and int(reply[11:15],16)==alias) :
+        if not (reply.startswith(":X19A08") and int(reply[7:10],16)==dest and int(reply[12:15],16)==alias) :
             print("Unexpected reply received ", reply)
             return 1
         # process content
@@ -92,26 +92,26 @@ def test(alias, dest, connection, verbose) :
         for c in val[2:] :
             if fill == 0 :
                 fill = 1
-                if c != 1 :
-                    print("First byte of first part should have been one, was ",c)
+                if c != 1 and c != 4:
+                    print("First byte of first part should have been one or four, was ",c)
                     return 3
-            elif fill == 1 : 
+            elif fill == 1 :
                 mfgName = mfgName+chr(c)
             elif fill == 2 :
-                mfgType = mfgType+chr(c)         
+                mfgType = mfgType+chr(c)
             elif fill == 3 :
-                mfgHVers = mfgHVers+chr(c)         
+                mfgHVers = mfgHVers+chr(c)
             elif fill == 4 :
-                mfgSVers = mfgSVers+chr(c)         
+                mfgSVers = mfgSVers+chr(c)
             elif fill == 5 :
                 fill = 6
-                if c != 1 :
-                    print("First byte of second part should have been one, was ",c)
+                if c != 1 and c != 2 :
+                    print("First byte of second part should have been one or two, was ",c)
                     return 4
             elif fill == 6 :
-                userName = userName+chr(c)         
+                userName = userName+chr(c)
             elif fill == 7 :
-                userComment = userComment+chr(c)         
+                userComment = userComment+chr(c)
             else :
                 print("Unexpected extra content", c)
                 return 15
@@ -132,17 +132,15 @@ def test(alias, dest, connection, verbose) :
     if verbose : print("  address other node, expect no reply")
     connection.network.send(makeframe(alias, (~dest)&0xFFF))
     reply = connection.network.receive()
-    if reply != None : 
+    if reply != None :
         print("Unexpected reply received ", reply)
-        
+
     if verbose : print("  check three simultaneous requests")
     alias2 = (alias+1)&0xFFF
     if alias2 == dest : alias2 = (alias2+1)&0xFFF
-    alias3 = (alias+10)&0xFFF
+    alias3 = (alias+3)&0xFFF
     if alias3 == dest : alias3 = (alias3+10)&0xFFF
-    
-    #frame = makeframe(alias, dest)+makeframe(alias2, dest)+makeframe(alias3, dest)
-    #connection.network.send(frame)
+
     connection.network.send(makeframe(alias, dest))
     connection.network.send(makeframe(alias2, dest))
     connection.network.send(makeframe(alias3, dest))
@@ -154,29 +152,29 @@ def test(alias, dest, connection, verbose) :
         reply = connection.network.receive()
         if reply == None :
             break
-        if (reply.startswith(":X19A08") and int(reply[7:10],16)==dest and int(reply[11:15],16)==alias) :
+        if (reply.startswith(":X19A08") and int(reply[7:10],16)==dest and int(reply[12:15],16)==alias) :
             count1 = count1+1
-        if (reply.startswith(":X19068") and int(reply[7:10],16)==dest and int(reply[11:15],16)==alias) :
+        if (reply.startswith(":X19068") and int(reply[7:10],16)==dest and int(reply[12:15],16)==alias) :
             count1 = count1-100
-        if (reply.startswith(":X19A08") and int(reply[7:10],16)==dest and int(reply[11:15],16)==alias2) :
+        if (reply.startswith(":X19A08") and int(reply[7:10],16)==dest and int(reply[12:15],16)==alias2) :
             count2 = count2+1
-        if (reply.startswith(":X19068") and int(reply[7:10],16)==dest and int(reply[11:15],16)==alias2) :
+        if (reply.startswith(":X19068") and int(reply[7:10],16)==dest and int(reply[12:15],16)==alias2) :
             count2 = count2-100
-        if (reply.startswith(":X19A08") and int(reply[7:10],16)==dest and int(reply[11:15],16)==alias3) :
+        if (reply.startswith(":X19A08") and int(reply[7:10],16)==dest and int(reply[12:15],16)==alias3) :
             count3 = count3+1
-        if (reply.startswith(":X19068") and int(reply[7:10],16)==dest and int(reply[11:15],16)==alias3) :
+        if (reply.startswith(":X19068") and int(reply[7:10],16)==dest and int(reply[12:15],16)==alias3) :
             count3 = count3-100
-    if count != count1 and count1 != -100: 
+    if count != count1 and count1 != -100:
         print("got ",count1," frames for request 1 instead of ",count)
         return 101
-    if count != count2 and count2 != -100: 
+    if count != count2 and count2 != -100:
         print("got ",count2," frames for request 2 instead of ",count)
         return 102
-    if count != count3 and count3 != -100: 
+    if count != count3 and count3 != -100:
         print("got ",count3," frames for request 3 instead of ",count)
         return 103
 
     return 0
-    
+
 if __name__ == '__main__':
     main()
