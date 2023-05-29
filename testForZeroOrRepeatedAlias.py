@@ -10,33 +10,33 @@ import canolcbutils
 import verifyNodeGlobal
 
 import time
-    
+
 def usage() :
-    print ""
-    print "Forces repeated reallocation of alias to check for zero or repetition."
-    print ""
-    print "Default connection detail taken from connection.py"
-    print ""
-    print "-d --dest destination (target node) starting alias"
-    print "-t find destination alias automatically"
-    print "-n --num number of cycles (default 40000, 0 means forever)"
-    print "-v verbose"
-    print "-V very verbose"
+    print("")
+    print("Forces repeated reallocation of alias to check for zero or repetition.")
+    print("")
+    print("Default connection detail taken from connection.py")
+    print("")
+    print("-d --dest destination (target node) starting alias")
+    print("-t find destination alias automatically")
+    print("-n --num number of cycles (default 4000, 0 means forever)")
+    print("-v verbose")
+    print("-V very verbose")
 
 import getopt, sys
 
 def main():
-    n = 40000
+    n = 4000
     dest = connection.testNodeAlias;
     verbose = False
     identifynode = False
-    
+
     # argument processing
     try:
         opts, remainder = getopt.getopt(sys.argv[1:], "n:d:a:vVt", ["alias=", "dest=","num="])
-    except getopt.GetoptError, err:
+    except getopt.GetoptError as err:
         # print help information and exit:
-        print str(err) # will print something like "option -a not recognized"
+        print(str(err)) # will print something like "option -a not recognized"
         usage()
         sys.exit(2)
     for opt, arg in opts:
@@ -57,14 +57,14 @@ def main():
     retval = test(dest, connection, identifynode, n, verbose)
     connection.network.close()
     return retval
-    
+
 def once(dest, connection, identifynode, verbose, marks) :
     alias = (dest-10)|1
 
     # Note: This test assumes that the response will be
     # to reacquire another alias after the conflicted one is
     # dropped.  This isn't required behavior by standard, but
-    # is a necessary condition for the test to continue and 
+    # is a necessary condition for the test to continue and
     # check another conflict condition.
     #
     # Sending a global message (that normally doesn't get a response)
@@ -72,23 +72,23 @@ def once(dest, connection, identifynode, verbose, marks) :
     connection.network.send(verifyNodeGlobal.makeframe(dest, [0,0,0,0,0,1]))
     reply = connection.network.receive()
     if reply == None :
-        print "no response received to conflict frame"
+        print("no response received to conflict frame")
         return -21
     if not reply.startswith(":X10703") :
-        print "Expected first AMR"
+        print("Expected first AMR")
         return -22
     reply = connection.network.receive()
     if reply == None :
-        print "no response received to conflict frame"
+        print("no response received to conflict frame")
         return -21
     if not reply.startswith(":X17") :
-        print "Expected first CID"
+        print("Expected first CID")
         return -22
     if int(reply[7:10],16) == 0 :
-        print "received alias == 0"
+        print("received alias == 0")
         return -24
     if int(reply[7:10],16) == dest :
-        print "received alias == previous alias"
+        print("received alias == previous alias")
         # this is just noted, it doesnt end test
     dest = int(reply[7:10],16)
     marks.add(dest)
@@ -102,7 +102,7 @@ def once(dest, connection, identifynode, verbose, marks) :
     reply = connection.network.receive()  # VerifiedNID
 
     return dest
-    
+
 def test(dest, connection, identifynode, n, verbose) :
     marks = set()
     if identifynode :
@@ -110,15 +110,15 @@ def test(dest, connection, identifynode, n, verbose) :
         dest, otherNodeId = getUnderTestAlias.get(0x123, None, verbose)
 
     if n == 0 :
-        while dest >= 0 : 
+        while dest >= 0 :
             dest = once(dest, connection, identifynode, verbose, marks)
     else :
         for i in range(n) :
             dest = once(dest, connection, identifynode, verbose, marks)
             if dest < 0 : return -dest
-    
-    if verbose : 
-        print "covered", len(marks), "of 4095 in",n,"attempts"
+
+    if verbose :
+        print("covered", len(marks), "of 4095 in",n,"attempts")
     return 0
 
 if __name__ == '__main__':

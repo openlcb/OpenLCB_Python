@@ -50,16 +50,16 @@ def sendOneDatagram(alias, dest, content, connection, verbose) :
         
     frame = connection.network.receive()
     if frame == None : 
-        print "Did not receive reply"
+        print("Did not receive reply")
         return 1
     if not isOkReply(frame) :
-        print "Unexpected message received instead of Datagram Received OK"
+        print("Unexpected message received instead of Datagram Received OK")
         return 2
     if not int(frame[12:15],16) == alias:
-        print "Improper dest alias in reply", frame
+        print("Improper dest alias in reply", frame)
         return 3
     if not int(frame[7:10],16) == dest:
-        print "Improper source alias in reply", frame
+        print("Improper source alias in reply", frame)
         return 3
     return 0
 
@@ -68,7 +68,7 @@ def receiveOneDatagram(alias, dest, conection, verbose) :
     while True :
         reply = connection.network.receive()
         if (reply == None ) : 
-            print "No datagram segment received"
+            print("No datagram segment received")
             return 4
         elif reply.startswith(":X1B") or reply.startswith(":X1C") :
             retval = retval + canolcbutils.bodyArray(reply)
@@ -78,7 +78,7 @@ def receiveOneDatagram(alias, dest, conection, verbose) :
             connection.network.send(makereply(alias, dest))
             return retval
         else :
-            print "Unexpected message instead of datagram segment", reply
+            print("Unexpected message instead of datagram segment", reply)
             return 3
 
 def sendOneDatagramNoWait(alias, dest, content, connection, verbose) :
@@ -108,7 +108,7 @@ def receiveDatagramReplyAndOneDatagram(alias, dest, conection, verbose) :
     while True :
         reply = connection.network.receive()
         if (reply == None ) : 
-            print "Missing response"
+            print("Missing response")
             return 4
         elif isOkReply(reply) : 
             haveReply = True
@@ -124,29 +124,29 @@ def receiveDatagramReplyAndOneDatagram(alias, dest, conection, verbose) :
             if haveReply :
                 return retval
         else :
-            print "Unexpected message", reply
+            print("Unexpected message", reply)
             return 3
 
     
 def usage() :
-    print ""
-    print "Called standalone, will send one CAN datagram message"
-    print " and display response."
-    print ""
-    print "Expect a single datagram reply in return"
-    print "e.g. [1Esssddd] 4C"
-    print "from destination alias to source alias"
-    print ""
-    print "Default connection detail taken from connection.py"
-    print ""
-    print "See also testDatagram.py"
-    print ""
-    print "-a --alias source alias (default 0x"+hex(connection.thisNodeAlias).upper()+")"
-    print "-d --dest dest alias (default 0x"+hex(connection.testNodeAlias).upper()+")"
-    print "-c --content message content (default 1.2.3.4)"
-    print "-t find destination alias automatically"
-    print "-v verbose"
-    print "-V Very verbose"
+    print("")
+    print("Called standalone, will send one CAN datagram message")
+    print(" and display response.")
+    print("")
+    print("Expect a single datagram reply in return")
+    print("e.g. [1Esssddd] 4C")
+    print("from destination alias to source alias")
+    print("")
+    print("Default connection detail taken from connection.py")
+    print("")
+    print("See also testDatagram.py")
+    print("")
+    print("-a --alias source alias (default 0x"+hex(connection.thisNodeAlias).upper()+")")
+    print("-d --dest dest alias (default 0x"+hex(connection.testNodeAlias).upper()+")")
+    print("-c --content message content (default 1.2.3.4)")
+    print("-t find destination alias automatically")
+    print("-v verbose")
+    print("-V Very verbose")
 
 import getopt, sys
 
@@ -160,9 +160,9 @@ def main():
     
     try:
         opts, remainder = getopt.getopt(sys.argv[1:], "d:a:c:vVt", ["dest=", "alias=", "content="])
-    except getopt.GetoptError, err:
+    except getopt.GetoptError as err:
         # print help information and exit:
-        print str(err) # will print something like "option -a not recognized"
+        print(str(err)) # will print something like "option -a not recognized"
         usage()
         sys.exit(2)
     for opt, arg in opts:

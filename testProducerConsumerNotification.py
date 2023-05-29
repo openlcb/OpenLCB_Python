@@ -48,9 +48,9 @@ def main():
     # argument processing
     try:
         opts, remainder = getopt.getopt(sys.argv[1:], "d:a:vVt", ["alias=", "dest="])
-    except getopt.GetoptError, err:
+    except getopt.GetoptError as err:
         # print help information and exit:
-        print (str(err)) # will print something like "option -a not recognized"
+        print((str(err))) # will print something like "option -a not recognized"
         usage()
         sys.exit(2)
     for opt, arg in opts:
@@ -86,51 +86,51 @@ def test(alias, dest, connection, verbose) :
         if (reply == None ) : break
         if ( reply.startswith(":X194C7") or reply.startswith(":X194C4") or reply.startswith(":X194C5") ):
             event = canolcbutils.bodyArray(reply)
-            if verbose : print ("  consumes "+str(event))
+            if verbose : print(("  consumes "+str(event)))
             consumed = consumed+[event]
         elif ( reply.startswith(":X19547") or reply.startswith(":X19544") or reply.startswith(":X19545") ):
             event = canolcbutils.bodyArray(reply)
-            if verbose : print ("  produces "+str(event))
+            if verbose : print(("  produces "+str(event)))
             produced = produced+[event]
     # now check consumers and producers individually
     timeout = connection.network.timeout
     connection.network.timeout = 0.25
-    if connection.network.verbose : print "Start individual checks"
+    if connection.network.verbose : print("Start individual checks")
     for c in consumed :
-        if verbose : print ("Check consumes "+str(c))
+        if verbose : print(("Check consumes "+str(c)))
         connection.network.send(identifyConsumers.makeframe(alias, c))
         reply = connection.network.receive()
         if (reply == None ) :
-            print ("no reply for consumer "+str(c))
+            print(("no reply for consumer "+str(c)))
             return 20
         # accept all three states plus range reply
         elif not ( reply.startswith(":X194C7") or reply.startswith(":X194C4") or reply.startswith(":X194C5") or reply.startswith(":X194A4") ):
-            print ("Unexpected reply "+reply)
+            print(("Unexpected reply "+reply))
             return 21
         # here is OK, go around to next
         while True :
             reply = connection.network.receive()
             if (reply == None ) : break
             elif ( not reply.startswith(":X194C7") ) :
-                print ("Unexpected reply "+reply)
+                print(("Unexpected reply "+reply))
                 return 22
     for p in produced :
-        if verbose : print ("Check produces "+str(p))
+        if verbose : print(("Check produces "+str(p)))
         connection.network.send(identifyProducers.makeframe(alias, p))
         reply = connection.network.receive()
         if (reply == None ) :
-            print ("no reply for producer "+str(p))
+            print(("no reply for producer "+str(p)))
             return 30
         # accept all three states plus range reply
         elif not ( reply.startswith(":X19547") or reply.startswith(":X19544") or reply.startswith(":X19545") or reply.startswith(":X19524") ):
-            print ("Unexpected reply "+reply)
+            print(("Unexpected reply "+reply))
             return 31
         # here is OK, go around to next
         while True :
             reply = connection.network.receive()
             if (reply == None ) : break
             elif ( not reply.startswith(":X19547") ) :
-                print ("Unexpected reply "+reply)
+                print(("Unexpected reply "+reply))
                 return 32
     connection.network.timeout = timeout
     return 0

@@ -14,21 +14,21 @@ def makeframe(alias, dest) :
     return canolcbutils.makeframestring(0x19968000+alias,body)
     
 def usage() :
-    print ""
-    print "Called standalone, will send one CAN IdentifyEvents message"
-    print " and display response"
-    print ""
-    print "Expect zero or more ConsumerIdentified reply in return"
-    print "e.g. [1926Bsss] nn nn nn nn nn nn"
-    print "containing dest alias and EventID"
-    print ""
-    print "Default connection detail taken from connection.py"
-    print ""
-    print "-a --alias source alias (default 0x"+hex(connection.thisNodeAlias).upper()+")"
-    print "-d --dest dest alias (default 0x"+hex(connection.testNodeAlias).upper()+")"
-    print "-t find destination alias automatically"
-    print "-v verbose"
-    print "-V very verbose"
+    print("")
+    print("Called standalone, will send one CAN IdentifyEvents message")
+    print(" and display response")
+    print("")
+    print("Expect zero or more ConsumerIdentified reply in return")
+    print("e.g. [1926Bsss] nn nn nn nn nn nn")
+    print("containing dest alias and EventID")
+    print("")
+    print("Default connection detail taken from connection.py")
+    print("")
+    print("-a --alias source alias (default 0x"+hex(connection.thisNodeAlias).upper()+")")
+    print("-d --dest dest alias (default 0x"+hex(connection.testNodeAlias).upper()+")")
+    print("-t find destination alias automatically")
+    print("-v verbose")
+    print("-V very verbose")
 
 from optparse import OptionParser
 
@@ -109,8 +109,8 @@ def test(alias, dest, connection, verbose) :
         if (reply.startswith(':X19524')) :
             producerRange.append(int(reply[11:27],16))
     if (verbose) :
-        print "  Found", consumerCount,"consumer events"
-        print "  Found", producerCount,"producer events"
+        print("  Found", consumerCount,"consumer events")
+        print("  Found", producerCount,"producer events")
         for a in consumerRange :
             i = 4
             if ((a % 2) == 0) :
@@ -125,9 +125,9 @@ def test(alias, dest, connection, verbose) :
                     i = i * 2
             mask = (i / 2) - 1
             base = a & ~mask
-            print "  Found consumer range", \
+            print("  Found consumer range", \
                   '{0:8x}'.format(base), "-", \
-                  '{0:8x}'.format(base + mask)
+                  '{0:8x}'.format(base + mask))
         for a in producerRange :
             i = 4
             if ((a % 2) == 0) :
@@ -142,9 +142,9 @@ def test(alias, dest, connection, verbose) :
                     i = i * 2
             mask = (i / 2) - 1
             base = a & ~mask
-            print "  Found producer range", \
+            print("  Found producer range", \
                   '{0:8x}'.format(base), "-", \
-                  '{0:8x}'.format(base + mask)
+                  '{0:8x}'.format(base + mask))
 
     return 0
 
