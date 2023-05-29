@@ -103,7 +103,8 @@ def test(alias, dest, connection, verbose) :
         if (reply == None ) :
             print ("no reply for consumer "+str(c))
             return 20
-        elif not ( reply.startswith(":X194C7") or reply.startswith(":X194C4") or reply.startswith(":X194C5") ):
+        # accept all three states plus range reply
+        elif not ( reply.startswith(":X194C7") or reply.startswith(":X194C4") or reply.startswith(":X194C5") or reply.startswith(":X194A4") ):
             print ("Unexpected reply "+reply)
             return 21
         # here is OK, go around to next
@@ -120,8 +121,9 @@ def test(alias, dest, connection, verbose) :
         if (reply == None ) :
             print ("no reply for producer "+str(p))
             return 30
-        elif not ( reply.startswith(":X19547") or reply.startswith(":X19544") or reply.startswith(":X19545") ):
-            print ("Unexpected reply "+reply)z
+        # accept all three states plus range reply
+        elif not ( reply.startswith(":X19547") or reply.startswith(":X19544") or reply.startswith(":X19545") or reply.startswith(":X19524") ):
+            print ("Unexpected reply "+reply)
             return 31
         # here is OK, go around to next
         while True :
