@@ -24,7 +24,7 @@ def get(alias, nodeID, verbose) :
         if (reply == None ) : continue
         if (reply.startswith(":X19170")) :
             alias,nodeID = int(reply[7:10],16),canolcbutils.bodyArray(reply)
-            if verbose : print ("   Found alias "+str(alias)+" ("+hex(alias)+") for node ID ",nodeID)
+            if verbose : print ("   Found alias "+str(alias)+" ("+hex(alias)+") for node ID "+str(nodeID))
             return alias,nodeID
 
 def usage() :

@@ -24,7 +24,7 @@ class SerialOlcbLink :
 
     def connect(self) :
         # if verbose, print
-        if (self.verbose) : print ("   connect to ",self.port," at ",self.speed)
+        if (self.verbose) : print ("   connect to "+str(self.port)+" at "+str(self.speed))
 
         self.ser = serial.Serial(self.port, self.speed)
         self.ser.parity = serial.PARITY_NONE
@@ -61,7 +61,7 @@ class SerialOlcbLink :
         if self.ser == None : self.connect()
 
         # if verbose, print
-        if self.verbose : print ("   send    ",frame)
+        if self.verbose : print ("   send    "+str(frame))
 
         # double-output format needed if operating at  230400
         tframe = frame+'\n'
