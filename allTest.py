@@ -103,7 +103,7 @@ def test(alias, dest, nodeID, event, connection, verbose, complete, repeat, iden
         #if verbose : print ("verifyNodeGlobal w no NodeID")
         #retval = verifyNodeGlobal.test(alias, None, connection)
         #if retval != 0 :
-        #    print "Error in verifyNodeGlobal w no NodeID"
+        #    print ("Error in verifyNodeGlobal w no NodeID")
         #    if not complete : done(retval)
         #    result |= retval
         if verbose : print ("verifyNodeGlobal")

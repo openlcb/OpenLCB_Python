@@ -21,29 +21,29 @@ CAN_ERROR = 0x06
 BOOTLOADER_VERSION = 0xA5
 
 def selectNode(CRIS, NNB, connection, verbose) :
-    print "In selectNode"
+    print("In selectNode")
     frame = makeframestring(CRIS, CAN_SELECT_NODE, [NNB])
     response = False
     resp_frame = ''
     counter = 100
     while (not response) and counter:
-      print "sending CAN_SELECT_NODE"
+      print("sending CAN_SELECT_NODE")
       connection.network.send(frame)
       resp_frame = connection.network.receive()
       if (resp_frame != None) and isFrameType(resp_frame, CAN_SELECT_NODE, CRIS):
-        print "node selected!"
+        print("node selected!")
 	response = True
       else:
 	counter -= 1
     if(counter == 0): return False
     #now examine the response more carefully
     data = bodyArray(resp_frame)
-    print "data contains ",
-    print data
+    print("data contains ", end=' ')
+    print(data)
     if(data[0] >= BOOTLOADER_VERSION) and (data[1] == 1):
-      print "selectNode success! Done"
+      print("selectNode success! Done")
       return True
-    print "selectNode fail!"
+    print("selectNode fail!")
     return False
 
 def expect(good, bad, connection, verbose) :
@@ -83,10 +83,10 @@ def selectMemoryPage(page, CRIS, connection, verbose):
     return expect(expected_response, error_response, connection, verbose)
 
 def eraseMemory(CRIS, connection, verbose) :
-    print "eraseMemory"
+    print("eraseMemory")
     frame = makeframestring(CRIS, CAN_PROG_START, [0x80, 0xFF, 0xFF])
     expected_response = makeframestring(CRIS, CAN_PROG_START, [0x00])
-    print expected_response
+    print(expected_response)
     error_response = makeframestring(CRIS, CAN_ERROR, [0x00])
     connection.network.send(frame)
     return expect(expected_response, error_response, connection, verbose)
@@ -99,7 +99,7 @@ def startWrite(start, end, CRIS, connection, verbose) :
     return expect(expected_response, error_response, connection, verbose)
 
 def writeMemory(ih, zero_index, start, end, CRIS, connection, verbose) :
-    if verbose: print "WRITE"
+    if verbose: print("WRITE")
     if not startWrite(start, end, CRIS, connection, verbose) :
       return False
     address = start
@@ -117,7 +117,7 @@ def writeMemory(ih, zero_index, start, end, CRIS, connection, verbose) :
         if(response != None) and isFrameType(response, CAN_PROG_DATA, CRIS):
           payload = bodyArray(response)
           if payload[0] != 0x00 and payload[0] != 0x02:
-            print "ERROR WRITING"
+            print("ERROR WRITING")
             return False
           else:
             done = True
@@ -127,7 +127,7 @@ def writeMemory(ih, zero_index, start, end, CRIS, connection, verbose) :
     return True
 
 def verifyMemory(ih, CRIS, connection, verbose) :
-    if verbose: print "VERIFY"
+    if verbose: print("VERIFY")
     address = ih.minaddr()
     while(address < ih.maxaddr()):
       incr = min(8, (ih.maxaddr()+1) - address)
@@ -140,7 +140,7 @@ def verifyMemory(ih, CRIS, connection, verbose) :
           payload = bodyArray(response)
           for i in range(len(payload)):
             if payload[i] != ih[address + i]:
-              print "ERROR IN VERIFY!"
+              print("ERROR IN VERIFY!")
               exit
           address += len(payload)
           done = True
@@ -151,20 +151,20 @@ def startApplication(CRIS, connection, verbose) :
     connection.network.send(frame)
     
 def usage() :
-    print ""
-    print "TODO Called standalone, will send one CAN datagram message"
-    print " and display response."
-    print ""
-    print "Expect a single datagram reply in return"
-    print "e.g. [1Esssddd] 4C"
-    print "from destination alias to source alias"
-    print ""
-    print "Default connection detail taken from connection.py"
-    print ""
-    print "-d --dest dest alias (default 0x"+hex(connection.testNodeAlias).upper()+")"
-    print "-t find destination alias semi-automatically"
-    print "-v verbose"
-    print "-V Very verbose"
+    print("")
+    print("TODO Called standalone, will send one CAN datagram message")
+    print(" and display response.")
+    print("")
+    print("Expect a single datagram reply in return")
+    print("e.g. [1Esssddd] 4C")
+    print("from destination alias to source alias")
+    print("")
+    print("Default connection detail taken from connection.py")
+    print("")
+    print("-d --dest dest alias (default 0x"+hex(connection.testNodeAlias).upper()+")")
+    print("-t find destination alias semi-automatically")
+    print("-v verbose")
+    print("-V Very verbose")
 
 
 if __name__ == '__main__':
@@ -177,9 +177,9 @@ if __name__ == '__main__':
     identifynode = False 
     try:
         opts, remainder = getopt.getopt(sys.argv[1:], "f:d:vVt", ["dest=", "alias=", "content="])
-    except getopt.GetoptError, err:
+    except getopt.GetoptError as err:
         # print help information and exit:
-        print str(err) # will print something like "option -a not recognized"
+        print(str(err)) # will print something like "option -a not recognized"
         usage()
         sys.exit(2)
     for opt, arg in opts:

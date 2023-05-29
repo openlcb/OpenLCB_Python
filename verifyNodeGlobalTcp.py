@@ -15,19 +15,19 @@ def makeMessage(sourceNodeID, destNodeID) :
     return tcpolcbutils.makemessagestring(sourceNodeID, None, body)
     
 def usage() :
-    print ""
-    print "Called standalone, will send TCP VerifyNode (Global) message."
-    print "By default, this carries no Node ID information in the body, "
-    print "but if you supply the -n or --node option, it will be included."
-    print ""
-    print "Expect a single VerifiedNode reply in return"
-    print "containing destination NodeID"
-    print ""
-    print "Default connection detail taken from connection.py"
-    print ""
-    print "-n --node dest nodeID (default None, format 01.02.03.04.05.06)"
-    print "-v verbose"
-    print "-V Very verbose"
+    print("")
+    print("Called standalone, will send TCP VerifyNode (Global) message.")
+    print("By default, this carries no Node ID information in the body, ")
+    print("but if you supply the -n or --node option, it will be included.")
+    print("")
+    print("Expect a single VerifiedNode reply in return")
+    print("containing destination NodeID")
+    print("")
+    print("Default connection detail taken from connection.py")
+    print("")
+    print("-n --node dest nodeID (default None, format 01.02.03.04.05.06)")
+    print("-v verbose")
+    print("-V Very verbose")
 
 import getopt, sys
 
@@ -41,9 +41,9 @@ def main():
     
     try:
         opts, remainder = getopt.getopt(sys.argv[1:], "tn:a:vV", ["alias=", "node="])
-    except getopt.GetoptError, err:
+    except getopt.GetoptError as err:
         # print help information and exit:
-        print str(err) # will print something like "option -a not recognized"
+        print(str(err)) # will print something like "option -a not recognized"
         usage()
         sys.exit(2)
     for opt, arg in opts:
@@ -65,30 +65,30 @@ def main():
 def test(sourceNodeID, destNodeID, connection, verbose):
 
     if verbose :
-        print "First message sent: "+tcpolcbutils.format(makeMessage(sourceNodeID, destNodeID))
+        print("First message sent: "+tcpolcbutils.format(makeMessage(sourceNodeID, destNodeID)))
         
     # first, send with dest node's nodeID in data
     connection.network.send(makeMessage(sourceNodeID, destNodeID))
     reply = connection.network.receive()
     if (reply == None ) : 
-        print "Global verify with matching node ID did not receive expected reply"
+        print("Global verify with matching node ID did not receive expected reply")
         return 2
     [transmitter, message] = reply
     [mti, source, dest, body] = tcpolcbutils.parseMessage(message)
     if not mti == 0x0170 :
-        print "Global verify with matching node ID received wrong reply message", tcpolcbutils.formatMessage(message)
+        print("Global verify with matching node ID received wrong reply message", tcpolcbutils.formatMessage(message))
         return 4
 
     # send without nodeID in data
     connection.network.send(makeMessage(sourceNodeID, None))
     reply = connection.network.receive()
     if (reply == None ) : 
-        print "Global verify without node ID did not receive expected reply"
+        print("Global verify without node ID did not receive expected reply")
         return 12
     [transmitter, message] = reply
     [mti, source, dest, body] = tcpolcbutils.parseMessage(message)
     if not mti == 0x0170 :
-        print "Global verify without node ID received wrong reply message ", tcpolcbutils.formatMessage(message)
+        print("Global verify without node ID received wrong reply message ", tcpolcbutils.formatMessage(message))
         return 14
 
     # send with wrong node ID in data
@@ -98,7 +98,7 @@ def test(sourceNodeID, destNodeID, connection, verbose):
         return 0
     else :
         [transmitter, message] = reply
-        print "Global verify with wrong node ID should not receive reply but did: ", tcpolcbutils.formatMessage(message)
+        print("Global verify with wrong node ID should not receive reply but did: ", tcpolcbutils.formatMessage(message))
         return 24
 
 if __name__ == '__main__':

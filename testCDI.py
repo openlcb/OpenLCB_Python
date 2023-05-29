@@ -10,16 +10,16 @@ import canolcbutils
 import datagram
     
 def usage() :
-    print ""
-    print "Read and check the Configuration Definition Information"
-    print ""
-    print "Default connection detail taken from connection.py"
-    print ""
-    print "-a --alias source alias (default 0x"+hex(connection.thisNodeAlias).upper()+")"
-    print "-d --dest dest alias (default 0x"+hex(connection.testNodeAlias).upper()+")"
-    print "-t find destination alias automatically"
-    print "-v verbose"
-    print "-V Very verbose"
+    print("")
+    print("Read and check the Configuration Definition Information")
+    print("")
+    print("Default connection detail taken from connection.py")
+    print("")
+    print("-a --alias source alias (default 0x"+hex(connection.thisNodeAlias).upper()+")")
+    print("-d --dest dest alias (default 0x"+hex(connection.testNodeAlias).upper()+")")
+    print("-t find destination alias automatically")
+    print("-v verbose")
+    print("-V Very verbose")
 
 import getopt, sys
 
@@ -32,9 +32,9 @@ def main():
     
     try:
         opts, remainder = getopt.getopt(sys.argv[1:], "d:a:vVt", ["dest=", "alias="])
-    except getopt.GetoptError, err:
+    except getopt.GetoptError as err:
         # print help information and exit:
-        print str(err) # will print something like "option -a not recognized"
+        print(str(err)) # will print something like "option -a not recognized"
         usage()
         sys.exit(2)
     for opt, arg in opts:
@@ -81,7 +81,7 @@ def test(alias, dest, connection, verbose) :
             # pass error code up
             return retval
         if retval[0:2] != [0x20,0x53] :
-            print "Unexpected message instead of read reply datagram ", retval
+            print("Unexpected message instead of read reply datagram ", retval)
             return 3
         for c in retval[6:] :
             result = result+chr(c)
@@ -91,8 +91,8 @@ def test(alias, dest, connection, verbose) :
         if done : break
         address = address + chunk
         
-    if verbose : print "   Read CDI result was ", len(result), " bytes"
-    if connection.network.verbose : print "  Read CDI result ++++++++++\n", result,"\n++++++++++++++++"
+    if verbose : print("   Read CDI result was ", len(result), " bytes")
+    if connection.network.verbose : print("  Read CDI result ++++++++++\n", result,"\n++++++++++++++++")
         
     executable = "xmllint --noout --schema ../../specs/schema/cdi.xsd - "
 
@@ -102,9 +102,9 @@ def test(alias, dest, connection, verbose) :
     [stdout, stderr] = process.communicate(result) 
     
     if process.returncode != 0 :
-        print "   CDI data did not validate:  ", stdout
+        print("   CDI data did not validate:  ", stdout)
     if process.returncode == 0 and verbose :
-        print "   CDI result check:  ", stdout
+        print("   CDI result check:  ", stdout)
 
     return process.returncode
 

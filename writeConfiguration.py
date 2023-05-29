@@ -10,20 +10,20 @@ import canolcbutils
 import datagram
     
 def usage() :
-    print ""
-    print "Called standalone, will do one-byte memory write"
-    print " and display response"
-    print ""
-    print "Default connection detail taken from connection.py"
-    print ""
-    print "-a --alias source alias (default 0x"+hex(connection.thisNodeAlias).upper()+")"
-    print "-d --dest dest alias (default 0x"+hex(connection.testNodeAlias).upper()+")"
-    print "-s --space address space (default 254, configuration; CDI is 255, all-mem is 253)"
-    print "-t find destination alias automatically"
-    print "-A address (decimal, required)"
-    print "-D data (decimal, one byte, required)"
-    print "-v verbose"
-    print "-V Very verbose"
+    print("")
+    print("Called standalone, will do one-byte memory write")
+    print(" and display response")
+    print("")
+    print("Default connection detail taken from connection.py")
+    print("")
+    print("-a --alias source alias (default 0x"+hex(connection.thisNodeAlias).upper()+")")
+    print("-d --dest dest alias (default 0x"+hex(connection.testNodeAlias).upper()+")")
+    print("-s --space address space (default 254, configuration; CDI is 255, all-mem is 253)")
+    print("-t find destination alias automatically")
+    print("-A address (decimal, required)")
+    print("-D data (decimal, one byte, required)")
+    print("-v verbose")
+    print("-V Very verbose")
 
 import getopt, sys
 
@@ -39,9 +39,9 @@ def main():
     
     try:
         opts, remainder = getopt.getopt(sys.argv[1:], "A:D:s:d:a:c:vVt", ["space=", "dest=", "alias="])
-    except getopt.GetoptError, err:
+    except getopt.GetoptError as err:
         # print help information and exit:
-        print str(err) # will print something like "option -a not recognized"
+        print(str(err)) # will print something like "option -a not recognized"
         usage()
         sys.exit(2)
     for opt, arg in opts:

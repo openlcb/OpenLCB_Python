@@ -2,20 +2,14 @@
 '''
 Drive an OpenLCB via pipes to an executable
 
-argparse is new in Jython 2.7, so dont use here
-
 @author: Bob Jacobsen
 '''
 
 import subprocess
 
-# stdout,stderr = p.communicate("send stuff input\n more studd")
-# print "O",stdout
-# print "E",stderr
-
 class PipeOlcbLink :
     def __init__(self) :
-        
+
         # Defaults (generally overridden by system-wide defaults elsewhere)
         # To use these:
         #    cd ../C   (e.g. to prototypes/C)
@@ -27,13 +21,13 @@ class PipeOlcbLink :
         self.verbose = False
         self.process = None
         return
-    
+
     def connect(self) :
         # if verbose, print
-        if (self.verbose) : print "   starting ",self.name," from ",self.location
-        
+        if (self.verbose) : print("   starting ",self.name," from ",self.location)
+
         executable = self.location+self.name
-        self.process = subprocess.Popen(executable,1,None,subprocess.PIPE,subprocess.PIPE, 
+        self.process = subprocess.Popen(executable,1,None,subprocess.PIPE,subprocess.PIPE,
                         sys.stderr, None, False, True)
         self.seenEnd = False
 
@@ -51,15 +45,15 @@ class PipeOlcbLink :
             self.process.stdin.write('T\n')
             self.flush()
         return
-        
+
     def send(self, frame) :
-        if self.process == None : 
+        if self.process == None :
             self.connect()
         elif not self.seenEnd :
             self.flush()
-            
+
         # if verbose, print
-        if self.verbose : print "   send    ",frame
+        if self.verbose : print("   send    ",frame)
 
         # send
         self.seenEnd = False
@@ -67,13 +61,10 @@ class PipeOlcbLink :
         self.process.stdin.flush()
 
         return
-        
+
     def receive(self) : # returns frame
         if (self.process == None) : self.connect()
-        
-        # if verbose, print
-        if (self.verbose) : print "   receive ",
-            
+
         r = self.process.stdout.readline()
 
         # timeout returns empty line
@@ -84,16 +75,16 @@ class PipeOlcbLink :
             self.process.stdin.write('T\n')
             self.process.stdin.flush()
             r = self.process.stdout.readline()
-            
+
         if not r.startswith(":") :
-            if (self.verbose) : print "<none>" # blank line to show delay?
+            if (self.verbose) : print("   receive <none>") # blank line to show delay?
             self.seenEnd = True
             return None
 
-        # if verbose, display what's received 
-        if (self.verbose) : print r,
-        
-        return r       
+        # if verbose, display what's received
+        if (self.verbose) : print("   receive "+str(r))
+
+        return r
 
     def close(self) :
         self.process.kill()
@@ -106,7 +97,7 @@ class PipeOlcbLink :
             if not r.startswith(":") :
                 self.seenEnd = True
                 break
-            if self.verbose : print "   drop    ",r,
+            if self.verbose : print("   drop    ",r, end=' ')
         return
 
     def more(self) : # checks whether any more input in response to most recent stimulus
@@ -116,54 +107,54 @@ import getopt, sys
 
 def main():
     global frame
-    
+
     # create connection object
     network = PipeOlcbLink()
 
     # get defaults
-    location = network.location 
+    location = network.location
     name = network.name
     verbose = network.verbose
-    
+
     frame = ':X180A7000N;'
 
     # process arguments
     (location, name, frame, verbose) = args(location, name, frame, verbose)
-        
+
     # load new defaults
     network.location = location
     network.name = name
     network.verbose = verbose
-    
+
     # send the frame
     network.send(frame)
     while True :
         network.receive()
-    
+
     return  # done with example
 
 def usage(location, name) :
-    print ""
-    print "Python module for connecting to an OpenLCB via an Ethernet connection."
-    print "Called standalone, will send one CAN frame."
-    print ""
-    print "valid options:"
-    print "  -v for verbose; also displays any responses"
-    print "  -n, --name executable name, e.g. "+location
-    print "  -l, --location directory to look for file, e.g. "+name
-    print ""
-    print "example:"
-    print "  python pipeolcblink.py :X180A7000N;\;"
-    print ""
-    print "Note: Most shells require escaping the semicolon at the end of the frame."
-    
+    print("")
+    print("Python module for connecting to an OpenLCB via an Ethernet connection.")
+    print("Called standalone, will send one CAN frame.")
+    print("")
+    print("valid options:")
+    print("  -v for verbose; also displays any responses")
+    print("  -n, --name executable name, e.g. "+location)
+    print("  -l, --location directory to look for file, e.g. "+name)
+    print("")
+    print("example:")
+    print("  python pipeolcblink.py :X180A7000N;\;")
+    print("")
+    print("Note: Most shells require escaping the semicolon at the end of the frame.")
+
 def args(location, name, frame, verbose) :
     # argument processing
     try:
         opts, remainder = getopt.getopt(sys.argv[1:], "n:l:vV", ["name=", "location="])
-    except getopt.GetoptError, err:
+    except getopt.GetoptError as err:
         # print help information and exit:
-        print str(err) # will print something like "option -a not recognized"
+        print(str(err)) # will print something like "option -a not recognized"
         usage(location, name)
         sys.exit(2)
     for opt, arg in opts:
@@ -177,11 +168,11 @@ def args(location, name, frame, verbose) :
             name = arg
         else:
             assert False, "unhandled option"
-            
-    if (len(remainder) > 0) : 
+
+    if (len(remainder) > 0) :
         frame = remainder[0]
     return (location, name, frame, verbose)
-    
+
 if __name__ == '__main__':
     main()
-    
+

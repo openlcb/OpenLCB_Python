@@ -19,14 +19,14 @@ def usage() :
     print("")
     print("-d --dest destination (target node) starting alias")
     print("-t find destination alias automatically")
-    print("-n --num number of cycles (default 4000, 0 means forever)")
+    print("-n --num number of cycles (default 400, 0 means forever)")
     print("-v verbose")
     print("-V very verbose")
 
 import getopt, sys
 
 def main():
-    n = 4000
+    n = 400
     dest = connection.testNodeAlias;
     verbose = False
     identifynode = False
