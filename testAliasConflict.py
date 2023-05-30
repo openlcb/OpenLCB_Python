@@ -18,7 +18,7 @@ import canolcbutils
 import verifyNodeGlobal
 import verifyNodeAddressed
 import time
-    
+
 def usage() :
     print("")
     print("Called standalone, tests a node's response to")
@@ -39,7 +39,7 @@ def main():
     dest = connection.testNodeAlias;
     verbose = False
     identifynode = False
-    
+
     # argument processing
     try:
         opts, remainder = getopt.getopt(sys.argv[1:], "d:a:vVt", ["alias=", "dest="])
@@ -70,36 +70,36 @@ def main():
     retval = test(alias, dest, connection, verbose)
     connection.network.close()
     return retval
-    
+
 def test(alias, dest, connection, verbose) :
     # Note: This test assumes that the response will be
     # to reacquire another alias after the conflicted one is
     # dropped.  This isn't required behavior by standard, but
-    # is a necessary condition for the test to continue and 
+    # is a necessary condition for the test to continue and
     # check another conflict condition.
-    #
+
     # Sending a global message (that normally doesn't get a response)
-    # by sending verifyNodeGlobal with a nodeID that doesn't match any valid
+    # by sending verifyNodeGlobal with a nodeID that doesn't match any valid ID
     if verbose : print("  check no-response global message with alias conflict")
     connection.network.send(verifyNodeGlobal.makeframe(dest, [0,0,0,0,0,1]))
     reply = connection.network.receive()
     if reply == None :
         print("no response received to conflict frame")
         return 21
-    if not reply.startswith(":X10703") :
+    if not reply.startswith(":X10703") :    # Expect AMR
         print("Expected first AMR")
         return 22
-    if int(reply[7:10],16) != dest :
+    if int(reply[7:10],16) != dest :        # with expected (existing) alias
         print("incorrect alias in AMR")
         return 23
     reply = connection.network.receive()
     if reply == None :
         print("no response received to conflict frame")
         return 21
-    if not reply.startswith(":X17") :
+    if not reply.startswith(":X17") :       # Then first CID
         print("Expected first CID")
         return 22
-    if int(reply[7:10],16) == 0 :
+    if int(reply[7:10],16) == 0 :           # With a new, non-zero alias
         print("received alias == 0")
         return 23
     dest = int(reply[7:10],16)
@@ -108,34 +108,35 @@ def test(alias, dest, connection, verbose) :
     reply = connection.network.receive()  # CID 3
     reply = connection.network.receive()  # CID 4
     timeout = connection.network.timeout
-    connection.network.timeout = 1.0
+    connection.network.timeout = 1.0      # (expect delay here)
     reply = connection.network.receive()  # RID
     connection.network.timeout = timeout
-    # dump everything until nothing heard
+    # dump everything until nothing heard - can include lots of e.g. event identification
     while (reply != None) :
         reply = connection.network.receive()
-    
+
     # Sending a global message (that normally does get a response)
+    # check to make sure that response is sent with new alias
     if verbose : print("  check response-inducing global message with alias conflict")
     connection.network.send(verifyNodeGlobal.makeframe(dest, None))
     reply = connection.network.receive()
     if reply == None :
         print("no response received to conflict frame")
         return 21
-    if not reply.startswith(":X10703") :
+    if not reply.startswith(":X10703") :    # Expect AMR
         print("Expected second AMR")
         return 22
-    if int(reply[7:10],16) != dest :
+    if int(reply[7:10],16) != dest :        # with alias from previous collision recovery
         print("incorrect alias in AMR")
         return 23
     reply = connection.network.receive()
     if reply == None :
         print("no response received to conflict frame")
         return 31
-    if not reply.startswith(":X17") :
+    if not reply.startswith(":X17") :       # Expect 1st frame of 2nd CID sequence
         print("Expected second CID")
         return 32
-    if int(reply[7:10],16) == 0 :
+    if int(reply[7:10],16) == 0 :           # with a new, non-zero alias
         print("received alias == 0")
         return 33
     dest = int(reply[7:10],16)
@@ -147,10 +148,10 @@ def test(alias, dest, connection, verbose) :
     connection.network.timeout = 1.0
     reply = connection.network.receive()  # RID
     connection.network.timeout = timeout
-    # dump everything until nothing heard
+    # dump everything until nothing heard - not yet checking for reply to VerifyNode
     while (reply != None) :
         reply = connection.network.receive()
-    
+
     # Sending an addressed message to some other alias (note arguments backwards, on purpose)
     if verbose : print("  check addressed message with alias conflict")
     connection.network.send(verifyNodeAddressed.makeframe(dest, alias, None))
@@ -187,7 +188,7 @@ def test(alias, dest, connection, verbose) :
     while (reply != None) :
         reply = connection.network.receive()
 
-    # send a CheckID   
+   # send a CheckID
     if verbose : print("  check CheckID with alias conflict")
     connection.network.send(canolcbutils.makeframestring(0x17020000+dest, None))
     reply = connection.network.receive()
@@ -201,14 +202,14 @@ def test(alias, dest, connection, verbose) :
         if verbose : print("CID reply not correct, RID expected")
         return 53
 
-    # send a ReserveID   
-    connection.network.send(canolcbutils.makeframestring(0x10700000+dest, None))
+    # send a ReserveID
     if verbose : print("  check ReserveID with alias conflict")
+    connection.network.send(canolcbutils.makeframestring(0x10700000+dest, None))
     reply = connection.network.receive()
     if reply == None :
         print("no response received to conflict frame")
         return 21
-    if not reply.startswith(":X10703") :
+    if not reply.startswith(":X10703") :    # Expect AMR
         print("Expected fourth AMR")
         return 22
     if int(reply[7:10],16) != dest :
