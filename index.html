@@ -15,7 +15,7 @@
 	</STYLE>
 </HEAD>
 <BODY LANG="en-US" BGCOLOR="#e6e6ff" DIR="LTR">
-<H1><FONT COLOR="#000000"><IMG SRC="../../web/logo-ajs-dph.png" NAME="OpenLCB" ALIGN=RIGHT WIDTH=337 HEIGHT=135 BORDER=2></FONT>OpenLCB
+<H1><FONT COLOR="#000000"><IMG SRC="https://openlcb.org/wp-content/uploads/2015/04/openlcb_3_1_1500_c.png" NAME="OpenLCB" ALIGN=RIGHT BORDER=2></FONT>OpenLCB
 Python Prototype</H1>
 <P>This is the index page of the OpenLCB™ Python prototypes
 directory.</P>
@@ -62,11 +62,7 @@ and
 test scripts that you can consult to see what normal operation looks
 like. Note that they contain node IDs, aliases, and event IDs that
 are specific to the particular node being tested, so your mileage
-</P>
-<UL>
-	<P>will</P>
-</UL>
-<P>vary.
+<u>will</u> vary.
 </P>
 <P STYLE="margin-bottom: 0cm">The type of access (Ethernet or USB)
 and parameters such as IP address, default node IDs, etc are defined
@@ -116,9 +112,15 @@ module.
 	</DD></DL>
 <H3 CLASS="western">
 Tests</H3>
+
+You can learn about use of these will the -h option, which is generally available.
+
 <DL>
 	<DT><B>allTest</B></DT><DD STYLE="margin-bottom: 0.5cm">
-	Runs the complete set of tests in sequence
+	Runs the complete set of tests in sequence. The -t
+	option will acquire the alias and node ID from the device under test.
+	The -c option will continue running after a failure so that you
+	get the results of the entire series of tests.
 	</DD><DT>
 	<B>testProducerConsumerNotification</B></DT><DD STYLE="margin-bottom: 0.5cm">
 	Uses IdentifyEvents to learn which events a node produces and
@@ -128,9 +130,6 @@ Tests</H3>
 	<B>testConfigurationProtocol</B></DT><DD STYLE="margin-bottom: 0.5cm">
 	Does a sequence of tests of the configuration protocol
 	</DD><DT>
-	<B>testConfigurationProtocol</B></DT><DD STYLE="margin-bottom: 0.5cm">
-	Does a sequence of tests of the configuration protocol
-	</DD></DL>
 <H3 CLASS="western">
 Tools</H3>
 <DL>
@@ -140,8 +139,11 @@ Tools</H3>
 	<B>readConfiguration</B></DT><DD>
 	Reads from a node via the configuration protocol
 	</DD><DT>
+	<B>serialolcblink</B></DT><DD>
+	Allows you to send specific CAN frames via a serial USB adapter
+	</DD><DT>
 	<B>ethernetolcblink</B></DT><DD>
-	Allows you to send specific CAN frames via an Ethernet adapter
+	Allows you to send specific CAN frames via an Ethernet link
 	</DD><DT>
 	<B>getUnderTestAlias</B></DT><DD STYLE="margin-bottom: 0.5cm">
 	Assumes there is only one node attached, and finds the alias for
