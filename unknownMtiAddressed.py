@@ -12,7 +12,7 @@ import canolcbutils
 
 def makeframe(alias, dest, mti) :
     return canolcbutils.makeframestring(0x19000000+alias+(mti<<12),[(dest>>8)&0xFF, dest&0xFF])
-    
+
 def usage() :
     print("")
     print("Called standalone, will send one CAN message with unknown MTI")
@@ -33,7 +33,9 @@ def usage() :
 
 import getopt, sys
 
-knownMti = [0x488, 0x068, 0x0A8, 0x828, 0x668, 0x968, 0x5EA, 0x1EA, 0x5E8, 0x1E8, 0x948, 0x949, 0xDA8, 0x9C8, 0xDE8, 0xA08, 0x1C48, 0xA28, 0xA48, 0xCC8, 0x868, 0x1F88, 0x888, 0x8A8]
+knownMti = [0x488, 0x068, 0x0A8, 0x828, 0x668, 0x968, 0x5EA, 0x1EA, 0x5E8, 0x1E8, 0x948,
+            0x949, 0xDA8, 0x9C8, 0xDE8, 0xA08, 0x1C48, 0xA28, 0xA48, 0xCC8, 0x868, 0x1F88,
+            0x888, 0x8A8]
 
 def main():
     # argument processing
@@ -41,7 +43,7 @@ def main():
     dest = connection.testNodeAlias
     identifynode = False
     verbose = False
-    
+
     try:
         opts, remainder = getopt.getopt(sys.argv[1:], "d:a:vVt", ["alias=", "dest="])
     except getopt.GetoptError as err:
@@ -71,18 +73,18 @@ def main():
     retval = test(alias, dest, connection, verbose)
     connection.network.close()
     exit(retval)
-    
+
 def test(alias, dest, connection, verbose) :
     for mti in range(0,4096) :
         if mti in knownMti : continue
-        if (mti&0x08) == 0 : continue
+        if (mti&0x08) == 0 : continue       # global MTI, may not get reply
         frame = makeframe(alias, dest, mti)
         connection.network.send(frame)
         reply = connection.network.receive()
-        if reply == None : 
+        if reply == None :
             print("No reply received for ", mti, "expected OIR")
             return 2
-        if  (not reply.startswith(":X19068")) or reply[12:15] != frame[7:10] or reply[7:10] != frame[12:15] : 
+        if  (not reply.startswith(":X19068")) or reply[12:15] != frame[7:10] or reply[7:10] != frame[12:15] :
             print("Wrong reply received for", mti, "was", reply)
             return 4
     return 0
