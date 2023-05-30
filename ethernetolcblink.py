@@ -136,7 +136,7 @@ def main():
     port = network.port
     verbose = network.verbose
 
-    frame = ':X182DF123N0203040506080001;'
+    frame = ':X19490001N;'
 
     # process arguments
     (host, port, frame, verbose) = args(host, port, frame, verbose)
@@ -149,7 +149,13 @@ def main():
     # send the frame
     network.send(frame)
 
-    return  # done with example
+    # then wait for and display responses until interrupted or nothing received
+    while True :
+        reply = network.receive()
+        if reply == None : break
+        print (reply)
+    return
+
 
 def usage() :
     print ("")
@@ -163,8 +169,8 @@ def usage() :
     print ("")
     print ("valid usages (default values):")
     print ("  ./ethernetolcblink.py --host=10.00.01.98")
-    print ("  ./ethernetolcblink.py --host=10.00.01.98 --port=23")
-    print ("  ./ethernetolcblink.py --host=10.00.01.98 --port=23 :X182DF123N0203040506080001\;")
+    print ("  ./ethernetolcblink.py --host=10.00.01.98 --port=12021")
+    print ("  ./ethernetolcblink.py --host=10.00.01.98 --port=12021 :X19490001N\;")
     print ("")
     print ("Note: Most shells require escaping the semicolon at the end of the frame.")
 
