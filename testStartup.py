@@ -72,6 +72,15 @@ def main():
     connection.network.close()
     sys.exit(retval)
 
+# skip (return False) frames that are not from our desired under-test source alias
+# and return ones that are
+def getDutMessage(dest) :
+    reply = connection.network.receive()
+    while (reply != None and (int(reply[7:10],16))!= dest) :
+        print ("    skipping "+reply);
+        reply = connection.network.receive()
+    return reply
+
 def test(alias, dest, connection, verbose) :
     # wait for reset
 
@@ -96,6 +105,9 @@ def test(alias, dest, connection, verbose) :
             if verbose: print ("ignoring misc characters not a frame: ", reply)
         reply = connection.network.receive()
 
+    # this overrides pre-configuration, is that OK?
+    dest = int(reply[7:10],16)
+
     connection.network.timeout = timeout
     testAlias = reply[7:10]
     if testAlias == "000" :
@@ -105,7 +117,7 @@ def test(alias, dest, connection, verbose) :
     id = reply[4:7]
     start = time.time()
 
-    reply = connection.network.receive()
+    reply = getDutMessage(dest)
     if reply == None :
         print ("2nd CIM reply not received")
         return 2
@@ -117,7 +129,7 @@ def test(alias, dest, connection, verbose) :
         return 32
     id = id+reply[4:7]
 
-    reply = connection.network.receive()
+    reply = getDutMessage(dest)
     if reply == None :
         print ("3rd CIM reply not received")
         return 3
@@ -129,7 +141,7 @@ def test(alias, dest, connection, verbose) :
         return 33
     id = id+reply[4:7]
 
-    reply = connection.network.receive()
+    reply = getDutMessage(dest)
     if reply == None :
         print ("4th CIM reply not received")
         return (4)
@@ -143,7 +155,7 @@ def test(alias, dest, connection, verbose) :
 
     # expect RIM (check timing)
     connection.network.timeout = 1
-    reply = connection.network.receive()
+    reply = getDutMessage(dest)
     end = time.time()
     connection.network.timeout = timeout
     if reply == None :
@@ -168,7 +180,7 @@ def test(alias, dest, connection, verbose) :
         return (22)
 
     # expect AMD
-    reply = connection.network.receive()
+    reply = getDutMessage(dest)
     if reply == None :
         print ("AMD reply not received")
         return (6)
@@ -183,7 +195,7 @@ def test(alias, dest, connection, verbose) :
         return (21)
 
     # expect NodeInit
-    reply = connection.network.receive()
+    reply = getDutMessage(dest)
     if reply == None :
         print ("NodeInit reply not received")
         return 7
@@ -203,12 +215,18 @@ def test(alias, dest, connection, verbose) :
     produced = []
     start = time.time()
     while (time.time() - start < 5.0) :
-        reply = connection.network.receive()
+        reply = getDutMessage(dest)
         if (reply == None ) : break
         if (reply.startswith(":X194C")) :
             event = canolcbutils.bodyArray(reply)
             if verbose : print ("consumes ", event)
             consumed = consumed+[event]
+        elif (reply.startswith(":X19524")) :
+            if verbose : print ("Producer Range Identified")
+            # we don't post-process these
+        elif (reply.startswith(":X194A4")) :
+            if verbose : print ("Consumer Range Identified")
+            # we don't post-process these
         elif (reply.startswith(":X1954")) :
             event = canolcbutils.bodyArray(reply)
             if verbose : print ("produces ", event)
