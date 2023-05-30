@@ -8,7 +8,7 @@ Comprehensive test of the Memory Configuration Protocol implementation
 import connection as connection
 import canolcbutils
 import datagram
-    
+
 def usage() :
     print("")
     print("Comprehensive test of the Memory Configuration ")
@@ -30,7 +30,7 @@ def main():
     dest = connection.testNodeAlias
     identifynode = False
     verbose = False
-    
+
     try:
         opts, remainder = getopt.getopt(sys.argv[1:], "d:a:vVt", ["dest=", "alias="])
     except getopt.GetoptError as err:
@@ -60,20 +60,20 @@ def main():
     retval = test(alias, dest, connection, verbose)
     connection.network.close()
     exit(retval)
-    
+
 def test(alias, dest, connection, verbose) :
 
     # Get Configuration Options
     retval = datagram.sendOneDatagramNoWait(alias, dest, [0x20,0x80], connection, verbose)
     # read data response
     retval = datagram.receiveDatagramReplyAndOneDatagram(alias, dest, connection, verbose)
-    if (type(retval) is int) : 
+    if (type(retval) is int) :
         # pass error code up
         return retval
     if retval[0:2] != [0x20,0x82] :
         print("Unexpected message instead of read reply datagram ", retval)
         return 3
-    if verbose : 
+    if verbose :
         print("  Configuration Options:")
         cmd = retval[2]*256+retval[3]
         print("    Available commands (",hex(cmd),")")
@@ -94,50 +94,51 @@ def test(alias, dest, connection, verbose) :
         print("    Lowest space  ", retval[6])
     lowSpace = retval[6]
     highSpace = retval[5]
-    
+
     # One byte read from config space
     retval = datagram.sendOneDatagramNoWait(alias, dest, [0x20,0x41,0,0,0,0,1], connection, verbose)
     # read data response
     retval = datagram.receiveDatagramReplyAndOneDatagram(alias, dest, connection, verbose)
-    if (type(retval) is int) : 
+    if (type(retval) is int) :
         # pass error code up
         return retval
     if retval[0:6] != [0x20,0x51,0x00,0x00,0x00,0x00] :
         print("Unexpected message instead of read reply datagram ", retval)
         return 3
     if verbose : print("  Read one byte result", retval[6:7])
-    
+
     # Eight byte read from config space
     retval = datagram.sendOneDatagramNoWait(alias, dest, [0x20,0x41,0,0,0,0,8], connection, verbose)
     # read data response
     retval = datagram.receiveDatagramReplyAndOneDatagram(alias, dest, connection, verbose)
-    if (type(retval) is int) : 
+    if (type(retval) is int) :
         # pass error code up
         return retval
     if retval[0:6] != [0x20,0x51,0x00,0x00,0x00,0x00] :
         print("Unexpected message instead of read reply datagram ", retval)
         return 3
     if verbose : print("  Read eight bytes result", retval[6:])
-       
+
     n = highSpace
     while n >= lowSpace-1 :
         # Get Address Space Info from each space
         retval = datagram.sendOneDatagramNoWait(alias, dest, [0x20,0x84,n], connection, verbose)
         # read data response
         retval = datagram.receiveDatagramReplyAndOneDatagram(alias, dest, connection, verbose)
-        if (type(retval) is int) : 
+        if (type(retval) is int) :
             # pass error code up
             return retval
         if retval[0] != 0x20 or retval[1]&0xFE != 0x86 or retval[2] != n :
             print("Unexpected message instead of starting with [0x20,0x86,",n,"] read reply datagram: ", retval)
             return 3
-        if verbose : 
+        if verbose :
+            retval.extend([0,0,0,0,0])  # in case trailing zeros not sent
             print("  Address Space",n,"Options:")
             print("      Present? ", "yes" if retval[1]&0x01 else "no")
             print("      Highest address ", hex(((retval[3]*256+retval[4])*256+retval[5])*256+retval[6]))
             print("                Flags (", hex(retval[7]),")")
             print("                        Read-only ", "yes" if retval[7]&0x01 else "no")
-            
+
             if len(retval) > 9:
                 print("      Lowest address ", hex(((retval[9]*256+retval[10])*256+retval[11])*256+retval[12]))
             else:
@@ -145,7 +146,7 @@ def test(alias, dest, connection, verbose) :
             if len(retval) > 12:
                 print("           Space name ", str(retval[12:]))
         n = n-1
-        
+
     return 0
 
 if __name__ == '__main__':

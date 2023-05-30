@@ -82,10 +82,10 @@ def test(alias, dest, connection, verbose) :
         connection.network.send(frame)
         reply = connection.network.receive()
         if reply == None :
-            print("No reply received for ", mti, "expected OIR")
+            print("No reply received for "+hex(mti)+" expected OIR")
             return 2
         if  (not reply.startswith(":X19068")) or reply[12:15] != frame[7:10] or reply[7:10] != frame[12:15] :
-            print("Wrong reply received for", mti, "was", reply)
+            print("Wrong reply received for "+hex(mti)+" was "+reply)
             return 4
     return 0
 

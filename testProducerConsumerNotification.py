@@ -81,6 +81,8 @@ def test(alias, dest, connection, verbose) :
     connection.network.send(identifyEventsAddressed.makeframe(alias, dest))
     consumed = []
     produced = []
+    retval = 0
+
     while (True) :
         reply = connection.network.receive()
         if (reply == None ) : break
@@ -92,6 +94,7 @@ def test(alias, dest, connection, verbose) :
             event = canolcbutils.bodyArray(reply)
             if verbose : print(("  produces "+str(event)))
             produced = produced+[event]
+
     # now check consumers and producers individually
     timeout = connection.network.timeout
     connection.network.timeout = 0.25
@@ -102,38 +105,46 @@ def test(alias, dest, connection, verbose) :
         reply = connection.network.receive()
         if (reply == None ) :
             print(("no reply for consumer "+str(c)))
-            return 20
+            retval = retval +1
+            continue
         # accept all three states plus range reply
         elif not ( reply.startswith(":X194C7") or reply.startswith(":X194C4") or reply.startswith(":X194C5") or reply.startswith(":X194A4") ):
             print(("Unexpected reply "+reply))
-            return 21
+            retval = retval +1
+            continue
         # here is OK, go around to next
         while True :
             reply = connection.network.receive()
             if (reply == None ) : break
             elif ( not reply.startswith(":X194C7") ) :
                 print(("Unexpected reply "+reply))
-                return 22
+                retval = retval +1
+                continue
     for p in produced :
         if verbose : print(("Check produces "+str(p)))
         connection.network.send(identifyProducers.makeframe(alias, p))
         reply = connection.network.receive()
         if (reply == None ) :
             print(("no reply for producer "+str(p)))
-            return 30
+            retval = retval +1
+            continue
         # accept all three states plus range reply
         elif not ( reply.startswith(":X19547") or reply.startswith(":X19544") or reply.startswith(":X19545") or reply.startswith(":X19524") ):
             print(("Unexpected reply "+reply))
-            return 31
+            retval = retval +1
+            continue
         # here is OK, go around to next
         while True :
             reply = connection.network.receive()
             if (reply == None ) : break
             elif ( not reply.startswith(":X19547") ) :
                 print(("Unexpected reply "+reply))
-                return 32
+                retval = retval +1
+                continue
+
     connection.network.timeout = timeout
-    return 0
+
+    return retval
 
 if __name__ == '__main__':
     main()

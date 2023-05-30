@@ -290,7 +290,7 @@ def test(alias, dest, nodeID, event, connection, verbose, complete, repeat, iden
         if result != 0 : print ("Encountered errors")
         else : print ("Normal end")
 
-    return
+    return result
 
 if __name__ == '__main__':
     main()

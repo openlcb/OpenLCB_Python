@@ -69,6 +69,7 @@ def test(alias, dest, connection, verbose) :
     result = ""
     chunk = 16
     done = False
+    connection.network.timeout = 3
 
     while True :
         # Read from CDI space

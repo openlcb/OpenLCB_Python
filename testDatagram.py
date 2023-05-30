@@ -61,8 +61,10 @@ def receiveOneDatagram(alias, dest, conection, verbose) :
     retval = []
     reply = connection.network.receive()
 
+    if reply == None :
+        return 10
     if reply.startswith(":X1A"):
-      if not int(reply[4:7],16) == alias:
+      if (alias != None) and not int(reply[4:7],16) == alias:
         print("Improper dest alias in reply", reply)
         return 3
       if not int(reply[7:10],16) == dest:
@@ -188,6 +190,7 @@ def checkrejection(alias, dest, connection, verbose) :
     return 0
 
 def test(alias, dest, connection, num, verbose) :
+
     # send a short read-request datagram in two segments
     if verbose : print("  test two segments")
     connection.network.send(makefirstframe(alias, dest, [0x20,0x41,0,0,0]))
@@ -217,62 +220,41 @@ def test(alias, dest, connection, num, verbose) :
         return 101
 
     # send a short read-request datagram in two segments with another from somebody else in between
-    # interposed one could get rejected or processed; here we assume rejected
+    # interposed one could get rejected or processed; attempt to handle both cases
     if verbose : print("  test two segments with another datagram interposed")
     connection.network.send(makefirstframe(alias, dest, [0x20,0x41,0,0,0]))
     newalias = (~alias)&0xFFF
     if newalias == dest:
 	    newalias = (newalias - 1)&0xFFF;
-    connection.network.send(makeonlyframe(newalias, dest, [0x20,0x41,0,0,0,0,8]))
+    connection.network.send(makeonlyframe(newalias, dest, [0x20,0x41,0,0,0,0,1]))
     # check for reject of this one
     frame = connection.network.receive()
     if frame == None :
         print("no reply to interposed datagram")
         return 81
-    elif num == 1 and isAck(frame) :
-        print("interposed datagram was not rejected due to buffer full:", frame)
-        return 82
     elif num > 1 and isNAK(frame) :
         print("Unexpected reject of interposed datagram:", frame)
         return 83
     elif not (isNAK(frame) or isAck(frame)) :
         print("Unexpected response to interposed datagram:", frame)
         return 84
+    elif num == 1 and isAck(frame) :
+        # this is the OK case of the intermediate datagram being accepted
+        if verbose: print("   interposed datagram was accepted:", frame)
+        retval = receiveOneDatagram(newalias, dest, connection, verbose)
+        if type(retval) is int :
+            # pass error code up
+            return retval
+        if retval[0:3] != [0x20,0x51,0] :
+            print("Unexpected message instead of read reply datagram ", retval)
+            return 3
     # send final part of original datagram
     connection.network.send(makefinalframe(alias, dest, [0,8]))
     # check response
     retval = checkreply(alias, dest, connection, verbose)
     if type(retval) is int and retval != 0 :
+        print("failure on reply to final seqment")
         return retval+20
-
-    # NAK the response datagram & check for retransmission
-    if verbose : print("  send NAK to response")
-    connection.network.send(makeonlyframe(alias, dest, [0x20,0x41,0,0,0,0,1]))
-    frame = connection.network.receive()
-    if frame == None :
-        print("Did not receive reply to NAK")
-        return 31
-    if not isAck(frame) :
-        print("Unexpected message received "+str(frame)+" instead of reply to NAK")
-        return 32
-    # read reply, should be a resend of same
-    reply = connection.network.receive()
-    if (reply == None ) :
-        print("No datagram segment received")
-        return 34
-    elif not reply.startswith(":X1A") :
-        print("Unexpected message "+str(reply)+" instead of datagram segment")
-        return 33
-    # send NAK asking for retransmit retransmit and see if it's right this time
-    connection.network.send(canolcbutils.makeframestring(0x19A48000+alias,[(dest>>8)&0xFF, dest&0xFF,0x20,00]))
-    #retval = datagram.receiveOneDatagram(alias, dest, connection, verbose)
-    retval = receiveOneDatagram(alias, dest, connection, verbose)
-    if type(retval) is int :
-        # pass error code up
-        return retval
-    if retval[0:3] != [0x20,0x51,0] :
-        print("Unexpected message instead of read reply datagram ", retval)
-        return 37
 
     # Test recovery from failure during datagram send by sending a 1st segment, then AMR,
     # then a complete datagram.  The reply will tell if the first part
@@ -317,6 +299,36 @@ def test(alias, dest, connection, num, verbose) :
     retval = checkreply(alias, dest, connection, verbose)
     if type(retval) is int and retval != 0 :
         return retval+20
+
+    # NAK the response datagram & check for retransmission
+    if verbose : print("  test NAK to response datagram")
+    connection.network.send(makeonlyframe(alias, dest, [0x20,0x41,0,0,0,0,1]))
+    frame = connection.network.receive()
+    if frame == None :
+        print("Did not receive reply to NAK")
+        return 31
+    if not isAck(frame) :
+        print("Unexpected message received "+str(frame)+" instead of reply to NAK")
+        return 32
+    # read reply, should be a resend of same
+    reply = connection.network.receive()
+    if (reply == None ) :
+        print("No datagram segment received")
+        return 34
+    elif not reply.startswith(":X1A") :
+        print("Unexpected message "+str(reply)+" instead of datagram segment")
+        return 33
+    # send NAK asking for retransmit retransmit and see if it's right this time
+    connection.network.send(canolcbutils.makeframestring(0x19A48000+alias,[(dest>>8)&0xFF, dest&0xFF,0x20,00]))
+    # expect that the datagram may be be retransmitted
+    retval = receiveOneDatagram(alias, dest, connection, verbose)
+    if type(retval) is int :
+        if retval != 10 :   # 10 is no datagram received, which is OK
+            # pass error code up
+            return retval
+    elif retval[0:3] != [0x20,0x51,0] :
+        print("Unexpected message instead of read reply datagram ", retval)
+        return 37
 
     return 0
 

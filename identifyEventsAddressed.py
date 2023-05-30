@@ -12,7 +12,7 @@ import canolcbutils
 def makeframe(alias, dest) :
     body = [(dest>>8)&0xFF, dest&0xFF]
     return canolcbutils.makeframestring(0x19968000+alias,body)
-    
+
 def usage() :
     print("")
     print("Called standalone, will send one CAN IdentifyEvents message")
@@ -85,8 +85,8 @@ def main():
     retval = test(options.alias, options.dest, connection, options.verbose)
     connection.network.close()
     exit(retval)
-    
-def test(alias, dest, connection, verbose) : 
+
+def test(alias, dest, connection, verbose) :
     connection.network.send(makeframe(alias,dest))
     producerCount = 0
     consumerCount = 0
@@ -120,10 +120,10 @@ def test(alias, dest, connection, verbose) :
                     i = i * 2
             else :
                 while (True) :
-                    if ((a % i) == 0) :
+                    if ((a % i) != i-1) :
                         break;
                     i = i * 2
-            mask = (i / 2) - 1
+            mask = int(i / 2) - 1
             base = a & ~mask
             print("  Found consumer range", \
                   '{0:8x}'.format(base), "-", \
@@ -137,10 +137,10 @@ def test(alias, dest, connection, verbose) :
                     i = i * 2
             else :
                 while (True) :
-                    if ((a % i) == 0) :
+                    if ((a % i) != i-1) :
                         break;
                     i = i * 2
-            mask = (i / 2) - 1
+            mask = int(i / 2) - 1
             base = a & ~mask
             print("  Found producer range", \
                   '{0:8x}'.format(base), "-", \
