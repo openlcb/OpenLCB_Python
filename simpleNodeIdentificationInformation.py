@@ -165,13 +165,13 @@ def test(alias, dest, connection, verbose) :
         if (reply.startswith(":X19068") and int(reply[7:10],16)==dest and int(reply[12:15],16)==alias3) :
             count3 = count3-100
     if count != count1 and count1 != -100:
-        print("got ",count1," frames for request 1 instead of ",count," in overlapping requests test")
+        print("got "+str(count1)+" frames for request 1 instead of "+str(count)+" in overlapping requests test")
         return 101
     if count != count2 and count2 != -100:
-        print("got ",count2," frames for request 2 instead of ",count," in overlapping requests test")
+        print("got "+str(count2)+" frames for request 2 instead of "+str(count)+" in overlapping requests test")
         return 102
     if count != count3 and count3 != -100:
-        print("got ",count3," frames for request 3 instead of ",count," in overlapping requests test")
+        print("got "+str(count3)+" frames for request 3 instead of "+str(count)+" in overlapping requests test")
         return 103
 
     return 0
