@@ -84,6 +84,8 @@ class SerialOlcbLink :
         # remove Xoff/Xon characters if present
         r = r.decode('utf8').replace("\x11", "")
         r = r.replace("\x13", "")
+        r = r.replace("\x0A", "")
+        r = r.replace("\x0D", "")
         # timeout returns ""
         if r == "" :
             if (self.verbose) : print ("   receive <none>") # blank line to show delay?
@@ -123,11 +125,15 @@ class SerialOlcbLink :
                 if (len(data) == ((len(result) - 12) / 2)) :
                     i = 0
                     j = 11
-                    while (data[i] == int('0x' + result[j] + result[j + 1], 16)) :
+                    while i != len(data)-1 :
+                        if (data[i] != int('0x' + result[j] + result[j + 1], 16)) :
+                            # fail on non equal
+                            return None
                         i = i + 1
                         j = j + 2
-                        if (i != len(data)) :
-                            return None
+                else :
+                    # fail on length
+                    return None
 
             if (exact != None) :
                 print ("exact may not be working right?")
@@ -160,7 +166,7 @@ def main():
     speed = network.speed
     verbose = network.verbose
 
-    frame = ':X180A7000N;'
+    frame = ':X19490001N;'
 
     # process arguments
     (port, speed, frame, verbose) = args(port, speed, frame, verbose)
@@ -172,10 +178,13 @@ def main():
 
     # send the frame
     network.send(frame)
-    while True :
-        network.receive()
 
-    return  # done with example
+    # then wait for and display responses until interrupted or nothing received
+    while True :
+        reply = network.receive()
+        if reply == None : break
+        print (reply)
+    return
 
 def usage() :
     print ("")
@@ -190,7 +199,7 @@ def usage() :
     print ("valid usages (default values):")
     print ("  python serialolcblink.py --port=/dev/tty.usbserial-A7007AOK")
     print ("  python serialolcblink.py --port=/dev/tty.usbserial-A7007AOK --speed=115200")
-    print ("  python serialolcblink.py --port=/dev/tty.usbserial-A7007AOK --speed=115200 :X180A7000N;\;")
+    print ("  python serialolcblink.py --port=/dev/tty.usbserial-A7007AOK --speed=115200 :X19490001N\;")
     print ("")
     print ("Note: Most shells require escaping the semicolon at the end of the frame.")
 
