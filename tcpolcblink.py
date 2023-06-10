@@ -31,7 +31,7 @@ class TcpToOlcbLink :
     
     def connect(self) :
         # if verbose, print
-        if (self.verbose) : print "   connect to ",self.host,":",self.port
+        if (self.verbose) : print("   connect to ",self.host,":",self.port)
         
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.socket.connect((self.host, self.port))
@@ -39,7 +39,7 @@ class TcpToOlcbLink :
         # wait for link startup
         # after (possible) reset due to serial startup
         if self.startdelay > 0 :
-            if self.verbose : print "   waiting", self.startdelay, "seconds for adapter restart"
+            if self.verbose : print("   waiting", self.startdelay, "seconds for adapter restart")
             time.sleep(self.startdelay)
 
         return
@@ -49,7 +49,7 @@ class TcpToOlcbLink :
         
         # if verbose, print
         if (self.verbose) :
-            print "   send   ",string
+            print("   send   ",string)
     
         # send
         self.socket.send(string)
@@ -76,9 +76,9 @@ class TcpToOlcbLink :
                 try:
                     self.rcvData = self.socket.recv(1024)
                     self.rcvIndex = 0
-                except socket.timeout, err:
+                except socket.timeout as err:
                     if (self.verbose) :
-                        print "<none>" # blank line to show delay?
+                        print("<none>") # blank line to show delay?
                     return None
             else :
                 # parse our data
@@ -91,7 +91,7 @@ class TcpToOlcbLink :
                         self.rcvIndex = self.rcvIndex + 1
                         # if verbose, print
                         if (self.verbose) :
-                            print "   receive",result
+                            print("   receive",result)
                         return result
                     i = i + 1
                     self.rcvIndex = self.rcvIndex + 1
@@ -134,7 +134,7 @@ class TcpToOlcbLink :
             if (timeout != 0) :
                 if (time.time() > (start + timeout)) :
                     if (self.verbose) :
-                        print "Timeout"
+                        print("Timeout")
                     return None
 
     def close(self) :

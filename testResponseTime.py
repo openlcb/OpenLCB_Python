@@ -22,18 +22,18 @@ def get(alias, nodeID) :
             return int(reply[7:10],16),canolcbutils.bodyArray(reply)
 
 def usage() :
-    print ""
-    print " Assumoing one under-test node present, uses "
-    print " one CAN VerifyNode (Global) message"
-    print " to get that node's alias "
-    print ""
-    print "Default connection detail taken from connection.py"
-    print ""
-    print "-a --alias source alias (default 123)"
-    print "-n --num number of cycles (default 100, 0 means forever)"
-    print "-p number of requests to send in parallel (default 1)"
-    print "-v verbose"
-    print "-V Very verbose"
+    print("")
+    print(" Assumoing one under-test node present, uses ")
+    print(" one CAN VerifyNode (Global) message")
+    print(" to get that node's alias ")
+    print("")
+    print("Default connection detail taken from connection.py")
+    print("")
+    print("-a --alias source alias (default 123)")
+    print("-n --num number of cycles (default 100, 0 means forever)")
+    print("-p number of requests to send in parallel (default 1)")
+    print("-v verbose")
+    print("-V Very verbose")
 
 import getopt, sys
 
@@ -46,9 +46,9 @@ def main():
     
     try:
         opts, remainder = getopt.getopt(sys.argv[1:], "h:p:n:a:vVp", ["alias=", "num=", "host=", "port="])
-    except getopt.GetoptError, err:
+    except getopt.GetoptError as err:
         # print help information and exit:
-        print str(err) # will print something like "option -a not recognized"
+        print(str(err)) # will print something like "option -a not recognized"
         usage()
         sys.exit(2)
     for opt, arg in opts:
@@ -80,10 +80,10 @@ def once(alias, n, connection, verbose, parallel) :
             # skip
             reply = connection.network.receive()
         if reply == None : 
-            print "No reply received"
+            print("No reply received")
             return 1
         if not reply.startswith(":X180B7") :
-            print "Incorrect reply received"
+            print("Incorrect reply received")
             return 2
     return 0
     
@@ -97,7 +97,7 @@ def test(alias, n, connection, verbose, parallel) :
             if retval != 0 : return retval
         end = time.time()
         if verbose :
-            print end-start
+            print(end-start)
     
     return 0
         

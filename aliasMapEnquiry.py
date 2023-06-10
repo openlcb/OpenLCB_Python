@@ -67,45 +67,40 @@ def main():
     if options.veryverbose :
         connection.network.verbose = True
 
-    '''
-    @todo identifynode option not currently implemented
-    '''
-    #if options.identifynode :
-    #    import getUnderTestAlias
-    #    options.dest, otherNodeId = getUnderTestAlias.get(options.alias,
-    #                                                      None,
-    #                                                      options.verbose)
-    #    if options.nodeid == None :
-    #        options.nodeid = otherNodeId
+    if options.identifynode :
+        import getUnderTestAlias
+        options.dest, options.nodeid = getUnderTestAlias.get(options.alias, None, options.verbose or options.veryverbose)
 
     retval = test(options.alias, options.dest, options.nodeid, connection,
                   options.verbose)
     connection.network.close()
     exit(retval)
-    
+
 def test(alias, dest, nodeID, connection, verbose) :
+    retval = 0
+
     # check with node id in frame
     connection.network.send(makeframe(alias, nodeID))
     expect = canolcbutils.makeframestring(0x10701000 + dest, nodeID)
-    if (connection.network.expect(exact=expect) == None) :
-        print "Expected reply when node ID matches not received"
-        return 2
+    if (connection.network.expect(startswith=expect) == None) :
+        print ("Expected reply "+expect+" when node ID matches not received")
+        retval = retval | 1
 
-    # check without node id in frame 
+    # check without node id in frame
     connection.network.send(canolcbutils.makeframestring(0x10702000+alias,None))
     expect = canolcbutils.makeframestring(0x10701000 + dest, nodeID)
-    if (connection.network.expect(exact=expect) == None) :
-        print "Expected reply when node ID matches not received"
-        return 2
+    if (connection.network.expect(startswith=expect) == None) :
+        print ("Expected reply when node ID matches not received")
+        retval = retval | 2
 
     # test non-matching NodeID using a reserved one
     connection.network.send(makeframe(alias, [0,0,0,0,0,1]))
     reply = connection.network.receive()
-    if (connection.network.expect(exact=expect) != None) :
-        print "Unexpected reply received when node ID didnt match ", reply
-        return 2
-        
-    return 0
+    if (connection.network.expect(startswith=expect) != None) :
+        print ("Unexpected reply received when node ID didnt match ", reply)
+        retval = retval | 4
+
+    return retval
 
 if __name__ == '__main__':
     main()

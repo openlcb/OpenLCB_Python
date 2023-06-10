@@ -16,13 +16,13 @@ def makeframe(header) :
     return retval
     
 def usage() :
-    print ""
-    print "Sends standard-form CAN frames, checking for no reply"
-    print ""
-    print "Default connection detail taken from connection.py"
-    print ""
-    print "-v verbose"
-    print "-V Very verbose"
+    print("")
+    print("Sends standard-form CAN frames, checking for no reply")
+    print("")
+    print("Default connection detail taken from connection.py")
+    print("")
+    print("-v verbose")
+    print("-V Very verbose")
 
 import getopt, sys
 
@@ -32,9 +32,9 @@ def main():
     
     try:
         opts, remainder = getopt.getopt(sys.argv[1:], "vV", [])
-    except getopt.GetoptError, err:
+    except getopt.GetoptError as err:
         # print help information and exit:
-        print str(err) # will print something like "option -a not recognized"
+        print(str(err)) # will print something like "option -a not recognized"
         usage()
         sys.exit(2)
     for opt, arg in opts:
@@ -59,7 +59,7 @@ def test(connection, verbose) :
     if reply == None : 
         return 0
     while reply != None :
-        print "Unexpected reply recieved to standard frame", hex(header), " was ", reply
+        print("Unexpected reply recieved to standard frame", hex(header), " was ", reply)
         reply = connection.network.receive()
     return 4
 

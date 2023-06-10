@@ -13,20 +13,20 @@ def makeframe(alias, eventID) :
     return canolcbutils.makeframestring(0x198F4000+alias,eventID)
     
 def usage() :
-    print ""
-    print "Called standalone, will send one CAN IdentifyConsumers message"
-    print " and display response"
-    print ""
-    print "Expect zero or more ConsumerIdentified reply in return"
-    print "e.g. [194C4sss] nn nn nn nn nn nn"
-    print "containing dest alias and EventID"
-    print ""
-    print "Default connection detail taken from connection.py"
-    print ""
-    print "-a --alias source alias (default 0x"+hex(connection.thisNodeAlias).upper()+")"
-    print "-e --event eventID as 1.2.3.4.5.6.7.8 form"
-    print "-v verbose"
-    print "-V Very verbose"
+    print("")
+    print("Called standalone, will send one CAN IdentifyConsumers message")
+    print(" and display response")
+    print("")
+    print("Expect zero or more ConsumerIdentified reply in return")
+    print("e.g. [194C4sss] nn nn nn nn nn nn")
+    print("containing dest alias and EventID")
+    print("")
+    print("Default connection detail taken from connection.py")
+    print("")
+    print("-a --alias source alias (default 0x"+hex(connection.thisNodeAlias).upper()+")")
+    print("-e --event eventID as 1.2.3.4.5.6.7.8 form")
+    print("-v verbose")
+    print("-V Very verbose")
 
 import getopt, sys
 
@@ -38,9 +38,9 @@ def main():
     # argument processing
     try:
         opts, remainder = getopt.getopt(sys.argv[1:], "e:a:vV", ["alias=", "event="])
-    except getopt.GetoptError, err:
+    except getopt.GetoptError as err:
         # print help information and exit:
-        print str(err) # will print something like "option -a not recognized"
+        print(str(err)) # will print something like "option -a not recognized"
         usage()
         sys.exit(2)
     for opt, arg in opts:
@@ -67,7 +67,7 @@ def test(alias,event,connection,verbose) :
     while (True) :
         if (connection.network.receive() == None ) : break
         count = count + 1
-    if verbose : print "  Found",count,"nodes"
+    if verbose : print("  Found",count,"nodes")
     return 0
 
 if __name__ == '__main__':

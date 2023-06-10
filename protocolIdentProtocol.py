@@ -12,10 +12,12 @@ import canolcbutils
 def makeframe(alias, dest) :
     body = [(dest>>8)&0xFF, dest&0xFF]
     return canolcbutils.makeframestring(0x19828000+alias,body)
-    
+
 from optparse import OptionParser
 
 def main():
+    nodeID = connection.testNodeID
+
     # argument processing
     usage = "usage: %prog [options]\n\n" + \
             "Called standalone, will send one CAN " + \
@@ -46,23 +48,20 @@ def main():
                       action="store_true", dest="veryverbose",
                       default=False,
                       help="print very verbose debug information")
-    
+
     (options, args) = parser.parse_args()
 
     if options.veryverbose :
         connection.network.verbose = True
 
-    '''
-    @todo identifynode option not currently implemented
-    '''
-    #if identifynode :
-    #    import getUnderTestAlias
-    #    dest, otherNodeId = getUnderTestAlias.get(alias, None, verbose)
+    if options.identifynode :
+        import getUnderTestAlias
+        options.dest, nodeID = getUnderTestAlias.get(options.alias, None, options.verbose or options.veryverbose)
 
     retval = test(options.alias, options.dest, connection, options.verbose)
     connection.network.close()
     exit(retval)
-    
+
 def test(alias, dest, connection, verbose) :
     connection.network.send(makeframe(alias, dest))
     body = [(alias>>8)&0xFF, alias&0xFF]
@@ -70,41 +69,41 @@ def test(alias, dest, connection, verbose) :
     expect = expect[:-1]
     reply = connection.network.expect(startswith=expect)
     if (reply == None) :
-        print "Expected reply to good request not received"
+        print ("Expected reply to good request not received")
         return 2
-    if (verbose) : 
-        print "  Node supports:"
+    if (verbose) :
+        print ("  Node supports:")
         value = canolcbutils.bodyArray(reply)
-        if (value[2] & 0x80) != 0 : print "      Protocol Identification"
-        if (value[2] & 0x40) != 0 : print "      Datagram Protocol"
-        if (value[2] & 0x20) != 0 : print "      Stream Protocol"
-        if (value[2] & 0x10) != 0 : print "      Memory Configuration Protocol"
-        if (value[2] & 0x08) != 0 : print "      Reservation Protocol"
-        if (value[2] & 0x04) != 0 : print "      Event Exchange (P/C) Protocol"
-        if (value[2] & 0x02) != 0 : print "      Identification Protocol"
-        if (value[2] & 0x01) != 0 : print "      Teaching/Learning Protocol"
-        if (value[3] & 0x80) != 0 : print "      Remote Button Protocol"
-        if (value[3] & 0x40) != 0 : print "      Abbreviated Default CDI Protocol"
-        if (value[3] & 0x20) != 0 : print "      Display Protocol"
-        if (value[3] & 0x10) != 0 : print "      Simple Node Information Protocol"
-        if (value[3] & 0x08) != 0 : print "      Configuration Description Information"
-        if (value[3] & 0x04) != 0 : print "      Traction Control Protocol"
-        if (value[3] & 0x02) != 0 : print "      Function Description Information"
-        if (value[3] & 0x01) != 0 : print "      DCC Command Station Protocol"
-        if (value[4] & 0x80) != 0 : print "      SimpleTrain Node Information"
-        if (value[4] & 0x40) != 0 : print "      Function Configuration"
-        if (value[4] & 0x20) != 0 : print "      Firmware Upgrade Protocol"
-        if (value[4] & 0x10) != 0 : print "      Firmware Upgrade Active"
+        if (value[2] & 0x80) != 0 : print ("      Protocol Identification")
+        if (value[2] & 0x40) != 0 : print ("      Datagram Protocol")
+        if (value[2] & 0x20) != 0 : print ("      Stream Protocol")
+        if (value[2] & 0x10) != 0 : print ("      Memory Configuration Protocol")
+        if (value[2] & 0x08) != 0 : print ("      Reservation Protocol")
+        if (value[2] & 0x04) != 0 : print ("      Event Exchange (P/C) Protocol")
+        if (value[2] & 0x02) != 0 : print ("      Identification Protocol")
+        if (value[2] & 0x01) != 0 : print ("      Teaching/Learning Protocol")
+        if (value[3] & 0x80) != 0 : print ("      Remote Button Protocol")
+        if (value[3] & 0x40) != 0 : print ("      Abbreviated Default CDI Protocol")
+        if (value[3] & 0x20) != 0 : print ("      Display Protocol")
+        if (value[3] & 0x10) != 0 : print ("      Simple Node Information Protocol")
+        if (value[3] & 0x08) != 0 : print ("      Configuration Description Information")
+        if (value[3] & 0x04) != 0 : print ("      Traction Control Protocol")
+        if (value[3] & 0x02) != 0 : print ("      Function Description Information")
+        if (value[3] & 0x01) != 0 : print ("      DCC Command Station Protocol")
+        if (value[4] & 0x80) != 0 : print ("      SimpleTrain Node Information")
+        if (value[4] & 0x40) != 0 : print ("      Function Configuration")
+        if (value[4] & 0x20) != 0 : print ("      Firmware Upgrade Protocol")
+        if (value[4] & 0x10) != 0 : print ("      Firmware Upgrade Active")
 
     if (verbose) :
-        print "  not addressed, expect no reply"
+        print ("  not addressed, expect no reply")
     connection.network.send(makeframe(alias, (~dest)&0xFFF))
     body = [(alias>>8)&0xFF, alias&0xFF]
     expect = canolcbutils.makeframestring(0x19668000 + dest, body)
     expect = expect[:-1]
     reply = connection.network.expect(startswith=expect)
-    if (reply != None ) : 
-        print "Unexpected reply received to request to different node ", reply
+    if (reply != None ) :
+        print ("Unexpected reply received to request to different node ", reply)
         return 1
 
     return 0

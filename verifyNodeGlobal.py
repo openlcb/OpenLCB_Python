@@ -23,6 +23,7 @@ import time
 from optparse import OptionParser
 
 def main():
+
     # argument processing
     usage = "usage: %prog [options]\n\n" + \
             "Called standalone, will send one CAN VerifyNode (Global) " + \
@@ -41,7 +42,7 @@ def main():
     parser.add_option("-a", "--alias", dest="alias", metavar="ALIAS",
                       default=connection.thisNodeAlias, type = int,
                       help="source alias")
-    parser.add_option("-n", "--node", dest="nodeid",
+    parser.add_option("-n", "--node", dest="nodeID",
                       metavar="0x1 0x2 0x3 0x4 0x5 0x6",
                       default=connection.testNodeID, type=int, nargs=6,
                       help="destination Node ID")
@@ -61,31 +62,29 @@ def main():
     if options.veryverbose :
         connection.network.verbose = True
 
-    '''
-    @todo identifynode option not currently implemented
-    '''
-    #if identifynode :
-    #    import getUnderTestAlias
-    #    dest, nodeID = getUnderTestAlias.get(alias, None, verbose)
-    #    if nodeID == None : nodeID = otherNodeId
+    if options.identifynode :
+        import getUnderTestAlias
+        options.dest, options.nodeID = getUnderTestAlias.get(options.alias, None, options.verbose or options.veryverbose)
 
     # now execute
-    retval = test(options.alias, options.nodeid, connection)
+    retval = test(options.alias, options.nodeID, connection)
     connection.network.close()
-    exit(retval)    
-    
+    exit(retval)
+
 def test(alias, nodeID, connection):
+    retval = 0
+
     # first, send to this node
     connection.network.send(makeframe(alias, nodeID))
     if (connection.network.expect(startswith=":X19170", data=nodeID) == None) :
-        print "Global verify with matching node ID did not receive expected reply"
-        return 2
+        print ("Global verify with matching node ID did not receive expected reply")
+        retval = retval | 1
 
     # send without node ID
     connection.network.send(makeframe(alias, None))
     if (connection.network.expect(startswith=":X19170", data=nodeID) == None) :
-        print "Global verify without node ID did not receive expected reply"
-        return 12
+        print ("Global verify without node ID did not receive expected reply")
+        retval = retval | 2
 
     # allow time for the bus to settle
     time.sleep(3)
@@ -95,11 +94,11 @@ def test(alias, nodeID, connection):
     # send with wrong node ID
     connection.network.send(makeframe(alias, [0,0,0,0,0,1]))
     reply = connection.network.expect(startswith=":X19170")
-    if (reply == None) :
-        return 0
-    else :
-        print "Global verify with wrong node ID should not receive reply but did: ", reply
-        return 24
+    if (reply != None) :
+        print ("Global verify with wrong node ID should not receive reply but did: ", reply)
+        rretval = retval | 4
+
+    return retval
 
 if __name__ == '__main__':
     main()
